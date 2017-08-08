@@ -5,12 +5,17 @@ import com.nevex.roboinvesting.database.entity.TickersEntity;
 import com.nevex.roboinvesting.ws.model.ErrorDto;
 import com.nevex.roboinvesting.ws.model.TickerDto;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import java.util.Optional;
 
 /**
@@ -21,7 +26,6 @@ import java.util.Optional;
 @RequestMapping("/tickers")
 public class TickersEndpoint {
 
-    private static final ErrorDto NO_SYMBOL_ERROR = new ErrorDto("No symbol provided");
     private final TickersRepository tickersRepository;
 
     @Autowired
@@ -32,7 +36,10 @@ public class TickersEndpoint {
 
     // TODO: Restrict the input - min/max chars etc...
     @RequestMapping(value = "/{symbol}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
-    ResponseEntity<?> getSymbol(@NotBlank @PathVariable(name = "symbol") String inputSymbol) {
+    ResponseEntity<?> getSymbol(
+            @Length(min = 2, max = 20, message = "Symbol must be a valid length")
+            @NotEmpty(message = "Symbol cannot be blank")
+            @PathVariable(name = "symbol") String inputSymbol) {
         String symbol = StringUtils.trim(inputSymbol).toUpperCase();
         Optional<TickersEntity> entityOptional = tickersRepository.findBySymbol(symbol);
         if ( entityOptional.isPresent()) {
