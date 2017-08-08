@@ -24,4 +24,3 @@ TABLESPACE pg_default;
 
 ALTER TABLE investing.tickers
     OWNER to postgres;
-    

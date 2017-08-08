@@ -120,10 +120,10 @@ public class TickerSymbolLoader {
         private final String industry;
 
         ParsedTicker(String symbol, String name, String sector, String industry) {
-            this.symbol = symbol;
-            this.name = name;
-            this.sector = sector;
-            this.industry = industry;
+            this.symbol = StringUtils.trim(symbol).toUpperCase();
+            this.name = StringUtils.trim(name);
+            this.sector = StringUtils.trim(sector);
+            this.industry = StringUtils.trim(industry);
         }
 
         boolean isValid() {
