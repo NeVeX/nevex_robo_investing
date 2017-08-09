@@ -26,6 +26,10 @@ public class TickersEntity {
     private Timestamp createdDate;
     @Column(name = "stock_exchange")
     private short stockExchange;
+    @Column(name = "is_tradable")
+    private boolean isTradable;
+    @Column(name = "trading_end_date")
+    private Timestamp tradingEndDate;
 
     public int getId() {
         return id;
@@ -83,16 +87,34 @@ public class TickersEntity {
         this.stockExchange = stockExchange;
     }
 
+    public boolean getIsTradable() {
+        return isTradable;
+    }
+
+    public void setIsTradable(boolean isTradable) {
+        this.isTradable = isTradable;
+    }
+
+    public Timestamp getTradingEndDate() {
+        return tradingEndDate;
+    }
+
+    public void setTradingEndDate(Timestamp tradingEndDate) {
+        this.tradingEndDate = tradingEndDate;
+    }
+
     @Override
     public String toString() {
         return "TickersEntity{" +
-                "id=" + id +
-                ", symbol='" + symbol + '\'' +
-                ", name='" + name + '\'' +
-                ", sector='" + sector + '\'' +
-                ", industry='" + industry + '\'' +
-                ", createdDate=" + createdDate +
-                ", stock_exchange=" + stockExchange +
-                '}';
+            "id=" + id +
+            ", symbol='" + symbol + '\'' +
+            ", name='" + name + '\'' +
+            ", sector='" + sector + '\'' +
+            ", industry='" + industry + '\'' +
+            ", createdDate=" + createdDate +
+            ", stockExchange=" + stockExchange +
+            ", isTradable=" + isTradable +
+            ", tradingEndDate=" + tradingEndDate +
+            '}';
     }
 }

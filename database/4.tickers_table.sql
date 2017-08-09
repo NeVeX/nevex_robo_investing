@@ -11,6 +11,8 @@ CREATE TABLE investing.tickers
     created_date timestamp with time zone NOT NULL,
     stock_exchange smallint NOT NULL,
     symbol character varying(20) COLLATE pg_catalog."default" NOT NULL,
+    is_tradable boolean NOT NULL,
+    trading_end_date timestamp with time zone,
     CONSTRAINT "Tickers_pkey" PRIMARY KEY (id),
     CONSTRAINT stock_exchange_fk FOREIGN KEY (stock_exchange)
         REFERENCES investing.stock_exchanges (id) MATCH SIMPLE

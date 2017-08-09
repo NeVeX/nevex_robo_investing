@@ -95,7 +95,7 @@ public class TickerSymbolLoader {
         entity.setSector(parsedTicker.sector);
         entity.setName(parsedTicker.name);
         entity.setIndustry(parsedTicker.industry);
-
+        entity.setIsTradable(true);
         boolean didSave;
         try {
             didSave = tickersRepository.save(entity) != null;

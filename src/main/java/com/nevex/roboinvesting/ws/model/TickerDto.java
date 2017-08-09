@@ -1,7 +1,7 @@
 package com.nevex.roboinvesting.ws.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.nevex.roboinvesting.database.entity.TickersEntity;
+import com.nevex.roboinvesting.model.TickerSymbol;
 
 /**
  * Created by Mark Cunningham on 8/8/2017.
@@ -16,6 +16,21 @@ public class TickerDto {
     private String sector;
     @JsonProperty("industry")
     private String industry;
+    @JsonProperty("is_tradable")
+    private boolean isTradable;
+    @JsonProperty("stock_exchange")
+    private String stockExchange;
+
+    public static TickerDto from(TickerSymbol tickerSymbol) {
+        TickerDto dto = new TickerDto();
+        dto.name = tickerSymbol.getName();
+        dto.symbol = tickerSymbol.getSymbol();
+        dto.sector = tickerSymbol.getSector();
+        dto.industry = tickerSymbol.getIndustry();
+        dto.isTradable = tickerSymbol.isTradable();
+        dto.stockExchange = tickerSymbol.getStockExchange().name().toUpperCase();
+        return dto;
+    }
 
     public String getSymbol() {
         return symbol;
@@ -49,13 +64,19 @@ public class TickerDto {
         this.industry = industry;
     }
 
-    public static TickerDto from(TickersEntity entity) {
-        TickerDto dto = new TickerDto();
-        dto.name = entity.getName();
-        dto.symbol = entity.getSymbol();
-        dto.sector = entity.getSector();
-        dto.industry = entity.getIndustry();
-        return dto;
+    public boolean getIsTradable() {
+        return isTradable;
     }
 
+    public void setIsTradable(boolean isTradable) {
+        this.isTradable = isTradable;
+    }
+
+    public String getStockExchange() {
+        return stockExchange;
+    }
+
+    public void setStockExchange(String stockExchange) {
+        this.stockExchange = stockExchange;
+    }
 }

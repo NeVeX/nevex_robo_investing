@@ -2,7 +2,6 @@ package com.nevex.roboinvesting.config;
 
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.database.entity.StockExchangesEntity;
 import com.nevex.roboinvesting.dataloader.TickerSymbolLoader;
 import com.nevex.roboinvesting.model.StockExchange;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +17,6 @@ import org.springframework.validation.annotation.Validated;
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * Created by Mark Cunningham on 8/7/2017.
