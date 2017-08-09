@@ -26,6 +26,7 @@ robo-investing:
     nyse-file: D:\Coding\Git\nevex_robo_investing\data\nyse_tickers_08_07_2017.csv
   tiingo:
     api-key: b685d125ea02159884511a9c8198da5d9fee8007
+    host: https://api.tiingo.com
   testing:
     allowed-symbols: LC, FB, APPL, NAKD, GOOGL, MSFT,
 

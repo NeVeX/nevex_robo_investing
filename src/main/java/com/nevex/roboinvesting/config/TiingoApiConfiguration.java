@@ -24,29 +24,33 @@ public class TiingoApiConfiguration {
 
     @NotBlank
     private String apiKey;
+    @NotBlank
+    private String host;
 
-    @PostConstruct
-    void init() throws Exception {
-        tiingoApiClient().getCurrentPriceDataForSymbol("LC");
-    }
+//    @PostConstruct
+//    void init() throws Exception {
+//        tiingoApiClient().getCurrentPriceForSymbol("LC");
+//        tiingoApiClient().getHistoricalPricesForSymbol("LC", 365);
+//    }
 
     @Bean
     TiingoApiClient tiingoApiClient() {
-        return new TiingoApiClient(apiKey);
-    }
-
-    public String getApiKey() {
-        return apiKey;
+        return new TiingoApiClient(apiKey, host);
     }
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
     }
 
+    public void setHost(String host) {
+        this.host = host;
+    }
+
     @Override
     public String toString() {
-        return "TiingoProperties{" +
+        return "TiingoApiConfiguration{" +
                 "apiKey='" + apiKey + '\'' +
+                ", host='" + host + '\'' +
                 '}';
     }
 }
