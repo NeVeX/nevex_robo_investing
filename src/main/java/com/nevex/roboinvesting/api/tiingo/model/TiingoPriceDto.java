@@ -1,0 +1,152 @@
+package com.nevex.roboinvesting.api.tiingo.model;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.springframework.format.datetime.joda.LocalDateTimeParser;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * Created by Mark Cunningham on 8/9/2017.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class TiingoPriceDto {
+
+    @JsonProperty("date")
+    private OffsetDateTime date;
+    @JsonProperty("open")
+    private BigDecimal open;
+    @JsonProperty("high")
+    private BigDecimal high;
+    @JsonProperty("low")
+    private BigDecimal low;
+    @JsonProperty("close")
+    private BigDecimal close;
+    @JsonProperty("volume")
+    private Integer volume;
+    @JsonProperty("adjOpen")
+    private BigDecimal adjOpen;
+    @JsonProperty("adjHigh")
+    private BigDecimal adjHigh;
+    @JsonProperty("adjLow")
+    private BigDecimal adjLow;
+    @JsonProperty("adjClose")
+    private BigDecimal adjClose;
+    @JsonProperty("adjVolume")
+    private Integer adjVolume;
+    @JsonProperty("divCash")
+    private BigDecimal divCash;
+    @JsonProperty("splitFactor")
+    private BigDecimal splitFactor;
+
+    public OffsetDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(OffsetDateTime date) {
+        this.date = date;
+    }
+
+    public BigDecimal getOpen() {
+        return open;
+    }
+
+    public void setOpen(BigDecimal open) {
+        this.open = open;
+    }
+
+    public BigDecimal getHigh() {
+        return high;
+    }
+
+    public void setHigh(BigDecimal high) {
+        this.high = high;
+    }
+
+    public BigDecimal getLow() {
+        return low;
+    }
+
+    public void setLow(BigDecimal low) {
+        this.low = low;
+    }
+
+    public BigDecimal getClose() {
+        return close;
+    }
+
+    public void setClose(BigDecimal close) {
+        this.close = close;
+    }
+
+    public Integer getVolume() {
+        return volume;
+    }
+
+    public void setVolume(Integer volume) {
+        this.volume = volume;
+    }
+
+    public BigDecimal getAdjOpen() {
+        return adjOpen;
+    }
+
+    public void setAdjOpen(BigDecimal adjOpen) {
+        this.adjOpen = adjOpen;
+    }
+
+    public BigDecimal getAdjHigh() {
+        return adjHigh;
+    }
+
+    public void setAdjHigh(BigDecimal adjHigh) {
+        this.adjHigh = adjHigh;
+    }
+
+    public BigDecimal getAdjLow() {
+        return adjLow;
+    }
+
+    public void setAdjLow(BigDecimal adjLow) {
+        this.adjLow = adjLow;
+    }
+
+    public BigDecimal getAdjClose() {
+        return adjClose;
+    }
+
+    public void setAdjClose(BigDecimal adjClose) {
+        this.adjClose = adjClose;
+    }
+
+    public Integer getAdjVolume() {
+        return adjVolume;
+    }
+
+    public void setAdjVolume(Integer adjVolume) {
+        this.adjVolume = adjVolume;
+    }
+
+    public BigDecimal getDivCash() {
+        return divCash;
+    }
+
+    public void setDivCash(BigDecimal divCash) {
+        this.divCash = divCash;
+    }
+
+    public BigDecimal getSplitFactor() {
+        return splitFactor;
+    }
+
+    public void setSplitFactor(BigDecimal splitFactor) {
+        this.splitFactor = splitFactor;
+    }
+}
