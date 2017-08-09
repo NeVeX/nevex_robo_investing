@@ -1,7 +1,10 @@
 package com.nevex.roboinvesting.config;
 
+import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.database.StockExchangesRepository;
+import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
+import com.nevex.roboinvesting.dataloader.HistoricalStockPriceLoader;
 import com.nevex.roboinvesting.dataloader.TickerSymbolLoader;
 import com.nevex.roboinvesting.model.StockExchange;
 import org.apache.commons.lang3.StringUtils;
@@ -25,63 +28,48 @@ import static com.nevex.roboinvesting.config.PropertyNames.ROBO_INVESTING;
  */
 @Validated
 @Configuration
-@ConfigurationProperties(prefix = DataLoaderConfiguration.CONFIGURATION_PREFIX_KEY)
-@ConditionalOnProperty(name = DataLoaderConfiguration.CONFIGURATION_ENABLED_KEY, havingValue = "true")
-public class DataLoaderConfiguration {
+@ConfigurationProperties(prefix = StockHistoricalPriceLoaderConfiguration.CONFIGURATION_PREFIX_KEY)
+@ConditionalOnProperty(name = StockHistoricalPriceLoaderConfiguration.CONFIGURATION_ENABLED_KEY, havingValue = "true")
+class StockHistoricalPriceLoaderConfiguration {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataLoaderConfiguration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StockHistoricalPriceLoaderConfiguration.class);
 
-    static final String CONFIGURATION_PREFIX_KEY = ROBO_INVESTING + ".data-loader";
+    static final String CONFIGURATION_PREFIX_KEY = ROBO_INVESTING + ".stock-historical-loader";
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
     @Autowired
-    private StockExchangesRepository stockExchangesRepository;
-    @Autowired
     private TickersRepository tickersRepository;
+    @Autowired
+    private StockPricesHistoricalRepository stockPricesHistoricalRepository;
+    @Autowired
+    private TiingoApiClient tiingoApiClient;
 
     @Valid
     @NotNull(message = "The 'enabled' property cannot be null")
     private Boolean enabled;
-    private String nasdaqFile; // can be empty
-    private String nyseFile; // can be empty
 
     @PostConstruct
     void init() throws Exception {
         LOGGER.info("The data load configuration has been activated. Configurations [{}]", this);
 
-        if (StringUtils.isNotBlank(nasdaqFile)) {
-            tickerSymbolLoader().loadTickers(StockExchange.Nasdaq, nasdaqFile);
-        }
-
-        if (StringUtils.isNotBlank(nyseFile)) {
-            tickerSymbolLoader().loadTickers(StockExchange.Nyse, nyseFile);
-        }
+        historicalStockPriceLoader().loadHistoricalPricesForSymbol("LC");
 
     }
 
     @Bean
-    TickerSymbolLoader tickerSymbolLoader() {
-        return new TickerSymbolLoader(stockExchangesRepository, tickersRepository);
+    HistoricalStockPriceLoader historicalStockPriceLoader() {
+        return new HistoricalStockPriceLoader(tickersRepository, tiingoApiClient, stockPricesHistoricalRepository);
     }
+
 
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 
-    public void setNasdaqFile(String nasdaqFile) {
-        this.nasdaqFile = nasdaqFile;
-    }
-
-    public void setNyseFile(String nyseFile) {
-        this.nyseFile = nyseFile;
-    }
-
     @Override
     public String toString() {
-        return "DataLoaderConfiguration{" +
+        return "StockHistoricalPriceLoaderConfiguration{" +
                 "enabled=" + enabled +
-                ", nasdaqFile='" + nasdaqFile + '\'' +
-                ", nyseFile='" + nyseFile + '\'' +
                 '}';
     }
 }
