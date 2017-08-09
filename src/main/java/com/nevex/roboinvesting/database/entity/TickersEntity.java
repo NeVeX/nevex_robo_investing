@@ -1,7 +1,12 @@
 package com.nevex.roboinvesting.database.entity;
 
+import org.apache.tomcat.jni.Local;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * Created by Mark Cunningham on 8/7/2017.
@@ -22,14 +27,14 @@ public class TickersEntity {
     private String sector;
     @Column(name = "industry")
     private String industry;
-    @Column(name = "created_date")
-    private Timestamp createdDate;
+    @Column(name = "created_date", columnDefinition = "timestamptz")
+    private OffsetDateTime createdDate;
     @Column(name = "stock_exchange")
     private short stockExchange;
     @Column(name = "is_tradable")
     private boolean isTradable;
-    @Column(name = "trading_end_date")
-    private Timestamp tradingEndDate;
+    @Column(name = "trading_end_date", columnDefinition = "DATE")
+    private LocalDate tradingEndDate;
 
     public int getId() {
         return id;
@@ -71,11 +76,11 @@ public class TickersEntity {
         this.industry = industry;
     }
 
-    public Timestamp getCreatedDate() {
+    public OffsetDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Timestamp createdDate) {
+    public void setCreatedDate(OffsetDateTime createdDate) {
         this.createdDate = createdDate;
     }
 
@@ -95,11 +100,11 @@ public class TickersEntity {
         this.isTradable = isTradable;
     }
 
-    public Timestamp getTradingEndDate() {
+    public LocalDate getTradingEndDate() {
         return tradingEndDate;
     }
 
-    public void setTradingEndDate(Timestamp tradingEndDate) {
+    public void setTradingEndDate(LocalDate tradingEndDate) {
         this.tradingEndDate = tradingEndDate;
     }
 

@@ -12,11 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.File;
 import java.io.FileReader;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Created by Mark Cunningham on 8/7/2017.
@@ -44,7 +45,7 @@ public class TickerSymbolLoader {
     }
 
     @Transactional
-    public DataLoadSummary loadTickers(StockExchange stockExchange, String fileLocation) throws DataLoadException {
+    public void loadTickers(StockExchange stockExchange, String fileLocation) throws DataLoadException {
         LOGGER.info("Will attempt to load all tickers in file [{}] for exchange [{}]", fileLocation, stockExchange);
         if ( !doesStockExchangeExists(stockExchange)) {
             throw new DataLoadException("Stock exchange ["+stockExchange+"] does not exist in the database");
@@ -53,13 +54,16 @@ public class TickerSymbolLoader {
         if ( !file.exists()) {
             throw new DataLoadException("Could not find the file ["+fileLocation+"] to load");
         }
-        return loadTickers(stockExchange.getId(), file);
+        Set<CSVParsedTicker> parsedTickers = loadTickers(file);
+        if ( !parsedTickers.isEmpty()) {
+            saveTickers(stockExchange, parsedTickers);
+        }
     }
 
     // TODO: Support updates to existing tickers!
-    private DataLoadSummary loadTickers(short stockExchangeId, File tickersFile) throws DataLoadException {
+    private Set<CSVParsedTicker> loadTickers(File tickersFile) throws DataLoadException {
         try {
-            int totalRecordsAdded = 0;
+            Set<CSVParsedTicker> csvParsedTickers = new HashSet<>();
             FileReader fileReader = new FileReader(tickersFile);
             CSVParser parser = CSVFormat.RFC4180
                     .withFirstRecordAsHeader()
@@ -72,31 +76,42 @@ public class TickerSymbolLoader {
                 String name = csvRecord.get("Name");
                 String sector = csvRecord.get("Sector");
                 String industry = csvRecord.get("industry");
-                ParsedTicker parsedTicker = new ParsedTicker(symbol, name, sector, industry);
-                if ( parsedTicker.isValid() ) {
-                    saveTicker(stockExchangeId, parsedTicker);
-                    totalRecordsAdded++;
+                CSVParsedTicker csvParsedTicker = new CSVParsedTicker(symbol, name, sector, industry);
+                if ( csvParsedTicker.isValid() ) {
+                    // and check if it's not already added
+                    if ( csvParsedTickers.contains(csvParsedTicker)) {
+                        LOGGER.warn("There are duplicate entries for the ticker symbol [{}] - ignoring this and subsequent duplicate tickers", csvParsedTicker.symbol);
+                    } else {
+                        csvParsedTickers.add(csvParsedTicker);
+                    }
                 } else {
-                    LOGGER.warn("CSV Ticker row is invalid: [{}]. Raw Value [{}]", parsedTicker, csvRecord.toString());
+                    LOGGER.warn("CSV Ticker row is invalid: [{}]. Raw Value [{}]", csvParsedTicker, csvRecord.toString());
                 }
             }
-            LOGGER.info("Successfully loaded a total of [{}] ticker records into the database from the file [{}]", totalRecordsAdded, tickersFile.getAbsolutePath());
-            return new DataLoadSummary(totalRecordsAdded);
+            LOGGER.info("Successfully loaded a total of [{}] ticker records into the database from the file [{}]", csvParsedTickers.size(), tickersFile.getAbsolutePath());
+            return csvParsedTickers;
         } catch (Exception e ) {
             throw new DataLoadException("Could not load file ["+tickersFile+"]", e);
         }
     }
 
-    private void saveTicker(short stockExchangeId, ParsedTicker parsedTicker) throws DataLoadException {
+    private void saveTickers(StockExchange stockExchange, Set<CSVParsedTicker> csvParsedTickers) throws DataLoadException {
+        for ( CSVParsedTicker t : csvParsedTickers ) {
+            saveTicker(stockExchange.getId(), t);
+        }
+    }
+
+    private void saveTicker(short stockExchangeId, CSVParsedTicker CSVParsedTicker) throws DataLoadException {
         TickersEntity entity = new TickersEntity();
-        entity.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
+        entity.setCreatedDate(OffsetDateTime.now());
         entity.setStockExchange(stockExchangeId);
-        entity.setSymbol(parsedTicker.symbol);
-        entity.setSector(parsedTicker.sector);
-        entity.setName(parsedTicker.name);
-        entity.setIndustry(parsedTicker.industry);
+        entity.setSymbol(CSVParsedTicker.symbol);
+        entity.setSector(CSVParsedTicker.sector);
+        entity.setName(CSVParsedTicker.name);
+        entity.setIndustry(CSVParsedTicker.industry);
         entity.setIsTradable(true);
         boolean didSave;
+
         try {
             didSave = tickersRepository.save(entity) != null;
         } catch (Exception ex ) {
@@ -113,13 +128,13 @@ public class TickerSymbolLoader {
     }
 
     // Simple class to hold the values of the parsed csv for us
-    private static class ParsedTicker {
+    private static class CSVParsedTicker {
         private final String symbol;
         private final String name;
         private final String sector;
         private final String industry;
 
-        ParsedTicker(String symbol, String name, String sector, String industry) {
+        CSVParsedTicker(String symbol, String name, String sector, String industry) {
             this.symbol = StringUtils.trim(symbol).toUpperCase();
             this.name = StringUtils.trim(name);
             this.sector = StringUtils.trim(sector);
@@ -131,8 +146,21 @@ public class TickerSymbolLoader {
         }
 
         @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            CSVParsedTicker that = (CSVParsedTicker) o;
+            return Objects.equals(symbol, that.symbol);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(symbol);
+        }
+
+        @Override
         public String toString() {
-            return "ParsedTicker{" +
+            return "CSVParsedTicker{" +
                     "symbol='" + symbol + '\'' +
                     ", name='" + name + '\'' +
                     ", sector='" + sector + '\'' +
