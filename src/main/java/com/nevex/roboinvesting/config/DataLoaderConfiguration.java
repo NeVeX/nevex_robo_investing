@@ -18,6 +18,8 @@ import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import static com.nevex.roboinvesting.config.PropertyNames.ROBO_INVESTING;
+
 /**
  * Created by Mark Cunningham on 8/7/2017.
  */
@@ -29,7 +31,7 @@ public class DataLoaderConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataLoaderConfiguration.class);
 
-    static final String CONFIGURATION_PREFIX_KEY = "robo-investing.data-loader";
+    static final String CONFIGURATION_PREFIX_KEY = ROBO_INVESTING + ".data-loader";
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
     @Autowired
