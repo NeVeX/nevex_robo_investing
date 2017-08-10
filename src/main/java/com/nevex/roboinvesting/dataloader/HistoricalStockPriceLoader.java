@@ -75,6 +75,11 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
 
 
     @Override
+    boolean canHaveExceptions() {
+        return false;
+    }
+
+    @Override
     public int orderNumber() {
         return DataLoaderOrder.STOCK_PRICE_HISTORICAL_LOADER;
     }

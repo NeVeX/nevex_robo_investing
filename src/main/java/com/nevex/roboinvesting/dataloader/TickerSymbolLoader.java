@@ -51,6 +51,11 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     }
 
     @Override
+    boolean canHaveExceptions() {
+        return false;
+    }
+
+    @Override
     int orderNumber() {
         return DataLoaderOrder.TICKER_SYMBOL_LOADER;
     }

@@ -37,6 +37,11 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
     }
 
     @Override
+    boolean canHaveExceptions() {
+        return false;
+    }
+
+    @Override
     int orderNumber() {
         return DataLoaderOrder.STOCK_PRICE_CURRENT_LOADER;
     }

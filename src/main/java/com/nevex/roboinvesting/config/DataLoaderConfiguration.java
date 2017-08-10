@@ -1,11 +1,13 @@
 package com.nevex.roboinvesting.config;
 
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
+import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.dataloader.CurrentStockPriceLoader;
 import com.nevex.roboinvesting.dataloader.DataLoaderManager;
 import com.nevex.roboinvesting.dataloader.DataLoaderWorker;
+import com.nevex.roboinvesting.dataloader.ReferenceDataLoader;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -26,7 +28,7 @@ public class DataLoaderConfiguration {
     @Autowired
     private TickersRepository tickersRepository;
     @Autowired
-    private StockPricesHistoricalRepository stockPricesHistoricalRepository;
+    private StockExchangesRepository stockExchangesRepository;
     @Autowired
     private TiingoApiClient tiingoApiClient;
     @Autowired
@@ -50,6 +52,11 @@ public class DataLoaderConfiguration {
     @Bean
     CurrentStockPriceLoader currentStockPriceLoader() {
         return new CurrentStockPriceLoader(tickersRepository, tiingoApiClient, stockPriceAdminService);
+    }
+
+    @Bean
+    ReferenceDataLoader referenceDataLoader() {
+        return new ReferenceDataLoader(stockExchangesRepository);
     }
 
 }

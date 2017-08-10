@@ -17,6 +17,8 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(DataLoaderWorker.class);
 
+    abstract boolean canHaveExceptions();
+
     abstract int orderNumber();
 
     abstract void doWork() throws DataLoadWorkerException;

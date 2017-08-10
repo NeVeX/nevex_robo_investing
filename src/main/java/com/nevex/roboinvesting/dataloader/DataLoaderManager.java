@@ -41,8 +41,15 @@ public class DataLoaderManager implements ApplicationListener<ApplicationReadyEv
             try {
                 dw.doWork();
             } catch (DataLoadWorkerException ex) {
-                // TODO: still continue?
-                LOGGER.error("DataLoaderWorker [{}] failed - will still allow other jobs to continue", dw.getClass(), ex);
+                if (dw.canHaveExceptions()) {
+                    LOGGER.warn("DataLoaderWorker [{}] failed - will still allow other jobs to continue", dw.getClass(), ex);
+                } else {
+                    // nope
+                    destroy();
+                    throw new IllegalStateException("Data loader workers will be stopped since the data worked [{}] failed and has inidicated it" +
+                            "cannot continue");
+
+                }
             }
         }
     }

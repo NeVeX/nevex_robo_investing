@@ -39,7 +39,7 @@ public class StockPriceEndpoint {
         this.stockPriceService = stockPriceService;
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
     ResponseEntity<?> getCurrentPrice(
             @Length(min = 2, max = 20, message = "Symbol must be a valid length")
             @NotEmpty(message = "Symbol cannot be blank")
