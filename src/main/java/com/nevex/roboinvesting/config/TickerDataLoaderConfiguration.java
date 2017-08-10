@@ -2,6 +2,7 @@ package com.nevex.roboinvesting.config;
 
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
+import com.nevex.roboinvesting.dataloader.DataLoaderManager;
 import com.nevex.roboinvesting.dataloader.TickerSymbolLoader;
 import com.nevex.roboinvesting.model.StockExchange;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.PostConstruct;
@@ -48,20 +50,14 @@ class TickerDataLoaderConfiguration {
     @PostConstruct
     void init() throws Exception {
         LOGGER.info("The ticker data load configuration has been activated. Configurations [{}]", this);
-
-        if (StringUtils.isNotBlank(nasdaqFile)) {
-            tickerSymbolLoader().loadTickers(StockExchange.Nasdaq, nasdaqFile);
-        }
-
-        if (StringUtils.isNotBlank(nyseFile)) {
-            tickerSymbolLoader().loadTickers(StockExchange.Nyse, nyseFile);
-        }
-
     }
 
     @Bean
     TickerSymbolLoader tickerSymbolLoader() {
-        return new TickerSymbolLoader(stockExchangesRepository, tickersRepository);
+        TickerSymbolLoader loader = new TickerSymbolLoader(stockExchangesRepository, tickersRepository);
+        loader.addTickerFileToLoad(StockExchange.Nasdaq, nasdaqFile);
+        loader.addTickerFileToLoad(StockExchange.Nyse, nyseFile);
+        return loader;
     }
 
     public void setEnabled(Boolean enabled) {

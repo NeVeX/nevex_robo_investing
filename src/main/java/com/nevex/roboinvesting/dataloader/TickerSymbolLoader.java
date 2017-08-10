@@ -15,18 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.FileReader;
 import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Mark Cunningham on 8/7/2017.
  */
-public class TickerSymbolLoader {
+public class TickerSymbolLoader extends DataLoaderWorker {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TickerSymbolLoader.class);
     private final StockExchangesRepository stockExchangesRepository;
     private final TickersRepository tickersRepository;
+    private final Map<StockExchange, String> tickersToLoad = new HashMap<>();
 
     public TickerSymbolLoader(StockExchangesRepository stockExchangesRepository, TickersRepository tickersRepository) {
         if ( stockExchangesRepository == null ) { throw new IllegalArgumentException("stock exchange repository is null"); }
@@ -34,7 +33,14 @@ public class TickerSymbolLoader {
         this.tickersRepository = tickersRepository;
         this.stockExchangesRepository = stockExchangesRepository;
 
-        printAllExchangesAvailable();
+    }
+
+    public void addTickerFileToLoad(StockExchange stockExchange, String fileLocation) {
+        if ( StringUtils.isNotBlank(fileLocation)) {
+            tickersToLoad.put(stockExchange, fileLocation);
+        } else {
+            LOGGER.warn("Will not load tickers for exchange [{}] since file given is blank", stockExchange);
+        }
     }
 
     private void printAllExchangesAvailable() {
@@ -42,6 +48,19 @@ public class TickerSymbolLoader {
         Iterable<StockExchangesEntity> stockExchanges = stockExchangesRepository.findAll();
         stockExchanges.forEach(e -> sb.append( "  - " + e.getId() + " : " + e.getName()).append("\n") );
         LOGGER.info(sb.toString());
+    }
+
+    @Override
+    int orderNumber() {
+        return DataLoaderOrder.TICKER_SYMBOL_LOADER;
+    }
+
+    @Override
+    @Transactional
+    public void doWork() {
+        LOGGER.info("{} will start to do it's work", this.getClass());
+        printAllExchangesAvailable();
+        LOGGER.info("{} has completed all it's work", this.getClass());
     }
 
     @Transactional

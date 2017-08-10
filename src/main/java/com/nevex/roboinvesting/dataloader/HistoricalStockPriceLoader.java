@@ -16,7 +16,7 @@ import java.util.Optional;
 /**
  * Created by Mark Cunningham on 8/9/2017.
  */
-public class HistoricalStockPriceLoader {
+public class HistoricalStockPriceLoader extends DataLoaderWorker {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HistoricalStockPriceLoader.class);
     private final static int DEFAULT_MAX_DAYS_HISTORICAL = 365;
@@ -35,7 +35,14 @@ public class HistoricalStockPriceLoader {
         this.stockPricesHistoricalRepository = stockPricesHistoricalRepository;
     }
 
+    @Override
     @Transactional
+    public void doWork() {
+        LOGGER.info("{} will start to do it's work", this.getClass());
+
+        LOGGER.info("{} has completed all it's work", this.getClass());
+    }
+
     public void loadHistoricalPricesForSymbol(String inputSymbol) {
 
         String symbol = inputSymbol.toUpperCase();
@@ -56,16 +63,19 @@ public class HistoricalStockPriceLoader {
 
         if ( historicalPrices == null || historicalPrices.isEmpty()) {
             LOGGER.warn("Received no historical prices for stock [{}]", tickersEntity.getSymbol());
+            return;
         }
 
         // We have data to save each one
-        for ( TiingoPriceDto tPrice : historicalPrices) {
+        for ( TiingoPriceDto tPrice : historicalPrices ) {
             StockPricesHistoricalEntity historyEntity = covertToEntity(tickersEntity.getSymbol(), tPrice);
             if ( stockPricesHistoricalRepository.save(historyEntity) == null) {
                 LOGGER.warn("Could not save the historical stock price entity [{}]", historyEntity);
             }
         }
-        
+
+        LOGGER.info("Successfully loaded [{}] historical prices for [{}]", historicalPrices.size(), symbol);
+
     }
 
     private StockPricesHistoricalEntity covertToEntity(String symbol, TiingoPriceDto tPrice) {
@@ -90,6 +100,11 @@ public class HistoricalStockPriceLoader {
         entity.setSplitFactor(tPrice.getSplitFactor());
         return entity;
 
+    }
+
+    @Override
+    public int orderNumber() {
+        return DataLoaderOrder.STOCK_PRICE_HISTORICAL_LOADER;
     }
 
 }

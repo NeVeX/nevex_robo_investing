@@ -5,6 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
 /**
  * Created by Mark Cunningham on 8/8/2017.
@@ -12,5 +13,6 @@ import java.math.BigInteger;
 @Repository
 public interface StockPricesRepository extends CrudRepository<StockPricesEntity, BigInteger> {
 
+    Optional<StockPricesEntity> findBySymbol(String symbol);
 
 }

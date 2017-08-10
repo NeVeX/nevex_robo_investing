@@ -4,6 +4,7 @@ import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
+import com.nevex.roboinvesting.dataloader.DataLoaderManager;
 import com.nevex.roboinvesting.dataloader.HistoricalStockPriceLoader;
 import com.nevex.roboinvesting.dataloader.TickerSymbolLoader;
 import com.nevex.roboinvesting.model.StockExchange;
@@ -15,6 +16,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.PostConstruct;
@@ -51,16 +53,12 @@ class StockHistoricalPriceLoaderConfiguration {
     @PostConstruct
     void init() throws Exception {
         LOGGER.info("The data load configuration has been activated. Configurations [{}]", this);
-
-        historicalStockPriceLoader().loadHistoricalPricesForSymbol("LC");
-
     }
 
     @Bean
     HistoricalStockPriceLoader historicalStockPriceLoader() {
         return new HistoricalStockPriceLoader(tickersRepository, tiingoApiClient, stockPricesHistoricalRepository);
     }
-
 
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;

@@ -2,8 +2,6 @@ package com.nevex.roboinvesting.database.entity;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 
 /**
@@ -11,7 +9,7 @@ import java.time.LocalDate;
  */
 @Entity
 @Table(schema = "investing", name = "stock_prices_historical")
-public class StockPricesHistoricalEntity {
+public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +29,7 @@ public class StockPricesHistoricalEntity {
     private BigDecimal close;
     @Column(name = "volume")
     private int volume;
+
     @Column(name = "adj_open")
     private BigDecimal adjOpen;
     @Column(name = "adj_high")
@@ -40,7 +39,7 @@ public class StockPricesHistoricalEntity {
     @Column(name = "adj_close")
     private BigDecimal adjClose;
     @Column(name = "adj_volume")
-    private int adjVolume;
+    private Integer adjVolume;
     @Column(name = "dividend_cash")
     private BigDecimal dividendCash;
     @Column(name = "split_factor")
@@ -54,6 +53,7 @@ public class StockPricesHistoricalEntity {
         this.id = id;
     }
 
+    @Override
     public String getSymbol() {
         return symbol;
     }
@@ -62,6 +62,7 @@ public class StockPricesHistoricalEntity {
         this.symbol = symbol;
     }
 
+    @Override
     public LocalDate getDate() {
         return date;
     }
@@ -70,6 +71,7 @@ public class StockPricesHistoricalEntity {
         this.date = date;
     }
 
+    @Override
     public BigDecimal getOpen() {
         return open;
     }
@@ -78,6 +80,7 @@ public class StockPricesHistoricalEntity {
         this.open = open;
     }
 
+    @Override
     public BigDecimal getHigh() {
         return high;
     }
@@ -86,6 +89,7 @@ public class StockPricesHistoricalEntity {
         this.high = high;
     }
 
+    @Override
     public BigDecimal getLow() {
         return low;
     }
@@ -94,6 +98,7 @@ public class StockPricesHistoricalEntity {
         this.low = low;
     }
 
+    @Override
     public BigDecimal getClose() {
         return close;
     }
@@ -102,6 +107,7 @@ public class StockPricesHistoricalEntity {
         this.close = close;
     }
 
+    @Override
     public int getVolume() {
         return volume;
     }
@@ -110,6 +116,7 @@ public class StockPricesHistoricalEntity {
         this.volume = volume;
     }
 
+    @Override
     public BigDecimal getAdjOpen() {
         return adjOpen;
     }
@@ -118,6 +125,7 @@ public class StockPricesHistoricalEntity {
         this.adjOpen = adjOpen;
     }
 
+    @Override
     public BigDecimal getAdjHigh() {
         return adjHigh;
     }
@@ -126,6 +134,7 @@ public class StockPricesHistoricalEntity {
         this.adjHigh = adjHigh;
     }
 
+    @Override
     public BigDecimal getAdjLow() {
         return adjLow;
     }
@@ -134,6 +143,7 @@ public class StockPricesHistoricalEntity {
         this.adjLow = adjLow;
     }
 
+    @Override
     public BigDecimal getAdjClose() {
         return adjClose;
     }
@@ -142,14 +152,16 @@ public class StockPricesHistoricalEntity {
         this.adjClose = adjClose;
     }
 
-    public int getAdjVolume() {
+    @Override
+    public Integer getAdjVolume() {
         return adjVolume;
     }
 
-    public void setAdjVolume(int adjVolume) {
+    public void setAdjVolume(Integer adjVolume) {
         this.adjVolume = adjVolume;
     }
 
+    @Override
     public BigDecimal getDividendCash() {
         return dividendCash;
     }
@@ -158,6 +170,7 @@ public class StockPricesHistoricalEntity {
         this.dividendCash = dividendCash;
     }
 
+    @Override
     public BigDecimal getSplitFactor() {
         return splitFactor;
     }
