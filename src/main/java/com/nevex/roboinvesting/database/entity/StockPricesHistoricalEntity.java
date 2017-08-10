@@ -3,12 +3,13 @@ package com.nevex.roboinvesting.database.entity;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * Created by Mark Cunningham on 8/7/2017.
  */
 @Entity
-@Table(schema = "investing", name = "stock_prices_historical")
+@Table(schema = "investing", name = "stock_prices_historical", uniqueConstraints = @UniqueConstraint(columnNames = {"symbol", "date"}))
 public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
 
     @Id
@@ -198,5 +199,33 @@ public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
                 ", dividendCash=" + dividendCash +
                 ", splitFactor=" + splitFactor +
                 '}';
+    }
+
+    public void merge(StockPricesHistoricalEntity other) {
+        this.open = other.open;
+        this.high = other.high;
+        this.low = other.low;
+        this.close = other.close;
+        this.volume = other.volume;
+        this.adjOpen = other.adjOpen;
+        this.adjHigh = other.adjHigh;
+        this.adjLow = other.adjLow;
+        this.adjVolume = other.adjVolume;
+        this.dividendCash = other.dividendCash;
+        this.splitFactor = other.splitFactor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StockPricesHistoricalEntity that = (StockPricesHistoricalEntity) o;
+        return Objects.equals(symbol, that.symbol) &&
+                Objects.equals(date, that.date);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(symbol, date);
     }
 }

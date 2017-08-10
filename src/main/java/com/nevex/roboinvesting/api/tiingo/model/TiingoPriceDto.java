@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.nevex.roboinvesting.api.ApiStockPrice;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.format.datetime.joda.LocalDateTimeParser;
 
@@ -17,7 +18,7 @@ import java.time.format.DateTimeFormatter;
  * Created by Mark Cunningham on 8/9/2017.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TiingoPriceDto {
+public class TiingoPriceDto extends ApiStockPrice {
 
     @JsonProperty("date")
     private OffsetDateTime date;
@@ -149,4 +150,6 @@ public class TiingoPriceDto {
     public void setSplitFactor(BigDecimal splitFactor) {
         this.splitFactor = splitFactor;
     }
+
+
 }

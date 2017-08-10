@@ -3,13 +3,13 @@ package com.nevex.roboinvesting.dataloader;
 /**
  * Created by Mark Cunningham on 8/8/2017.
  */
-public class DataLoadException extends Exception {
+public class DataLoadWorkerException extends Exception {
 
-    DataLoadException(String message) {
+    DataLoadWorkerException(String message) {
         super(message);
     }
 
-    DataLoadException(String message, Throwable t) {
+    DataLoadWorkerException(String message, Throwable t) {
         super(message, t);
     }
 

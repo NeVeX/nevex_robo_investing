@@ -14,9 +14,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Created by Mark Cunningham on 8/8/2017.
@@ -47,14 +45,18 @@ public class TiingoApiClient {
         Request request = buildDefaultRequest().url(url).build();
 
         TiingoPriceDto priceDto = null;
-        List<TiingoPriceDto> prices = getStockPrices(request);
-        if ( prices != null && !prices.isEmpty()) {
-            priceDto = prices.get(0); // There should only ever be one
+        Set<TiingoPriceDto> prices = getStockPrices(request);
+        if ( prices != null ) {
+            Optional<TiingoPriceDto> firstPrice = prices.stream().findFirst();
+            if ( firstPrice.isPresent()) {
+                priceDto = firstPrice.get();
+            }
+
         }
         return Optional.ofNullable(priceDto);
     }
 
-    public List<TiingoPriceDto> getHistoricalPricesForSymbol(String symbol, int maxDaysToFetch) throws TiingoApiException {
+    public Set<TiingoPriceDto> getHistoricalPricesForSymbol(String symbol, int maxDaysToFetch) throws TiingoApiException {
         // Build the date to use
         LocalDate todaysDate = LocalDate.now();
         LocalDate earliestDate = todaysDate.minus(maxDaysToFetch, ChronoUnit.DAYS);
@@ -66,17 +68,17 @@ public class TiingoApiClient {
         url = StringUtils.replace(url, "{START_DATE}", earliestDateAsString);
         url = StringUtils.replace(url, "{END_DATE}", todaysDateAsString);
         Request request = buildDefaultRequest().url(url).build();
-        List<TiingoPriceDto> allPrices = getStockPrices(request);
+        Set<TiingoPriceDto> allPrices = getStockPrices(request);
         return allPrices;
     }
 
-    private List<TiingoPriceDto> getStockPrices(Request request) throws TiingoApiException {
+    private Set<TiingoPriceDto> getStockPrices(Request request) throws TiingoApiException {
         try {
             Response response = httpClient.newCall(request).execute();
             if ( response.isSuccessful()) {
-                return objectMapper.readValue(response.body().byteStream(), new TypeReference<List<TiingoPriceDto>>(){});
+                return objectMapper.readValue(response.body().byteStream(), new TypeReference<Set<TiingoPriceDto>>(){});
             }
-            return new ArrayList<>();
+            return new HashSet<>();
         } catch (IOException ioException ) {
             throw new TiingoApiException("Could not get the current price using the Tiingo API for url ["+request.url()+"]", ioException);
         }

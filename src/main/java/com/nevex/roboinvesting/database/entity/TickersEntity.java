@@ -7,12 +7,13 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 /**
  * Created by Mark Cunningham on 8/7/2017.
  */
 @Entity
-@Table(schema = "investing", name = "tickers")
+@Table(schema = "investing", name = "tickers", uniqueConstraints = @UniqueConstraint(columnNames = "symbol"))
 public class TickersEntity {
 
     @Id
@@ -121,5 +122,18 @@ public class TickersEntity {
             ", isTradable=" + isTradable +
             ", tradingEndDate=" + tradingEndDate +
             '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TickersEntity that = (TickersEntity) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

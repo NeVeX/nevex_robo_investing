@@ -3,18 +3,19 @@ package com.nevex.roboinvesting.database.entity;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * Created by Mark Cunningham on 8/7/2017.
  */
 @Entity
-@Table(schema = "investing", name = "stock_prices")
+@Table(schema = "investing", name = "stock_prices", uniqueConstraints = @UniqueConstraint(columnNames = "symbol"))
 public class StockPricesEntity implements StockPriceBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private int id;
     @Column(name = "symbol")
     private String symbol;
     @Column(name = "date", columnDefinition = "DATE")
@@ -45,11 +46,11 @@ public class StockPricesEntity implements StockPriceBaseEntity {
     @Column(name = "split_factor")
     private BigDecimal splitFactor;
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -198,5 +199,32 @@ public class StockPricesEntity implements StockPriceBaseEntity {
                 ", dividendCash=" + dividendCash +
                 ", splitFactor=" + splitFactor +
                 '}';
+    }
+
+    public void merge(StockPricesEntity other) {
+        this.open = other.open;
+        this.high = other.high;
+        this.low = other.low;
+        this.close = other.close;
+        this.volume = other.volume;
+        this.adjOpen = other.adjOpen;
+        this.adjHigh = other.adjHigh;
+        this.adjLow = other.adjLow;
+        this.adjVolume = other.adjVolume;
+        this.dividendCash = other.dividendCash;
+        this.splitFactor = other.splitFactor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StockPricesEntity that = (StockPricesEntity) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

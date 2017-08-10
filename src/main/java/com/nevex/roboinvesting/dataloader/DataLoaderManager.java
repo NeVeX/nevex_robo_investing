@@ -1,5 +1,7 @@
 package com.nevex.roboinvesting.dataloader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,6 +19,7 @@ import java.util.concurrent.Executors;
  */
 public class DataLoaderManager implements ApplicationListener<ApplicationReadyEvent> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataLoaderManager.class);
     private Set<DataLoaderWorker> workers = new TreeSet<>();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -24,7 +27,6 @@ public class DataLoaderManager implements ApplicationListener<ApplicationReadyEv
         this.workers.add(dw);
     }
 
-    @Scheduled()
     public void onApplicationEvent(ApplicationReadyEvent event) {
         executorService.submit(this::start);
     }
@@ -36,7 +38,12 @@ public class DataLoaderManager implements ApplicationListener<ApplicationReadyEv
 
     private void start() {
         for ( DataLoaderWorker dw : workers ) {
-            dw.doWork();
+            try {
+                dw.doWork();
+            } catch (DataLoadWorkerException ex) {
+                // TODO: still continue?
+                LOGGER.error("DataLoaderWorker [{}] failed - will still allow other jobs to continue", dw.getClass(), ex);
+            }
         }
     }
 }

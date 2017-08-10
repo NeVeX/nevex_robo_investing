@@ -21,7 +21,7 @@ spring:
 
 robo-investing:
   ticker-data-loader:
-    enabled: true # Set this to true and and put values in below for the optional csv to load data into the database
+    enabled: false # Set this to true and and put values in below for the optional csv to load data into the database
     nasdaq-file: D:\Coding\Git\nevex_robo_investing\data\nasdaq_tickers_08_07_2017.csv
     nyse-file: D:\Coding\Git\nevex_robo_investing\data\nyse_tickers_08_07_2017.csv
   stock-historical-loader:
@@ -30,6 +30,7 @@ robo-investing:
     api-key: b685d125ea02159884511a9c8198da5d9fee8007
     host: https://api.tiingo.com
   testing:
+    enabled: true
     allowed-symbols: LC, FB, APPL, NAKD, GOOGL, MSFT,
 
 
