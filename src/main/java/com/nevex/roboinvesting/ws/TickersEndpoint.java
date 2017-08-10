@@ -24,7 +24,7 @@ import java.util.Optional;
  */
 @RestController
 @Validated
-@RequestMapping("/tickers")
+@RequestMapping(value = "/tickers")
 public class TickersEndpoint {
 
     private final TickerSymbolService tickerSymbolService;

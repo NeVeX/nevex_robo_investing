@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -49,6 +50,7 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
 
     // Run this Monday to Friday, at 8pm
     @Scheduled(cron = "0 0 20 * * MON-FRI", zone = "America/Los_Angeles")
+//    @Scheduled(cron = "*/10 * * * * *", zone = "America/Los_Angeles") // Every 10 seconds
     void getAllCurrentPrices() {
         LOGGER.info("Current prices job has started!");
 
@@ -57,7 +59,7 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
         }
 
         // Fetch all the ticker symbols we have
-        super.processAllPagesForRepo(tickersRepository, this::loadCurrentPrice);
+        super.processAllPagesForRepo(tickersRepository, this::loadCurrentPrice, TimeUnit.MINUTES.toMillis(1));
 
         LOGGER.info("Current prices job has finished!");
     }

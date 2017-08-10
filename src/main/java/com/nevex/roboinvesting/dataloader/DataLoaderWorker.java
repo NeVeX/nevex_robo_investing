@@ -1,6 +1,7 @@
 package com.nevex.roboinvesting.dataloader;
 
-import com.nevex.roboinvesting.database.entity.TickersEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,8 @@ import java.util.function.Consumer;
  */
 public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(DataLoaderWorker.class);
+
     abstract int orderNumber();
 
     abstract void doWork() throws DataLoadWorkerException;
@@ -23,10 +26,16 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
         return Integer.compare(orderNumber(), that.orderNumber());
     }
 
+
+    protected  <T, ID extends Serializable> void processAllPagesForRepo(
+            PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer) {
+        processAllPagesForRepo(sortingRepository, consumer, 0);
+    }
     /**
      * Helper function to page across a pageable repository
      */
-    protected  <T, ID extends Serializable> void processAllPagesForRepo(PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer) {
+    protected  <T, ID extends Serializable> void processAllPagesForRepo(
+            PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer, long pauseBetweenPagesMs) {
 
         // Fetch all the ticker symbols we have
         Pageable pageable = new PageRequest(0, 20);
@@ -39,6 +48,20 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
             }
 
             pageable = page != null && page.hasNext() ? page.nextPageable() : null;
+
+            if ( pauseBetweenPagesMs > 0 ) {
+                // we need to pause the thread for a moment
+                try {
+                    LOGGER.info("Sleeping thread for [{}] for repository [{}] at page [{}]",
+                            pauseBetweenPagesMs, sortingRepository.getClass().getName(), pageable);
+                    Thread.sleep(pauseBetweenPagesMs);
+                } catch (Exception e) {
+                    LOGGER.error("Will stop paging since a thread exception was received while sleeping for [{}] for repository [{}] at page [{}]",
+                            pauseBetweenPagesMs, sortingRepository.getClass().getName(), pageable, e);
+                    return; // stop processing
+                }
+            }
+
         }
     }
 

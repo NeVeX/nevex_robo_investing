@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Mark Cunningham on 8/9/2017.
@@ -42,7 +43,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         LOGGER.info("{} will start to do it's work", this.getClass());
 
         // Fetch all the ticker symbols we have
-        super.processAllPagesForRepo(tickersRepository, this::loadHistoricalPricesForSymbol);
+        super.processAllPagesForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, TimeUnit.MINUTES.toMillis(1));
 
         LOGGER.info("{} has completed all it's work", this.getClass());
     }
