@@ -17,6 +17,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(DataLoaderWorker.class);
 
+    @Deprecated // Not necessary anymore
     abstract boolean canHaveExceptions();
 
     abstract int orderNumber();
@@ -28,16 +29,11 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
         return Integer.compare(orderNumber(), that.orderNumber());
     }
 
-
-    protected  <T, ID extends Serializable> void processAllPagesForRepo(
-            PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer) {
-        processAllPagesForRepo(sortingRepository, consumer, 0);
-    }
     /**
      * Helper function to page across a pageable repository
      */
-    protected  <T, ID extends Serializable> void processAllPagesForRepo(
-            PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer, long pauseBetweenPagesMs) {
+    <T, ID extends Serializable> void processAllPagesForRepo(
+            PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer, long waitTimeBetweenTickersMs) {
 
         // Fetch all the ticker symbols we have
         Pageable pageable = new PageRequest(0, 20);
@@ -46,24 +42,33 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
             Page<T> page = sortingRepository.findAll(pageable);
             if ( page != null && page.hasContent()) {
-                page.forEach(consumer);
-            }
-
-            pageable = page != null && page.hasNext() ? page.nextPageable() : null;
-
-            if ( pauseBetweenPagesMs > 0 ) {
-                // we need to pause the thread for a moment
-                try {
-                    LOGGER.info("Sleeping thread for [{}] for repository [{}] at page [{}]",
-                            pauseBetweenPagesMs, sortingRepository.getClass().getName(), pageable);
-                    Thread.sleep(pauseBetweenPagesMs);
-                } catch (Exception e) {
-                    LOGGER.error("Will stop paging since a thread exception was received while sleeping for [{}] for repository [{}] at page [{}]",
-                            pauseBetweenPagesMs, sortingRepository.getClass().getName(), pageable, e);
-                    return; // stop processing
+                for ( T data : page) {
+                    consumer.accept(data);
+                    if ( waitTimeBetweenTickersMs > 0 ) {
+                        boolean exceptionOccurred = tryPauseThreadForMs(waitTimeBetweenTickersMs, sortingRepository.getClass().getName(), pageable);
+                        if ( exceptionOccurred ) {
+                            return;
+                        }
+                    }
                 }
             }
 
+            pageable = page != null && page.hasNext() ? page.nextPageable() : null;
+        }
+    }
+
+    // Tries to pause the thread for a certain amount of time
+    // Returns TRUE if an exception happened
+    private boolean tryPauseThreadForMs(long timeToPauseMs, String repoName, Pageable pageable) {
+        // we need to pause the thread for a moment
+        try {
+//            LOGGER.info("Sleeping thread for [{}] for repository [{}] at page [{}]", timeToPauseMs, repoName, pageable);
+            Thread.sleep(timeToPauseMs);
+            return false;
+        } catch (Exception e) {
+            LOGGER.error("Will stop paging since a thread exception was received while sleeping for [{}] for repository [{}] at page [{}]",
+                    timeToPauseMs, repoName, pageable, e);
+            return true; // stop processing
         }
     }
 

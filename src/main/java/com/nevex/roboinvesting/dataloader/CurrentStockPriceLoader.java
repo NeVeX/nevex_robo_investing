@@ -8,12 +8,9 @@ import com.nevex.roboinvesting.service.StockPriceAdminService;
 import com.nevex.roboinvesting.util.TestingControlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -26,11 +23,17 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
     private final TickersRepository tickersRepository;
     private final TiingoApiClient tiingoApiClient;
     private final StockPriceAdminService stockPriceAdminService;
+    private final long waitTimeBetweenTickersMs;
 
-    public CurrentStockPriceLoader(TickersRepository tickersRepository, TiingoApiClient tiingoApiClient, StockPriceAdminService stockPriceAdminService) {
+    public CurrentStockPriceLoader(TickersRepository tickersRepository,
+                                   TiingoApiClient tiingoApiClient,
+                                   StockPriceAdminService stockPriceAdminService,
+                                   long waitTimeBetweenTickersMs) {
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( tiingoApiClient == null) { throw new IllegalArgumentException("Provided tiingoApiClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
+        if ( waitTimeBetweenTickersMs < 0) { throw new IllegalArgumentException("Provided waitTimeBetweenTickersMs ["+waitTimeBetweenTickersMs+"] is invalid"); }
+        this.waitTimeBetweenTickersMs = waitTimeBetweenTickersMs;
         this.tickersRepository = tickersRepository;
         this.tiingoApiClient = tiingoApiClient;
         this.stockPriceAdminService = stockPriceAdminService;
@@ -64,7 +67,7 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
         }
 
         // Fetch all the ticker symbols we have
-        super.processAllPagesForRepo(tickersRepository, this::loadCurrentPrice, TimeUnit.MINUTES.toMillis(1));
+        super.processAllPagesForRepo(tickersRepository, this::loadCurrentPrice, waitTimeBetweenTickersMs);
 
         LOGGER.info("Current prices job has finished!");
     }

@@ -1,11 +1,7 @@
 package com.nevex.roboinvesting.database.entity;
 
-import org.apache.tomcat.jni.Local;
-
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 

@@ -1,7 +1,6 @@
 package com.nevex.roboinvesting.model;
 
 import com.nevex.roboinvesting.database.entity.StockPriceBaseEntity;
-import com.nevex.roboinvesting.database.entity.StockPricesEntity;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;

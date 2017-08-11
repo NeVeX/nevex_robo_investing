@@ -1,18 +1,11 @@
 package com.nevex.roboinvesting.api.tiingo.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.nevex.roboinvesting.api.ApiStockPrice;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.springframework.format.datetime.joda.LocalDateTimeParser;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Created by Mark Cunningham on 8/9/2017.

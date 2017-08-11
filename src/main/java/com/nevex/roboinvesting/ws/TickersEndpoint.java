@@ -1,7 +1,5 @@
 package com.nevex.roboinvesting.ws;
 
-import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.database.entity.TickersEntity;
 import com.nevex.roboinvesting.model.TickerSymbol;
 import com.nevex.roboinvesting.service.TickerSymbolService;
 import com.nevex.roboinvesting.ws.model.TickerDto;

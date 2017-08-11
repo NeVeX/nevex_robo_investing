@@ -1,7 +1,6 @@
 package com.nevex.roboinvesting.database;
 
 import com.nevex.roboinvesting.database.entity.TickersEntity;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 

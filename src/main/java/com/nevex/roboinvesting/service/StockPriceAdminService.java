@@ -1,7 +1,6 @@
 package com.nevex.roboinvesting.service;
 
 import com.nevex.roboinvesting.api.ApiStockPrice;
-import com.nevex.roboinvesting.api.tiingo.model.TiingoPriceDto;
 import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.StockPricesRepository;
 import com.nevex.roboinvesting.database.entity.StockPricesEntity;
@@ -10,9 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import sun.security.krb5.internal.APOptions;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**

@@ -1,11 +1,8 @@
 package com.nevex.roboinvesting.ws;
 
 import com.nevex.roboinvesting.model.StockPrice;
-import com.nevex.roboinvesting.model.TickerSymbol;
 import com.nevex.roboinvesting.service.StockPriceService;
-import com.nevex.roboinvesting.service.TickerSymbolService;
 import com.nevex.roboinvesting.ws.model.StockPriceDto;
-import com.nevex.roboinvesting.ws.model.TickerDto;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;

@@ -2,9 +2,7 @@ package com.nevex.roboinvesting.dataloader;
 
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.api.tiingo.model.TiingoPriceDto;
-import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.database.entity.StockPricesHistoricalEntity;
 import com.nevex.roboinvesting.database.entity.TickersEntity;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
 import com.nevex.roboinvesting.util.TestingControlUtil;
@@ -13,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Mark Cunningham on 8/9/2017.
@@ -25,13 +22,17 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     private final TickersRepository tickersRepository;
     private final TiingoApiClient tiingoApiClient;
     private final StockPriceAdminService stockPriceAdminService;
+    private final long waitTimeBetweenTickersMs;
 
     public HistoricalStockPriceLoader(TickersRepository tickersRepository,
                                       TiingoApiClient tiingoApiClient,
-                                      StockPriceAdminService stockPriceAdminService) {
+                                      StockPriceAdminService stockPriceAdminService,
+                                      long waitTimeBetweenTickersMs) {
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( tiingoApiClient == null) { throw new IllegalArgumentException("Provided tiingoApiClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
+        if ( waitTimeBetweenTickersMs < 0) { throw new IllegalArgumentException("Provided waitTimeBetweenTickersMs ["+waitTimeBetweenTickersMs+"] is invalid"); }
+        this.waitTimeBetweenTickersMs = waitTimeBetweenTickersMs;
         this.tickersRepository = tickersRepository;
         this.tiingoApiClient = tiingoApiClient;
         this.stockPriceAdminService = stockPriceAdminService;
@@ -43,7 +44,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         LOGGER.info("{} will start to do it's work", this.getClass());
 
         // Fetch all the ticker symbols we have
-        super.processAllPagesForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, TimeUnit.MINUTES.toMillis(1));
+        super.processAllPagesForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, waitTimeBetweenTickersMs);
 
         LOGGER.info("{} has completed all it's work", this.getClass());
     }

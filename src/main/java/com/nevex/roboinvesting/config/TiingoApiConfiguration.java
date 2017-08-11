@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-import javax.annotation.PostConstruct;
-
 import static com.nevex.roboinvesting.config.PropertyNames.ROBO_INVESTING;
 import static com.nevex.roboinvesting.config.TiingoApiConfiguration.TIINGO_PREFIX;
 

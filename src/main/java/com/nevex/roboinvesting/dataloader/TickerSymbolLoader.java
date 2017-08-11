@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.io.File;
 import java.io.FileReader;
 import java.time.OffsetDateTime;
@@ -32,7 +33,6 @@ public class TickerSymbolLoader extends DataLoaderWorker {
         if ( tickersRepository == null ) { throw new IllegalArgumentException("tickers repository is null"); }
         this.tickersRepository = tickersRepository;
         this.stockExchangesRepository = stockExchangesRepository;
-
     }
 
     public void addTickerFileToLoad(StockExchange stockExchange, String fileLocation) {

@@ -2,10 +2,8 @@ package com.nevex.roboinvesting.config;
 
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.dataloader.DataLoaderManager;
 import com.nevex.roboinvesting.dataloader.TickerSymbolLoader;
 import com.nevex.roboinvesting.model.StockExchange;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +11,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.PostConstruct;
