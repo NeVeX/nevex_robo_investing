@@ -1,0 +1,42 @@
+server:
+  port: 56700
+  context-path: /investing/dataloader
+
+logging:
+  file: log/investing-data-loader.log
+  level: INFO
+
+spring:
+  profiles:
+    active: sensitive
+  properties.hibernate.format_sql: true
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    hibernate:
+      ddl-auto: validate #auto-drop
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+robo-investing:
+  ticker-data-loader:
+    enabled: false # Set this to true and and put values in below for the optional csv to load data into the database
+    nasdaq-file: D:\Coding\Git\nevex_robo_investing\data\nasdaq_tickers_08_07_2017.csv
+    nyse-file: D:\Coding\Git\nevex_robo_investing\data\nyse_tickers_08_07_2017.csv
+  stock-historical-loader:
+    enabled: true
+    wait-time-between-tickers-ms: 1000
+  daily-stock-price-loader:
+    enabled: true
+    wait-time-between-tickers-ms: 1000
+  tiingo:
+    api-key: b685d125ea02159884511a9c8198da5d9fee8007
+    host: https://api.tiingo.com
+  testing:
+    enabled: false
+    allowed-symbols: LC, FB, APPL, NAKD, GOOGL, MSFT,
+
+
+# Tiingo API: https://api.tiingo.com/
+

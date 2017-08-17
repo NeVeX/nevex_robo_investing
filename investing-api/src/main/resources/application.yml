@@ -1,0 +1,30 @@
+server:
+  port: 56888
+  context-path: /investing/api
+
+logging:
+  file: log/api-investing.log
+  level: INFO
+
+spring:
+  jackson.serialization.write_dates_as_timestamps: false
+  jackson.serialization.indent_output: true # Should disable this in the future
+  profiles:
+    active: sensitive
+  properties.hibernate.format_sql: true
+  # Need to get rid of the below - it should be read in from the module included (database-access)
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    hibernate:
+      ddl-auto: validate #auto-drop
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+
+robo-investing:
+  testing:
+    enabled: false
+    allowed-symbols: LC, FB, APPL, NAKD, GOOGL, MSFT,
+

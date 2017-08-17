@@ -1,0 +1,4 @@
+
+dependencies {
+    compile project(':investing-database-access')
+}

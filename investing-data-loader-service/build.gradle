@@ -1,0 +1,5 @@
+
+dependencies {
+    compile project(':investing-service')
+    compile project(':investing-external-data-sources')
+}

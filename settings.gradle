@@ -1,2 +1,9 @@
 rootProject.name = 'nevex-robo-investing'
+include 'investing-database-access'
+include 'investing-api'
+include 'investing-data-loader'
+include 'investing-service'
+include 'investing-external-data-sources'
+include 'investing-common'
+include 'investing-data-loader-service'
 
