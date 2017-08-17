@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -31,6 +32,12 @@ public class TickersEndpoint {
     public TickersEndpoint(TickerSymbolService tickerSymbolService) {
         if ( tickerSymbolService == null ) { throw new IllegalArgumentException("Provided tickers service is null"); }
         this.tickerSymbolService = tickerSymbolService;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
+    ResponseEntity<?> getTickers() {
+        List<TickerSymbol> tickersFound = tickerSymbolService.getAllTickers();
+        return ResponseEntity.ok(tickersFound);
     }
 
     @RequestMapping(value = "/{symbol}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )

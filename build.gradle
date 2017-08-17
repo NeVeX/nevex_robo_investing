@@ -8,6 +8,10 @@ subprojects {
     sourceCompatibility = javaSourceCompatibility
     targetCompatibility = javaTargetCompatibility
 
+    bootRepackage {
+        enabled = false
+    }
+
     repositories {
         mavenCentral()
     }
