@@ -1,6 +1,6 @@
 server:
   port: 56888
-  context-path: /investing/api
+  context-path: /investing
 
 logging:
   file: log/api-investing.log

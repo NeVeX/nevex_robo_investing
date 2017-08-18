@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @Validated
-@RequestMapping(value = "/search")
+@RequestMapping(value = "/api/search")
 public class TickerSearchEndpoint {
 
     private final TickerService tickerService;

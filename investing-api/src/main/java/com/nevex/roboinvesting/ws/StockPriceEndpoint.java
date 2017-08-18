@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @Validated
-@RequestMapping(value = "/tickers/{symbol}/prices")
+@RequestMapping(value = "/api/tickers/{symbol}/prices")
 public class StockPriceEndpoint {
 
     private final StockPriceService stockPriceService;

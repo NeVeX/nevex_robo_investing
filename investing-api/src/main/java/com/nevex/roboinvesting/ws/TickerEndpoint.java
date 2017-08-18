@@ -22,7 +22,7 @@ import java.util.Optional;
  */
 @RestController
 @Validated
-@RequestMapping(value = "/tickers")
+@RequestMapping(value = "/api/tickers")
 public class TickerEndpoint {
 
     private final TickerService tickerService;

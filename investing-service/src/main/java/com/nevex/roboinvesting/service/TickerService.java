@@ -54,6 +54,7 @@ public class TickerService {
         }
         TickerCache.update(symbolToTickerIdMap);
         try {
+            // Since we need to blindly update the full list, we'll just get a write lock and well, blindly update the set
             tickersLock.writeLock().lock();
             allTickers = newTickers;
         } finally {
@@ -64,9 +65,11 @@ public class TickerService {
 
     public List<Ticker> searchForTicker(String name) {
         try {
+            // Try to get a read lock
             if ( tickersLock.readLock().tryLock(3, TimeUnit.SECONDS) ) {
                 return allTickers.parallelStream()
                         .filter(t -> StringUtils.containsIgnoreCase(t.getSymbol(), name) || StringUtils.containsIgnoreCase(t.getName(), name))
+                        .limit(10)
                         .collect(Collectors.toList());
             }
         } catch (Exception e ) {
