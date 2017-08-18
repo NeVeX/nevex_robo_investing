@@ -16,8 +16,8 @@ import java.util.Optional;
  */
 public class StockPriceService {
 
-    protected final StockPricesHistoricalRepository stockPricesHistoricalRepository;
-    protected final StockPricesRepository stockPricesRepository;
+    final StockPricesHistoricalRepository stockPricesHistoricalRepository;
+    final StockPricesRepository stockPricesRepository;
 
     public StockPriceService(StockPricesRepository stockPricesRepository,
                              StockPricesHistoricalRepository stockPricesHistoricalRepository) {

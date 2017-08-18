@@ -4,7 +4,7 @@ import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.StockPricesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.service.StockPriceService;
-import com.nevex.roboinvesting.service.TickerSymbolService;
+import com.nevex.roboinvesting.service.TickerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,8 +23,8 @@ public class ServicesConfiguration {
     private StockPricesHistoricalRepository stockPricesHistoricalRepository;
 
     @Bean
-    TickerSymbolService tickerSymbolService() {
-        return new TickerSymbolService(tickersRepository);
+    TickerService tickerSymbolService() {
+        return new TickerService(tickersRepository);
     }
 
     @Bean

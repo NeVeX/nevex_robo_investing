@@ -40,6 +40,8 @@ public class StockPriceDto {
     @JsonProperty("split_factor")
     private BigDecimal splitFactor;
 
+    public StockPriceDto() { }
+
     public StockPriceDto(StockPrice stockPrice) {
         this.symbol = stockPrice.getSymbol();
         this.date = stockPrice.getDate();

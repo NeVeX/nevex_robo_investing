@@ -1,11 +1,12 @@
 package com.nevex.roboinvesting.service.model;
 
 import com.nevex.roboinvesting.database.entity.TickersEntity;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by Mark Cunningham on 8/8/2017.
  */
-public final class TickerSymbol {
+public final class Ticker {
 
     private final String symbol;
     private final String name;
@@ -14,13 +15,21 @@ public final class TickerSymbol {
     private final boolean isTradable;
     private final StockExchange stockExchange;
 
-    public TickerSymbol(TickersEntity tickersEntity, StockExchange stockExchange) {
+    public Ticker(TickersEntity tickersEntity, StockExchange stockExchange) {
+        if ( tickersEntity == null ) { throw new IllegalArgumentException("TickersEntity cannot be null"); }
+        if ( stockExchange == null ) { throw new IllegalArgumentException("StockExchange cannot be null"); }
+
         this.symbol = tickersEntity.getSymbol();
         this.name = tickersEntity.getName();
         this.sector = tickersEntity.getSector();
         this.industry = tickersEntity.getIndustry();
         this.isTradable = tickersEntity.getIsTradable();
         this.stockExchange = stockExchange;
+
+        if (StringUtils.isBlank(this.symbol) ) { throw new IllegalArgumentException("Symbol cannot be blank"); }
+        if (StringUtils.isBlank(this.name) ) { throw new IllegalArgumentException("Name cannot be blank"); }
+        if (StringUtils.isBlank(this.sector) ) { throw new IllegalArgumentException("Sector cannot be blank"); }
+        if (StringUtils.isBlank(this.industry) ) { throw new IllegalArgumentException("Industry cannot be blank"); }
     }
 
     public String getSymbol() {

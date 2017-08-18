@@ -1,7 +1,8 @@
 package com.nevex.roboinvesting.ws.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.nevex.roboinvesting.service.model.TickerSymbol;
+import com.nevex.roboinvesting.service.model.Ticker;
 
 /**
  * Created by Mark Cunningham on 8/8/2017.
@@ -21,15 +22,15 @@ public class TickerDto {
     @JsonProperty("stock_exchange")
     private String stockExchange;
 
-    public static TickerDto from(TickerSymbol tickerSymbol) {
-        TickerDto dto = new TickerDto();
-        dto.name = tickerSymbol.getName();
-        dto.symbol = tickerSymbol.getSymbol();
-        dto.sector = tickerSymbol.getSector();
-        dto.industry = tickerSymbol.getIndustry();
-        dto.isTradable = tickerSymbol.isTradable();
-        dto.stockExchange = tickerSymbol.getStockExchange().name().toUpperCase();
-        return dto;
+    public TickerDto() { }
+
+    public TickerDto(Ticker ticker) {
+        this.name = ticker.getName();
+        this.symbol = ticker.getSymbol();
+        this.sector = ticker.getSector();
+        this.industry = ticker.getIndustry();
+        this.isTradable = ticker.isTradable();
+        this.stockExchange = ticker.getStockExchange().name().toUpperCase();
     }
 
     public String getSymbol() {
