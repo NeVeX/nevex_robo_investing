@@ -9,15 +9,15 @@ import java.util.Objects;
  * Created by Mark Cunningham on 8/7/2017.
  */
 @Entity
-@Table(schema = "investing", name = "stock_prices_historical", uniqueConstraints = @UniqueConstraint(columnNames = {"symbol", "date"}))
-public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
+@Table(schema = "investing", name = "stock_prices_historical", uniqueConstraints = @UniqueConstraint(columnNames = {"ticker_id", "date"}))
+public class StockPriceHistoricalEntity implements StockPriceBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
-    @Column(name = "symbol")
-    private String symbol;
+    @Column(name = "ticker_id")
+    private int tickerId;
     @Column(name = "date", columnDefinition = "DATE")
     private LocalDate date;
     @Column(name = "open")
@@ -29,7 +29,7 @@ public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
     @Column(name = "close")
     private BigDecimal close;
     @Column(name = "volume")
-    private int volume;
+    private long volume;
 
     @Column(name = "adj_open")
     private BigDecimal adjOpen;
@@ -40,7 +40,7 @@ public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
     @Column(name = "adj_close")
     private BigDecimal adjClose;
     @Column(name = "adj_volume")
-    private Integer adjVolume;
+    private Long adjVolume;
     @Column(name = "dividend_cash")
     private BigDecimal dividendCash;
     @Column(name = "split_factor")
@@ -55,12 +55,12 @@ public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
     }
 
     @Override
-    public String getSymbol() {
-        return symbol;
+    public int getTickerId() {
+        return tickerId;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    public void setTickerId(int tickerId) {
+        this.tickerId = tickerId;
     }
 
     @Override
@@ -109,11 +109,11 @@ public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
     }
 
     @Override
-    public int getVolume() {
+    public long getVolume() {
         return volume;
     }
 
-    public void setVolume(int volume) {
+    public void setVolume(long volume) {
         this.volume = volume;
     }
 
@@ -154,11 +154,11 @@ public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
     }
 
     @Override
-    public Integer getAdjVolume() {
+    public Long getAdjVolume() {
         return adjVolume;
     }
 
-    public void setAdjVolume(Integer adjVolume) {
+    public void setAdjVolume(Long adjVolume) {
         this.adjVolume = adjVolume;
     }
 
@@ -182,9 +182,9 @@ public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
 
     @Override
     public String toString() {
-        return "StockPriceEntityBase{" +
+        return "StockPriceHistoricalEntity{" +
                 "id=" + id +
-                ", symbol='" + symbol + '\'' +
+                ", tickerId=" + tickerId +
                 ", date=" + date +
                 ", open=" + open +
                 ", high=" + high +
@@ -201,7 +201,7 @@ public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
                 '}';
     }
 
-    public void merge(StockPricesHistoricalEntity other) {
+    public void merge(StockPriceHistoricalEntity other) {
         this.open = other.open;
         this.high = other.high;
         this.low = other.low;
@@ -219,13 +219,13 @@ public class StockPricesHistoricalEntity implements StockPriceBaseEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StockPricesHistoricalEntity that = (StockPricesHistoricalEntity) o;
-        return Objects.equals(symbol, that.symbol) &&
+        StockPriceHistoricalEntity that = (StockPriceHistoricalEntity) o;
+        return Objects.equals(tickerId, that.tickerId) &&
                 Objects.equals(date, that.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(symbol, date);
+        return Objects.hash(tickerId, date);
     }
 }

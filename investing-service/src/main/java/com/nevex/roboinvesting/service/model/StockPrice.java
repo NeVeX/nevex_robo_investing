@@ -1,5 +1,6 @@
 package com.nevex.roboinvesting.service.model;
 
+import com.nevex.roboinvesting.TickerCache;
 import com.nevex.roboinvesting.database.entity.StockPriceBaseEntity;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,31 +13,33 @@ import java.util.Optional;
  */
 public final class StockPrice {
 
-    private final String symbol;
+    private final int tickerId;
+    private final String tickerSymbol;
     private final LocalDate date;
     private final BigDecimal open;
     private final BigDecimal high;
     private final BigDecimal low;
     private final BigDecimal close;
-    private final int volume;
+    private final long volume;
     // Optionals below
     private final BigDecimal adjOpen;
     private final BigDecimal adjHigh;
     private final BigDecimal adjLow;
     private final BigDecimal adjClose;
-    private final Integer adjVolume;
+    private final Long adjVolume;
     private final BigDecimal dividendCash;
     private final BigDecimal splitFactor;
 
-    public StockPrice(String symbol, LocalDate date, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, int volume, BigDecimal adjOpen, BigDecimal adjHigh, BigDecimal adjLow, BigDecimal adjClose, Integer adjVolume, BigDecimal dividendCash, BigDecimal splitFactor) {
-        if (StringUtils.isBlank(symbol)) { throw new IllegalArgumentException("Provided symbol is blank"); }
+    public StockPrice(int tickerId, LocalDate date, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, long volume, BigDecimal adjOpen, BigDecimal adjHigh, BigDecimal adjLow, BigDecimal adjClose, Long adjVolume, BigDecimal dividendCash, BigDecimal splitFactor) {
         if (date == null) { throw new IllegalArgumentException("Provided date is null"); }
         if (open == null) { throw new IllegalArgumentException("Provided open is null"); }
         if (high == null) { throw new IllegalArgumentException("Provided open is null"); }
         if (low == null) { throw new IllegalArgumentException("Provided open is null"); }
         if (close == null) { throw new IllegalArgumentException("Provided open is null"); }
-
-        this.symbol = symbol;
+        Optional<String> tickerSymbolOpt = TickerCache.getSymbolForId(tickerId);
+        if ( !tickerSymbolOpt.isPresent() ) { throw new IllegalArgumentException("Ticker id ["+tickerId+"] could not be found"); }
+        this.tickerId = tickerId;
+        this.tickerSymbol = tickerSymbolOpt.get();
         this.date = date;
         this.open = open;
         this.high = high;
@@ -56,7 +59,7 @@ public final class StockPrice {
 
     public StockPrice(StockPriceBaseEntity entity) {
         this(
-            entity.getSymbol(),
+            entity.getTickerId(),
             entity.getDate(),
             entity.getOpen(),
             entity.getHigh(),
@@ -73,9 +76,12 @@ public final class StockPrice {
         );
     }
 
+    public String getTickerSymbol() {
+        return tickerSymbol;
+    }
 
-    public String getSymbol() {
-        return symbol;
+    public int getTickerId() {
+        return tickerId;
     }
 
     public LocalDate getDate() {
@@ -98,7 +104,7 @@ public final class StockPrice {
         return close;
     }
 
-    public int getVolume() {
+    public long getVolume() {
         return volume;
     }
 
@@ -118,7 +124,7 @@ public final class StockPrice {
         return Optional.ofNullable(adjClose);
     }
 
-    public Optional<Integer> getAdjVolume() {
+    public Optional<Long> getAdjVolume() {
         return Optional.ofNullable(adjVolume);
     }
 

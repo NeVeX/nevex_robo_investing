@@ -10,7 +10,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(schema = "investing", name = "tickers", uniqueConstraints = @UniqueConstraint(columnNames = "symbol"))
-public class TickersEntity {
+public class TickerEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -107,7 +107,7 @@ public class TickersEntity {
 
     @Override
     public String toString() {
-        return "TickersEntity{" +
+        return "TickerEntity{" +
             "id=" + id +
             ", symbol='" + symbol + '\'' +
             ", name='" + name + '\'' +
@@ -124,7 +124,7 @@ public class TickersEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TickersEntity that = (TickersEntity) o;
+        TickerEntity that = (TickerEntity) o;
         return id == that.id;
     }
 

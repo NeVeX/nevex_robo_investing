@@ -1,6 +1,7 @@
 package com.nevex.roboinvesting.ws;
 
 import com.nevex.roboinvesting.service.StockPriceService;
+import com.nevex.roboinvesting.service.exception.TickerNotFoundException;
 import com.nevex.roboinvesting.service.model.StockPrice;
 import com.nevex.roboinvesting.ws.model.StockPriceDto;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +44,12 @@ public class StockPriceEndpoint {
             @PathVariable(name = "symbol") String inputSymbol) {
 
         String symbol = StringUtils.trim(inputSymbol).toUpperCase();
-        Optional<StockPrice> stockPriceOpt = stockPriceService.getCurrentPrice(symbol);
+        Optional<StockPrice> stockPriceOpt;
+        try {
+            stockPriceOpt = stockPriceService.getCurrentPrice(symbol);
+        } catch (TickerNotFoundException tickerNotFound) {
+            return ResponseEntity.notFound().build();
+        }
 
         if ( stockPriceOpt.isPresent()) {
             StockPrice stockPrice = stockPriceOpt.get();
@@ -60,7 +66,12 @@ public class StockPriceEndpoint {
             @PathVariable(name = "symbol") String inputSymbol) {
 
         String symbol = StringUtils.trim(inputSymbol).toUpperCase();
-        List<StockPrice> historicalPrices = stockPriceService.getHistoricalPrices(symbol);
+        List<StockPrice> historicalPrices;
+        try {
+            historicalPrices = stockPriceService.getHistoricalPrices(symbol);
+        } catch (TickerNotFoundException tickerNotFound) {
+            return ResponseEntity.notFound().build();
+        }
 
         if ( !historicalPrices.isEmpty()) {
             List<StockPriceDto> stockPriceDtos = historicalPrices.stream().map(StockPriceDto::new).collect(Collectors.toList());

@@ -19,7 +19,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import static com.nevex.roboinvesting.PropertyNames.ROBO_INVESTING;
+import static com.nevex.roboinvesting.PropertyNames.NEVEX_INVESTING;
 
 /**
  * Created by Mark Cunningham on 8/7/2017.
@@ -32,7 +32,7 @@ class StockPricesHistoricalLoaderConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StockPricesHistoricalLoaderConfiguration.class);
 
-    static final String CONFIGURATION_PREFIX_KEY = ROBO_INVESTING + ".stock-historical-loader";
+    static final String CONFIGURATION_PREFIX_KEY = NEVEX_INVESTING + ".stock-historical-loader";
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
     @Autowired

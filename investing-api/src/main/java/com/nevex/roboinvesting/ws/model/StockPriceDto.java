@@ -11,8 +11,8 @@ import java.time.LocalDate;
  */
 public class StockPriceDto {
 
-    @JsonProperty("symbol")
-    private String symbol;
+    @JsonProperty("ticker")
+    private String ticker;
     @JsonProperty("date")
     private LocalDate date;
     @JsonProperty("open")
@@ -24,7 +24,7 @@ public class StockPriceDto {
     @JsonProperty("close")
     private BigDecimal close;
     @JsonProperty("volume")
-    private int volume;
+    private long volume;
     @JsonProperty("adj_open")
     private BigDecimal adjOpen;
     @JsonProperty("adj_high")
@@ -34,7 +34,7 @@ public class StockPriceDto {
     @JsonProperty("adj_close")
     private BigDecimal adjClose;
     @JsonProperty("adj_volume")
-    private Integer adjVolume;
+    private Long adjVolume;
     @JsonProperty("dividend_cash")
     private BigDecimal dividendCash;
     @JsonProperty("split_factor")
@@ -43,7 +43,7 @@ public class StockPriceDto {
     public StockPriceDto() { }
 
     public StockPriceDto(StockPrice stockPrice) {
-        this.symbol = stockPrice.getSymbol();
+        this.ticker = stockPrice.getTickerSymbol();
         this.date = stockPrice.getDate();
         this.open = stockPrice.getOpen();
         this.high = stockPrice.getHigh();
@@ -59,12 +59,12 @@ public class StockPriceDto {
         this.splitFactor = stockPrice.getSplitFactor().isPresent() ? stockPrice.getSplitFactor().get() : null;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getTicker() {
+        return ticker;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    public void setTicker(String ticker) {
+        this.ticker = ticker;
     }
 
     public LocalDate getDate() {
@@ -107,11 +107,11 @@ public class StockPriceDto {
         this.close = close;
     }
 
-    public int getVolume() {
+    public long getVolume() {
         return volume;
     }
 
-    public void setVolume(int volume) {
+    public void setVolume(long volume) {
         this.volume = volume;
     }
 
@@ -147,11 +147,11 @@ public class StockPriceDto {
         this.adjClose = adjClose;
     }
 
-    public Integer getAdjVolume() {
+    public Long getAdjVolume() {
         return adjVolume;
     }
 
-    public void setAdjVolume(Integer adjVolume) {
+    public void setAdjVolume(Long adjVolume) {
         this.adjVolume = adjVolume;
     }
 

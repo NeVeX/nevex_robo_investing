@@ -5,6 +5,6 @@ package com.nevex.roboinvesting;
  */
 public class PropertyNames {
 
-    public final static String ROBO_INVESTING = "robo-investing";
+    public final static String NEVEX_INVESTING = "nevex-investing";
 
 }

@@ -2,8 +2,9 @@ package com.nevex.roboinvesting.dataloader;
 
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.database.entity.StockExchangesEntity;
-import com.nevex.roboinvesting.database.entity.TickersEntity;
+import com.nevex.roboinvesting.database.entity.StockExchangeEntity;
+import com.nevex.roboinvesting.database.entity.TickerEntity;
+import com.nevex.roboinvesting.service.TickerService;
 import com.nevex.roboinvesting.service.model.StockExchange;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -26,13 +27,16 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     private final static Logger LOGGER = LoggerFactory.getLogger(TickerSymbolLoader.class);
     private final StockExchangesRepository stockExchangesRepository;
     private final TickersRepository tickersRepository;
+    private final TickerService tickerService;
     private final Map<StockExchange, String> tickersToLoad = new HashMap<>();
 
-    public TickerSymbolLoader(StockExchangesRepository stockExchangesRepository, TickersRepository tickersRepository) {
+    public TickerSymbolLoader(TickerService tickerService, StockExchangesRepository stockExchangesRepository, TickersRepository tickersRepository) {
+        if ( tickerService == null ) { throw new IllegalArgumentException("ticker service is null"); }
         if ( stockExchangesRepository == null ) { throw new IllegalArgumentException("stock exchange repository is null"); }
         if ( tickersRepository == null ) { throw new IllegalArgumentException("tickers repository is null"); }
         this.tickersRepository = tickersRepository;
         this.stockExchangesRepository = stockExchangesRepository;
+        this.tickerService = tickerService;
     }
 
     public void addTickerFileToLoad(StockExchange stockExchange, String fileLocation) {
@@ -45,7 +49,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
 
     private void printAllExchangesAvailable() {
         StringBuilder sb = new StringBuilder("The list of exchanges available to the application are:\n");
-        Iterable<StockExchangesEntity> stockExchanges = stockExchangesRepository.findAll();
+        Iterable<StockExchangeEntity> stockExchanges = stockExchangesRepository.findAll();
         stockExchanges.forEach(e -> sb.append( "  - " + e.getId() + " : " + e.getName()).append("\n") );
         LOGGER.info(sb.toString());
     }
@@ -68,6 +72,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
         for (Map.Entry<StockExchange, String> entry : tickersToLoad.entrySet()) {
             loadTickers(entry.getKey(), entry.getValue());
         }
+        this.tickerService.refreshAllTickers();
         LOGGER.info("{} has completed all it's work", this.getClass());
     }
 
@@ -129,7 +134,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     }
 
     private void saveTicker(short stockExchangeId, CSVParsedTicker CSVParsedTicker) throws DataLoadWorkerException {
-        TickersEntity entity = new TickersEntity();
+        TickerEntity entity = new TickerEntity();
         entity.setCreatedDate(OffsetDateTime.now());
         entity.setStockExchange(stockExchangeId);
         entity.setSymbol(CSVParsedTicker.symbol);

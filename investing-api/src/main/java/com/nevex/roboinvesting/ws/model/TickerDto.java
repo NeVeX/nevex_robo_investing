@@ -9,8 +9,8 @@ import com.nevex.roboinvesting.service.model.Ticker;
  */
 public class TickerDto {
 
-    @JsonProperty("symbol")
-    private String symbol;
+    @JsonProperty("ticker")
+    private String ticker;
     @JsonProperty("name")
     private String name;
     @JsonProperty("sector")
@@ -26,19 +26,19 @@ public class TickerDto {
 
     public TickerDto(Ticker ticker) {
         this.name = ticker.getName();
-        this.symbol = ticker.getSymbol();
+        this.ticker = ticker.getSymbol();
         this.sector = ticker.getSector();
         this.industry = ticker.getIndustry();
         this.isTradable = ticker.isTradable();
         this.stockExchange = ticker.getStockExchange().name().toUpperCase();
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getTicker() {
+        return ticker;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    public void setTicker(String symbol) {
+        this.ticker = ticker;
     }
 
     public String getName() {

@@ -18,7 +18,7 @@ public abstract class ApiStockPrice implements Comparable<ApiStockPrice> {
 
     public abstract  BigDecimal getClose();
 
-    public abstract  Integer getVolume();
+    public abstract  Long getVolume();
 
     public abstract  BigDecimal getAdjOpen();
 
@@ -28,7 +28,7 @@ public abstract class ApiStockPrice implements Comparable<ApiStockPrice> {
 
     public abstract  BigDecimal getAdjClose();
 
-    public abstract  Integer getAdjVolume();
+    public abstract  Long getAdjVolume();
 
     public abstract  BigDecimal getDivCash();
 

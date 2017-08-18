@@ -24,7 +24,7 @@ public class TiingoPriceDto extends ApiStockPrice {
     @JsonProperty("close")
     private BigDecimal close;
     @JsonProperty("volume")
-    private Integer volume;
+    private Long volume;
     @JsonProperty("adjOpen")
     private BigDecimal adjOpen;
     @JsonProperty("adjHigh")
@@ -34,7 +34,7 @@ public class TiingoPriceDto extends ApiStockPrice {
     @JsonProperty("adjClose")
     private BigDecimal adjClose;
     @JsonProperty("adjVolume")
-    private Integer adjVolume;
+    private Long adjVolume;
     @JsonProperty("divCash")
     private BigDecimal divCash;
     @JsonProperty("splitFactor")
@@ -80,11 +80,11 @@ public class TiingoPriceDto extends ApiStockPrice {
         this.close = close;
     }
 
-    public Integer getVolume() {
+    public Long getVolume() {
         return volume;
     }
 
-    public void setVolume(Integer volume) {
+    public void setVolume(Long volume) {
         this.volume = volume;
     }
 
@@ -120,11 +120,11 @@ public class TiingoPriceDto extends ApiStockPrice {
         this.adjClose = adjClose;
     }
 
-    public Integer getAdjVolume() {
+    public Long getAdjVolume() {
         return adjVolume;
     }
 
-    public void setAdjVolume(Integer adjVolume) {
+    public void setAdjVolume(Long adjVolume) {
         this.adjVolume = adjVolume;
     }
 

@@ -15,7 +15,7 @@ import static com.nevex.roboinvesting.config.TiingoApiConfiguration.TIINGO_PREFI
  */
 @Validated
 @Configuration
-@ConfigurationProperties(prefix = PropertyNames.ROBO_INVESTING + TIINGO_PREFIX)
+@ConfigurationProperties(prefix = PropertyNames.NEVEX_INVESTING + TIINGO_PREFIX)
 public class TiingoApiConfiguration {
 
     static final String TIINGO_PREFIX = ".tiingo";

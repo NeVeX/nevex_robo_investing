@@ -4,7 +4,7 @@ import com.nevex.roboinvesting.TestingControlUtil;
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.api.tiingo.model.TiingoPriceDto;
 import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.database.entity.TickersEntity;
+import com.nevex.roboinvesting.database.entity.TickerEntity;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,28 +49,28 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         LOGGER.info("{} has completed all it's work", this.getClass());
     }
 
-    private void loadHistoricalPricesForSymbol(TickersEntity tickersEntity) {
+    private void loadHistoricalPricesForSymbol(TickerEntity tickerEntity) {
 
-        if (!TestingControlUtil.isTickerAllowed(tickersEntity.getSymbol())) {
-//            LOGGER.info("Not processing symbol [{}] since testing control does not allow it", tickersEntity.getSymbol());
+        if (!TestingControlUtil.isTickerAllowed(tickerEntity.getSymbol())) {
+//            LOGGER.info("Not processing symbol [{}] since testing control does not allow it", tickerEntity.getSymbol());
             return;
         }
 
         Set<TiingoPriceDto> historicalPrices;
         try {
-            historicalPrices = tiingoApiClient.getHistoricalPricesForSymbol(tickersEntity.getSymbol(), DEFAULT_MAX_DAYS_HISTORICAL);
+            historicalPrices = tiingoApiClient.getHistoricalPricesForSymbol(tickerEntity.getSymbol(), DEFAULT_MAX_DAYS_HISTORICAL);
 
             if ( historicalPrices == null || historicalPrices.isEmpty()) {
-                LOGGER.warn("Received no historical prices for stock [{}]", tickersEntity.getSymbol());
+                LOGGER.warn("Received no historical prices for stock [{}]", tickerEntity.getSymbol());
                 return;
             }
 
-            stockPriceAdminService.saveHistoricalPrices(tickersEntity.getSymbol(), historicalPrices);
+            stockPriceAdminService.saveHistoricalPrices(tickerEntity.getSymbol(), historicalPrices);
 
-            LOGGER.info("Successfully loaded [{}] historical prices for [{}]", historicalPrices.size(), tickersEntity.getSymbol());
+            LOGGER.info("Successfully loaded [{}] historical prices for [{}]", historicalPrices.size(), tickerEntity.getSymbol());
 
         } catch (Exception e ) {
-            LOGGER.error("Could not get historical prices for symbol [{}]", tickersEntity.getSymbol(), e);
+            LOGGER.error("Could not get historical prices for symbol [{}]", tickerEntity.getSymbol(), e);
         }
     }
 

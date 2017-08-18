@@ -8,7 +8,7 @@ import java.time.LocalDate;
  */
 public interface StockPriceBaseEntity {
 
-    String getSymbol();
+    int getTickerId();
 
     LocalDate getDate();
 
@@ -20,7 +20,7 @@ public interface StockPriceBaseEntity {
 
     BigDecimal getClose();
 
-    int getVolume();
+    long getVolume();
 
     BigDecimal getAdjOpen();
 
@@ -30,7 +30,7 @@ public interface StockPriceBaseEntity {
 
     BigDecimal getAdjClose();
 
-    Integer getAdjVolume();
+    Long getAdjVolume();
 
     BigDecimal getDividendCash();
 

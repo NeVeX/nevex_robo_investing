@@ -4,7 +4,7 @@ import com.nevex.roboinvesting.TestingControlUtil;
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.api.tiingo.model.TiingoPriceDto;
 import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.database.entity.TickersEntity;
+import com.nevex.roboinvesting.database.entity.TickerEntity;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,23 +72,23 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
         LOGGER.info("Current prices job has finished!");
     }
 
-    private void loadCurrentPrice(TickersEntity tickersEntity) {
+    private void loadCurrentPrice(TickerEntity tickerEntity) {
 
-        if (!TestingControlUtil.isTickerAllowed(tickersEntity.getSymbol())) {
-//            LOGGER.info("Not processing symbol [{}] since testing control does not allow it", tickersEntity.getSymbol());
+        if (!TestingControlUtil.isTickerAllowed(tickerEntity.getSymbol())) {
+//            LOGGER.info("Not processing symbol [{}] since testing control does not allow it", tickerEntity.getSymbol());
             return;
         }
 
         try {
-            Optional<TiingoPriceDto> tiingoPriceOpt = tiingoApiClient.getCurrentPriceForSymbol(tickersEntity.getSymbol());
+            Optional<TiingoPriceDto> tiingoPriceOpt = tiingoApiClient.getCurrentPriceForSymbol(tickerEntity.getSymbol());
             if ( tiingoPriceOpt.isPresent()) {
-                stockPriceAdminService.saveNewCurrentPrice(tickersEntity.getSymbol(), tiingoPriceOpt.get());
+                stockPriceAdminService.saveNewCurrentPrice(tickerEntity.getSymbol(), tiingoPriceOpt.get());
             } else {
-                LOGGER.info("No current price information was returned for [{}]", tickersEntity.getSymbol());
+                LOGGER.info("No current price information was returned for [{}]", tickerEntity.getSymbol());
             }
 
         } catch (Exception e) {
-            LOGGER.error("An error occured trying to get current price for symbol [{}]", tickersEntity.getSymbol(), e);
+            LOGGER.error("An error occured trying to get current price for symbol [{}]", tickerEntity.getSymbol(), e);
         }
     }
 

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.nevex.roboinvesting.PropertyNames.ROBO_INVESTING;
+import static com.nevex.roboinvesting.PropertyNames.NEVEX_INVESTING;
 import static com.nevex.roboinvesting.config.TestingConfiguration.TESTING_PREFIX;
 
 /**
@@ -26,7 +26,7 @@ import static com.nevex.roboinvesting.config.TestingConfiguration.TESTING_PREFIX
 @ConditionalOnProperty(name = TESTING_PREFIX + ".enabled", havingValue = "true")
 public class TestingConfiguration {
 
-    static final String TESTING_PREFIX = ROBO_INVESTING + ".testing";
+    static final String TESTING_PREFIX = NEVEX_INVESTING + ".testing";
     private final Set<String> allowableSymbols = new HashSet<>();
 
     @NotBlank

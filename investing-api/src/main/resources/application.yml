@@ -23,7 +23,7 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 
-robo-investing:
+nevex-investing:
   testing:
     enabled: false
     allowed-symbols: LC, FB, APPL, NAKD, GOOGL, MSFT,

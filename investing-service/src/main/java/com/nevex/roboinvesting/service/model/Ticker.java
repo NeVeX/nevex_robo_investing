@@ -1,6 +1,6 @@
 package com.nevex.roboinvesting.service.model;
 
-import com.nevex.roboinvesting.database.entity.TickersEntity;
+import com.nevex.roboinvesting.database.entity.TickerEntity;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -15,15 +15,15 @@ public final class Ticker {
     private final boolean isTradable;
     private final StockExchange stockExchange;
 
-    public Ticker(TickersEntity tickersEntity, StockExchange stockExchange) {
-        if ( tickersEntity == null ) { throw new IllegalArgumentException("TickersEntity cannot be null"); }
+    public Ticker(TickerEntity tickerEntity, StockExchange stockExchange) {
+        if ( tickerEntity == null ) { throw new IllegalArgumentException("TickerEntity cannot be null"); }
         if ( stockExchange == null ) { throw new IllegalArgumentException("StockExchange cannot be null"); }
 
-        this.symbol = tickersEntity.getSymbol();
-        this.name = tickersEntity.getName();
-        this.sector = tickersEntity.getSector();
-        this.industry = tickersEntity.getIndustry();
-        this.isTradable = tickersEntity.getIsTradable();
+        this.symbol = tickerEntity.getSymbol();
+        this.name = tickerEntity.getName();
+        this.sector = tickerEntity.getSector();
+        this.industry = tickerEntity.getIndustry();
+        this.isTradable = tickerEntity.getIsTradable();
         this.stockExchange = stockExchange;
 
         if (StringUtils.isBlank(this.symbol) ) { throw new IllegalArgumentException("Symbol cannot be blank"); }

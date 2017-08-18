@@ -1,10 +1,11 @@
 package com.nevex.roboinvesting.service;
 
+import com.nevex.roboinvesting.TickerCache;
 import com.nevex.roboinvesting.api.ApiStockPrice;
 import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.StockPricesRepository;
-import com.nevex.roboinvesting.database.entity.StockPricesEntity;
-import com.nevex.roboinvesting.database.entity.StockPricesHistoricalEntity;
+import com.nevex.roboinvesting.database.entity.StockPriceEntity;
+import com.nevex.roboinvesting.database.entity.StockPriceHistoricalEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,14 +30,22 @@ public class StockPriceAdminService extends StockPriceService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveNewCurrentPrice(String symbol, ApiStockPrice price) {
-        // save this to both the historical price and the current price
-        saveHistoricalPrice(symbol, price);
 
-        StockPricesEntity newCurrentPrice = convertToCurrentEntity(symbol, price);
+        Optional<Integer> tickerIdOpt = TickerCache.getIdForSymbol(symbol);
+        if ( !tickerIdOpt.isPresent()) {
+            LOGGER.warn("Cannot save historical price for symbol [{}] since there is no mapping to an id for it", symbol);
+            return;
+        }
+        int tickerId = tickerIdOpt.get();
+
+        // save this to both the historical price and the current price
+        saveHistoricalPrice(tickerId, price);
+
+        StockPriceEntity newCurrentPrice = convertToCurrentEntity(tickerId, price);
         // Get the current one and update it
-        Optional<StockPricesEntity> existingCurrentPriceOpt = stockPricesRepository.findBySymbol(symbol);
+        Optional<StockPriceEntity> existingCurrentPriceOpt = stockPricesRepository.findByTickerId(tickerId);
         if ( existingCurrentPriceOpt.isPresent()) {
-            StockPricesEntity existingCurrentPrice = existingCurrentPriceOpt.get();
+            StockPriceEntity existingCurrentPrice = existingCurrentPriceOpt.get();
             existingCurrentPrice.merge(newCurrentPrice); // merge in any changes
             newCurrentPrice = existingCurrentPrice; // swap!
         }
@@ -49,14 +58,20 @@ public class StockPriceAdminService extends StockPriceService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public <E extends ApiStockPrice> void saveHistoricalPrices(String symbol, Set<E> historicalPrices) {
 
+        Optional<Integer> tickerIdOpt = TickerCache.getIdForSymbol(symbol);
+        if ( !tickerIdOpt.isPresent()) {
+            LOGGER.warn("Cannot save historical price for symbol [{}] since there is no mapping to an id for it", symbol);
+            return;
+        }
+        int tickerId = tickerIdOpt.get();
         // delete all records we currently have
-        stockPricesHistoricalRepository.deleteBySymbol(symbol);
+        stockPricesHistoricalRepository.deleteByTickerId(tickerId);
 
-        Set<StockPricesHistoricalEntity> newEntitiesToSave = new HashSet<>();
+        Set<StockPriceHistoricalEntity> newEntitiesToSave = new HashSet<>();
 
         // We have data to save each one
         newEntitiesToSave.addAll(
-                historicalPrices.stream().map(tPrice -> convertToHistoricalEntity(symbol, tPrice))
+                historicalPrices.stream().map(tPrice -> convertToHistoricalEntity(tickerId, tPrice))
                 .collect(Collectors.toList())
         );
 
@@ -74,16 +89,16 @@ public class StockPriceAdminService extends StockPriceService {
         orderPrices.stream().findFirst().ifPresent(p -> saveNewCurrentPrice(symbol, p));
     }
 
-    private void saveHistoricalPrice(String symbol, ApiStockPrice price) {
+    private void saveHistoricalPrice(int tickerId, ApiStockPrice price) {
         // now insert all our records
-        StockPricesHistoricalEntity newHistoryEntity = convertToHistoricalEntity(symbol, price);
+        StockPriceHistoricalEntity newHistoryEntity = convertToHistoricalEntity(tickerId, price);
 
         // check if we already have this saved
-        Optional<StockPricesHistoricalEntity> existingHistPriceOpt =
-                stockPricesHistoricalRepository.findBySymbolAndDate(symbol, price.getDate().toLocalDate());
+        Optional<StockPriceHistoricalEntity> existingHistPriceOpt =
+                stockPricesHistoricalRepository.findByTickerIdAndDate(tickerId, price.getDate().toLocalDate());
 
         if ( existingHistPriceOpt.isPresent()) {
-            StockPricesHistoricalEntity existingHistPrice = existingHistPriceOpt.get();
+            StockPriceHistoricalEntity existingHistPrice = existingHistPriceOpt.get();
             LOGGER.info("Merging found existing entity for historical price [{}]", existingHistPrice);
             existingHistPrice.merge(newHistoryEntity);
             newHistoryEntity = existingHistPrice; // swap what we should save
@@ -95,10 +110,10 @@ public class StockPriceAdminService extends StockPriceService {
     }
 
     // TODO: merge these 2 entity models
-    private StockPricesHistoricalEntity convertToHistoricalEntity(String symbol, ApiStockPrice tPrice) {
+    private StockPriceHistoricalEntity convertToHistoricalEntity(int tickerId, ApiStockPrice tPrice) {
 
-        StockPricesHistoricalEntity entity = new StockPricesHistoricalEntity();
-        entity.setSymbol(symbol);
+        StockPriceHistoricalEntity entity = new StockPriceHistoricalEntity();
+        entity.setTickerId(tickerId);
         entity.setDate(tPrice.getDate().toLocalDate());
 
         entity.setClose(tPrice.getClose());
@@ -119,10 +134,10 @@ public class StockPriceAdminService extends StockPriceService {
 
     }
 
-    private StockPricesEntity convertToCurrentEntity(String symbol, ApiStockPrice tPrice) {
+    private StockPriceEntity convertToCurrentEntity(int tickerId, ApiStockPrice tPrice) {
 
-        StockPricesEntity entity = new StockPricesEntity();
-        entity.setSymbol(symbol);
+        StockPriceEntity entity = new StockPriceEntity();
+        entity.setTickerId(tickerId);
         entity.setDate(tPrice.getDate().toLocalDate());
 
         entity.setClose(tPrice.getClose());

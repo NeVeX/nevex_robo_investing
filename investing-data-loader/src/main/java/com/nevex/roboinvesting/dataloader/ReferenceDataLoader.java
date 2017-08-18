@@ -1,7 +1,7 @@
 package com.nevex.roboinvesting.dataloader;
 
 import com.nevex.roboinvesting.database.StockExchangesRepository;
-import com.nevex.roboinvesting.database.entity.StockExchangesEntity;
+import com.nevex.roboinvesting.database.entity.StockExchangeEntity;
 import com.nevex.roboinvesting.service.model.StockExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +32,10 @@ public class ReferenceDataLoader extends DataLoaderWorker {
 
     private void loadStockExchanges() throws DataLoadWorkerException {
         for (StockExchange se : StockExchange.values()) {
-            StockExchangesEntity entity = stockExchangesRepository.findOne(se.getId());
+            StockExchangeEntity entity = stockExchangesRepository.findOne(se.getId());
             if ( entity == null ) {
                 // add it
-                StockExchangesEntity newEntity = new StockExchangesEntity();
+                StockExchangeEntity newEntity = new StockExchangeEntity();
                 newEntity.setId(se.getId());
                 newEntity.setName(se.name());
                 if ( stockExchangesRepository.save(newEntity) == null) {

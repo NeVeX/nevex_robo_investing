@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(schema = "investing", name = "stock_exchanges")
-public class StockExchangesEntity {
+public class StockExchangeEntity {
 
     @Id
     @Column(name = "id")
@@ -39,7 +39,7 @@ public class StockExchangesEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StockExchangesEntity that = (StockExchangesEntity) o;
+        StockExchangeEntity that = (StockExchangeEntity) o;
         return id == that.id;
     }
 
@@ -50,7 +50,7 @@ public class StockExchangesEntity {
 
     @Override
     public String toString() {
-        return "StockExchangesEntity{" +
+        return "StockExchangeEntity{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';

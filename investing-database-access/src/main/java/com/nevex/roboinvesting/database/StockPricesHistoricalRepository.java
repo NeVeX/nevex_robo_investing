@@ -1,6 +1,6 @@
 package com.nevex.roboinvesting.database;
 
-import com.nevex.roboinvesting.database.entity.StockPricesHistoricalEntity;
+import com.nevex.roboinvesting.database.entity.StockPriceHistoricalEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -15,13 +15,13 @@ import java.util.Optional;
  * Created by Mark Cunningham on 8/8/2017.
  */
 @Repository
-public interface StockPricesHistoricalRepository extends CrudRepository<StockPricesHistoricalEntity, BigInteger> {
+public interface StockPricesHistoricalRepository extends CrudRepository<StockPriceHistoricalEntity, BigInteger> {
 
-    List<StockPricesHistoricalEntity> findAllBySymbol(String symbol);
+    List<StockPriceHistoricalEntity> findAllByTickerId(int tickerId);
 
-    Optional<StockPricesHistoricalEntity> findBySymbolAndDate(String symbol, LocalDate date);
+    Optional<StockPriceHistoricalEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    void deleteBySymbol(String symbol);
+    void deleteByTickerId(int tickerId);
 
 }

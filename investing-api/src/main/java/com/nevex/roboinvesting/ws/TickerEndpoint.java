@@ -15,10 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Created by Mark Cunningham on 8/8/2017.
@@ -39,7 +36,7 @@ public class TickerEndpoint {
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
     ResponseEntity<PageableDataDto<TickerDto>> getTickersForPage(
             @Min(value = 0, message = "Invalid page size provided") @RequestParam(value = "page", defaultValue = "0") Integer pageNumber) {
-        PageableData<Ticker> pageableData = tickerService.getAllTickers(pageNumber);
+        PageableData<Ticker> pageableData = tickerService.getTickers(pageNumber);
         if ( pageableData == null || !pageableData.hasData() ) {
             return ResponseEntity.ok(new PageableDataDto<>()); // empty response
         }

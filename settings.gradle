@@ -1,4 +1,4 @@
-rootProject.name = 'nevex-robo-investing'
+rootProject.name = 'nevex-investing'
 include 'investing-database-access'
 include 'investing-api'
 include 'investing-data-loader'
