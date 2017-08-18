@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Mark Cunningham on 8/17/2017.
  */
+@Deprecated // I don't really like this...
 public final class TickerCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TickerCache.class);
@@ -40,5 +41,5 @@ public final class TickerCache {
         TICKER_ID_TO_SYMBOL.putAll(tickerIdToSymbols);
         LOGGER.info("Refreshed [{}] tickers into the cache from the previous size of [{}]", TICKER_ID_TO_SYMBOL.size(), previousCount);
     }
-    
+
 }

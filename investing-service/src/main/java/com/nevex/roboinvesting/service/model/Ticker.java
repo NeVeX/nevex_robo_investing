@@ -3,6 +3,8 @@ package com.nevex.roboinvesting.service.model;
 import com.nevex.roboinvesting.database.entity.TickerEntity;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
+
 /**
  * Created by Mark Cunningham on 8/8/2017.
  */
@@ -54,5 +56,30 @@ public final class Ticker {
 
     public boolean isTradable() {
         return isTradable;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Ticker ticker = (Ticker) o;
+        return Objects.equals(symbol, ticker.symbol);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(symbol);
+    }
+
+    @Override
+    public String toString() {
+        return "Ticker{" +
+                "symbol='" + symbol + '\'' +
+                ", name='" + name + '\'' +
+                ", sector='" + sector + '\'' +
+                ", industry='" + industry + '\'' +
+                ", isTradable=" + isTradable +
+                ", stockExchange=" + stockExchange +
+                '}';
     }
 }
