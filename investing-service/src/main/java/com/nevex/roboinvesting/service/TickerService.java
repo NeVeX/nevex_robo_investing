@@ -1,8 +1,8 @@
 package com.nevex.roboinvesting.service;
 
-import com.nevex.roboinvesting.TickerCache;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.database.entity.TickerEntity;
+import com.nevex.roboinvesting.service.exception.TickerNotFoundException;
 import com.nevex.roboinvesting.service.model.PageableData;
 import com.nevex.roboinvesting.service.model.StockExchange;
 import com.nevex.roboinvesting.service.model.Ticker;
@@ -26,37 +26,80 @@ import java.util.stream.Collectors;
 public class TickerService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TickerService.class);
-    private final TickersRepository tickersRepository;
+    private final ConcurrentHashMap<String, Integer> symbolToTickerIdMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, String> tickerIdToSymbolMap = new ConcurrentHashMap<>();
     private final static int DEFAULT_PAGE_ELEMENT_SIZE = 20;
     private final static PageRequest DEFAULT_PAGE_REQUEST = new PageRequest(0, DEFAULT_PAGE_ELEMENT_SIZE);
-    private Set<Ticker> allTickers = new HashSet<>();
+    private final TickersRepository tickersRepository;
     private final ReadWriteLock tickersLock = new ReentrantReadWriteLock();
+    private Set<Ticker> allTickers = new HashSet<>();
 
     public TickerService(TickersRepository tickersRepository) {
         if ( tickersRepository == null ) { throw new IllegalArgumentException("Provided ticker repository is null"); }
         this.tickersRepository = tickersRepository;
 
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        Runnable refreshTickersTask = new Runnable() {
-            public void run() {
-                refreshAllTickers();
-            }
-        };
+        Runnable refreshTickersTask = this::refreshAllTickers;
         executor.scheduleAtFixedRate(refreshTickersTask, 10, TimeUnit.MINUTES.toSeconds(10), TimeUnit.SECONDS);
     }
 
-    public void refreshAllTickers() {
+    public Optional<Integer> tryGetIdForSymbol(String symbol) {
+        String ticker = symbol.toUpperCase();
+        Integer tickerId = symbolToTickerIdMap.get(ticker);
+        return Optional.ofNullable(tickerId);
+    }
+
+    public Optional<String> tryGetSymbolForId(int tickerId) {
+        String tickerSymbol = tickerIdToSymbolMap.get(tickerId);
+        return Optional.ofNullable(tickerSymbol);
+    }
+
+    // Returns the tickerId for symbol, or throws an exception if not found
+    public String getSymbolForId(int tickerId) throws TickerNotFoundException {
+        Optional<String> foundIdOpt = tryGetSymbolForId(tickerId);
+        if (foundIdOpt.isPresent()) {
+            return foundIdOpt.get();
+        }
+        throw new TickerNotFoundException(tickerId);
+    }
+
+    // Returns the tickerId for symbol, or throws an exception if not found
+    public int getIdForSymbol(String symbol) throws TickerNotFoundException {
+        Optional<Integer> foundIdOpt = tryGetIdForSymbol(symbol);
+        if (foundIdOpt.isPresent()) {
+            return foundIdOpt.get();
+        }
+        throw new TickerNotFoundException(symbol);
+    }
+
+    private void updateInternalTickerMaps(Map<String, Integer> newSymbolsToIds) {
+        Map<Integer, String> tickerIdToSymbols = newSymbolsToIds
+                .entrySet()
+                .stream().map( e -> new AbstractMap.SimpleEntry<>(e.getValue(), e.getKey()))
+                .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+
+        symbolToTickerIdMap.putAll(newSymbolsToIds);
+        tickerIdToSymbolMap.putAll(tickerIdToSymbols);
+    }
+
+    protected void refreshAllTickers() {
         Map<String, Integer> symbolToTickerIdMap = new HashMap<>();
         Set<Ticker> newTickers = new HashSet<>();
+
         for ( TickerEntity te : tickersRepository.findAll()) {
             symbolToTickerIdMap.put(te.getSymbol(), te.getId());
             newTickers.add(new Ticker(te, StockExchange.fromId(te.getStockExchange()).get()));
         }
-        TickerCache.update(symbolToTickerIdMap);
+
+
+
         try {
             // Since we need to blindly update the full list, we'll just get a write lock and well, blindly update the set
             tickersLock.writeLock().lock();
+            int previousCount = allTickers.size();
             allTickers = newTickers;
+            updateInternalTickerMaps(symbolToTickerIdMap);
+            LOGGER.info("Refreshed [{}] tickers into the cache from the previous size of [{}]", allTickers.size(), previousCount);
         } finally {
             tickersLock.writeLock().unlock();
         }

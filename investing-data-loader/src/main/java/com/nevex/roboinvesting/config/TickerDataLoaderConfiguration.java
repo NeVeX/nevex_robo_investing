@@ -3,6 +3,7 @@ package com.nevex.roboinvesting.config;
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.dataloader.TickerSymbolLoader;
+import com.nevex.roboinvesting.service.TickerAdminService;
 import com.nevex.roboinvesting.service.TickerService;
 import com.nevex.roboinvesting.service.model.StockExchange;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ class TickerDataLoaderConfiguration {
     @Autowired
     private TickersRepository tickersRepository;
     @Autowired
-    private TickerService tickerService;
+    private TickerAdminService tickerAdminService;
 
     @Valid
     @NotNull(message = "The 'enabled' property cannot be null")
@@ -54,7 +55,7 @@ class TickerDataLoaderConfiguration {
 
     @Bean
     TickerSymbolLoader tickerSymbolLoader() {
-        TickerSymbolLoader loader = new TickerSymbolLoader(tickerService, stockExchangesRepository, tickersRepository);
+        TickerSymbolLoader loader = new TickerSymbolLoader(tickerAdminService, stockExchangesRepository, tickersRepository);
         loader.addTickerFileToLoad(StockExchange.Nasdaq, nasdaqFile);
         loader.addTickerFileToLoad(StockExchange.Nyse, nyseFile);
         return loader;

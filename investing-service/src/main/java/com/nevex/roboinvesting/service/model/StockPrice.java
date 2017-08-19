@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -13,7 +14,6 @@ import java.util.Optional;
  */
 public final class StockPrice {
 
-    private final int tickerId;
     private final String tickerSymbol;
     private final LocalDate date;
     private final BigDecimal open;
@@ -30,16 +30,14 @@ public final class StockPrice {
     private final BigDecimal dividendCash;
     private final BigDecimal splitFactor;
 
-    public StockPrice(int tickerId, LocalDate date, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, long volume, BigDecimal adjOpen, BigDecimal adjHigh, BigDecimal adjLow, BigDecimal adjClose, Long adjVolume, BigDecimal dividendCash, BigDecimal splitFactor) {
+    public StockPrice(String symbol, LocalDate date, BigDecimal open, BigDecimal high, BigDecimal low, BigDecimal close, long volume, BigDecimal adjOpen, BigDecimal adjHigh, BigDecimal adjLow, BigDecimal adjClose, Long adjVolume, BigDecimal dividendCash, BigDecimal splitFactor) {
+        if (StringUtils.isBlank(symbol)) { throw new IllegalArgumentException("Provided symbol is null"); }
         if (date == null) { throw new IllegalArgumentException("Provided date is null"); }
         if (open == null) { throw new IllegalArgumentException("Provided open is null"); }
         if (high == null) { throw new IllegalArgumentException("Provided open is null"); }
         if (low == null) { throw new IllegalArgumentException("Provided open is null"); }
         if (close == null) { throw new IllegalArgumentException("Provided open is null"); }
-        Optional<String> tickerSymbolOpt = TickerCache.getSymbolForId(tickerId);
-        if ( !tickerSymbolOpt.isPresent() ) { throw new IllegalArgumentException("Ticker id ["+tickerId+"] could not be found"); }
-        this.tickerId = tickerId;
-        this.tickerSymbol = tickerSymbolOpt.get();
+        this.tickerSymbol = symbol;
         this.date = date;
         this.open = open;
         this.high = high;
@@ -57,9 +55,9 @@ public final class StockPrice {
         this.splitFactor = splitFactor;
     }
 
-    public StockPrice(StockPriceBaseEntity entity) {
+    public StockPrice(String symbol, StockPriceBaseEntity entity) {
         this(
-            entity.getTickerId(),
+            symbol,
             entity.getDate(),
             entity.getOpen(),
             entity.getHigh(),
@@ -78,10 +76,6 @@ public final class StockPrice {
 
     public String getTickerSymbol() {
         return tickerSymbol;
-    }
-
-    public int getTickerId() {
-        return tickerId;
     }
 
     public LocalDate getDate() {
@@ -134,5 +128,39 @@ public final class StockPrice {
 
     public Optional<BigDecimal> getSplitFactor() {
         return Optional.ofNullable(splitFactor);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StockPrice that = (StockPrice) o;
+        return Objects.equals(tickerSymbol, that.tickerSymbol) &&
+                Objects.equals(date, that.date);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tickerSymbol, date);
+    }
+
+    @Override
+    public String toString() {
+        return "StockPrice{" +
+                "tickerSymbol='" + tickerSymbol + '\'' +
+                ", date=" + date +
+                ", open=" + open +
+                ", high=" + high +
+                ", low=" + low +
+                ", close=" + close +
+                ", volume=" + volume +
+                ", adjOpen=" + adjOpen +
+                ", adjHigh=" + adjHigh +
+                ", adjLow=" + adjLow +
+                ", adjClose=" + adjClose +
+                ", adjVolume=" + adjVolume +
+                ", dividendCash=" + dividendCash +
+                ", splitFactor=" + splitFactor +
+                '}';
     }
 }

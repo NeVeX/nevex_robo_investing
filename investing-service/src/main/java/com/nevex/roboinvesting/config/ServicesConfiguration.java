@@ -23,13 +23,13 @@ public class ServicesConfiguration {
     private StockPricesHistoricalRepository stockPricesHistoricalRepository;
 
     @Bean
-    TickerService tickerSymbolService() {
+    TickerService tickerService() {
         return new TickerService(tickersRepository);
     }
 
     @Bean
     StockPriceService stockPriceService() {
-        return new StockPriceService(stockPricesRepository, stockPricesHistoricalRepository);
+        return new StockPriceService(tickerService(), stockPricesRepository, stockPricesHistoricalRepository);
     }
 
 }

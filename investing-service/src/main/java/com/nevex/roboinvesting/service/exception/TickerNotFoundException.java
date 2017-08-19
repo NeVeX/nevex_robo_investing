@@ -9,6 +9,10 @@ public final class TickerNotFoundException extends Exception {
         super("The ticker for symbol ["+symbol+"] was not found");
     }
 
+    public TickerNotFoundException(int tickerId) {
+        super("The ticker for id ["+tickerId+"] was not found");
+    }
+
     @Override // Suppress the stack, it's not needed
     public synchronized Throwable fillInStackTrace() {
         return this;

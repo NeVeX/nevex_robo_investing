@@ -4,6 +4,7 @@ import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.database.entity.StockExchangeEntity;
 import com.nevex.roboinvesting.database.entity.TickerEntity;
+import com.nevex.roboinvesting.service.TickerAdminService;
 import com.nevex.roboinvesting.service.TickerService;
 import com.nevex.roboinvesting.service.model.StockExchange;
 import org.apache.commons.csv.CSVFormat;
@@ -27,16 +28,16 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     private final static Logger LOGGER = LoggerFactory.getLogger(TickerSymbolLoader.class);
     private final StockExchangesRepository stockExchangesRepository;
     private final TickersRepository tickersRepository;
-    private final TickerService tickerService;
+    private final TickerAdminService tickerAdminService;
     private final Map<StockExchange, String> tickersToLoad = new HashMap<>();
 
-    public TickerSymbolLoader(TickerService tickerService, StockExchangesRepository stockExchangesRepository, TickersRepository tickersRepository) {
-        if ( tickerService == null ) { throw new IllegalArgumentException("ticker service is null"); }
+    public TickerSymbolLoader(TickerAdminService tickerAdminService, StockExchangesRepository stockExchangesRepository, TickersRepository tickersRepository) {
+        if ( tickerAdminService == null ) { throw new IllegalArgumentException("ticker admin service is null"); }
         if ( stockExchangesRepository == null ) { throw new IllegalArgumentException("stock exchange repository is null"); }
         if ( tickersRepository == null ) { throw new IllegalArgumentException("tickers repository is null"); }
         this.tickersRepository = tickersRepository;
         this.stockExchangesRepository = stockExchangesRepository;
-        this.tickerService = tickerService;
+        this.tickerAdminService = tickerAdminService;
     }
 
     public void addTickerFileToLoad(StockExchange stockExchange, String fileLocation) {
@@ -72,7 +73,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
         for (Map.Entry<StockExchange, String> entry : tickersToLoad.entrySet()) {
             loadTickers(entry.getKey(), entry.getValue());
         }
-        this.tickerService.refreshAllTickers();
+        tickerAdminService.refreshAllTickers();
         LOGGER.info("{} has completed all it's work", this.getClass());
     }
 

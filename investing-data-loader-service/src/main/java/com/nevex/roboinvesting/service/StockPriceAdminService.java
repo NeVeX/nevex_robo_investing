@@ -6,6 +6,7 @@ import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.StockPricesRepository;
 import com.nevex.roboinvesting.database.entity.StockPriceEntity;
 import com.nevex.roboinvesting.database.entity.StockPriceHistoricalEntity;
+import com.nevex.roboinvesting.service.exception.TickerNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,19 +25,14 @@ public class StockPriceAdminService extends StockPriceService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(StockPriceAdminService.class);
 
-    public StockPriceAdminService(StockPricesRepository stockPricesRepository, StockPricesHistoricalRepository stockPricesHistoricalRepository) {
-        super(stockPricesRepository, stockPricesHistoricalRepository);
+    public StockPriceAdminService(TickerService tickerService, StockPricesRepository stockPricesRepository, StockPricesHistoricalRepository stockPricesHistoricalRepository) {
+        super(tickerService, stockPricesRepository, stockPricesHistoricalRepository);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveNewCurrentPrice(String symbol, ApiStockPrice price) {
+    public void saveNewCurrentPrice(String symbol, ApiStockPrice price) throws TickerNotFoundException {
 
-        Optional<Integer> tickerIdOpt = TickerCache.getIdForSymbol(symbol);
-        if ( !tickerIdOpt.isPresent()) {
-            LOGGER.warn("Cannot save historical price for symbol [{}] since there is no mapping to an id for it", symbol);
-            return;
-        }
-        int tickerId = tickerIdOpt.get();
+        int tickerId = tickerService.getIdForSymbol(symbol);
 
         // save this to both the historical price and the current price
         saveHistoricalPrice(tickerId, price);
@@ -56,14 +52,10 @@ public class StockPriceAdminService extends StockPriceService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public <E extends ApiStockPrice> void saveHistoricalPrices(String symbol, Set<E> historicalPrices) {
+    public <E extends ApiStockPrice> void saveHistoricalPrices(String symbol, Set<E> historicalPrices) throws TickerNotFoundException {
 
-        Optional<Integer> tickerIdOpt = TickerCache.getIdForSymbol(symbol);
-        if ( !tickerIdOpt.isPresent()) {
-            LOGGER.warn("Cannot save historical price for symbol [{}] since there is no mapping to an id for it", symbol);
-            return;
-        }
-        int tickerId = tickerIdOpt.get();
+        int tickerId = tickerService.getIdForSymbol(symbol);
+
         // delete all records we currently have
         stockPricesHistoricalRepository.deleteByTickerId(tickerId);
 
@@ -85,8 +77,10 @@ public class StockPriceAdminService extends StockPriceService {
 
         // Order the prices to get the latest one
         TreeSet<E> orderPrices = new TreeSet<>(historicalPrices);
-        // get the first one, that will be the "latest" using the comparable
-        orderPrices.stream().findFirst().ifPresent(p -> saveNewCurrentPrice(symbol, p));
+        // get the first one, that will be the "latest" using the comparable - can't use streams due to exceptions
+        E currentPrice = orderPrices.first();
+        if ( currentPrice != null ) { saveNewCurrentPrice(symbol, currentPrice); }
+
     }
 
     private void saveHistoricalPrice(int tickerId, ApiStockPrice price) {
