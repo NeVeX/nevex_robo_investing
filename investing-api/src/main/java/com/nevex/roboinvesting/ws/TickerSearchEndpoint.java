@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +47,7 @@ public class TickerSearchEndpoint {
             return ResponseEntity.status(422).body(new ErrorDto("Search name is not valid"));
         }
 
-        List<Ticker> foundTickers = tickerService.searchForTicker(searchName);
+        Set<Ticker> foundTickers = tickerService.searchForTicker(searchName);
         List<TickerDto> returnList = new ArrayList<>();
         if ( foundTickers != null && !foundTickers.isEmpty()) {
             returnList = foundTickers.parallelStream().map(TickerDto::new).collect(Collectors.toList());

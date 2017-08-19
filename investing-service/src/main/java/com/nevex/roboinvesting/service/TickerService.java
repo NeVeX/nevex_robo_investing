@@ -110,12 +110,12 @@ public class TickerService {
     }
 
     // TODO: Need to search by ticker first
-    public List<Ticker> searchForTicker(String name) {
+    public Set<Ticker> searchForTicker(String name) {
         int limit = 10;
         try {
             // Try to get a read lock
             if ( tickersLock.readLock().tryLock(3, TimeUnit.SECONDS) ) {
-                List<Ticker> tickersFound = performSearchOnTickers(t -> StringUtils.containsIgnoreCase(t.getSymbol(), name), 10);
+                Set<Ticker> tickersFound = performSearchOnTickers(t -> StringUtils.containsIgnoreCase(t.getSymbol(), name), 10);
                 if ( tickersFound.size() < limit) {
                     // Try and fill up the search with a filter on the name - only getting enough to fill to our defined limit
                     tickersFound.addAll(performSearchOnTickers(t -> StringUtils.containsIgnoreCase(t.getName(), name), limit - tickersFound.size()));
@@ -127,15 +127,14 @@ public class TickerService {
         } finally {
             tickersLock.readLock().unlock();
         }
-        return new ArrayList<>();
+            return new HashSet<>();
     }
 
-    private List<Ticker> performSearchOnTickers(Predicate<Ticker> predicate, int limit) {
-
+    private Set<Ticker> performSearchOnTickers(Predicate<Ticker> predicate, int limit) {
         return allTickers.parallelStream()
                 .filter(predicate)
                 .limit(limit)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     /**
