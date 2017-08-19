@@ -3,7 +3,6 @@
 
     <head>
         <meta charset="utf-8">
-        <!--<meta http-equiv="X-UA-Compatible" content="IE=edge">-->
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
         <meta name="description" content="Investing with NeVeX">
@@ -17,9 +16,14 @@
     <body >
         <div class="col-12"></div>
         <div class="col-12 title">NeVeX Investing</div>
-        <div class="col-12 title">
-            <input class="ticker-search" type="text" id="ticker-input" list="tickers-datalist" placeholder="Enter a ticker...">
-            <datalist id="tickers-datalist"></datalist>
+        <div class="col-12">
+            <input class="ticker-search" type="text" id="ticker-input"
+                   list="tickers-datalist" placeholder="Enter a ticker (at least 3 chars)">
+            <datalist id="tickers-datalist">
+            </datalist>
+        </div>
+        <div class="col-12">
+            <h3 id="ticker-title"></h3>
         </div>
     </body>
 

@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -91,8 +92,6 @@ public class TickerService {
             newTickers.add(new Ticker(te, StockExchange.fromId(te.getStockExchange()).get()));
         }
 
-
-
         try {
             // Since we need to blindly update the full list, we'll just get a write lock and well, blindly update the set
             tickersLock.writeLock().lock();
@@ -106,21 +105,33 @@ public class TickerService {
         LOGGER.info("Refreshed all tickers");
     }
 
+    // TODO: Need to search by ticker first
     public List<Ticker> searchForTicker(String name) {
+        int limit = 10;
         try {
             // Try to get a read lock
             if ( tickersLock.readLock().tryLock(3, TimeUnit.SECONDS) ) {
-                return allTickers.parallelStream()
-                        .filter(t -> StringUtils.containsIgnoreCase(t.getSymbol(), name) || StringUtils.containsIgnoreCase(t.getName(), name))
-                        .limit(10)
-                        .collect(Collectors.toList());
+                List<Ticker> tickersFound = performSearchOnTickers(t -> StringUtils.containsIgnoreCase(t.getSymbol(), name), 10);
+                if ( tickersFound.size() < limit) {
+                    // Try and fill up the search with a filter on the name - only getting enough to fill to our defined limit
+                    tickersFound.addAll(performSearchOnTickers(t -> StringUtils.containsIgnoreCase(t.getName(), name), limit - tickersFound.size()));
+                }
+                return tickersFound;
             }
         } catch (Exception e ) {
-            // for now nothing...
+            LOGGER.error("An exception occurred while searching for ticker with name [{}]", name, e);
         } finally {
             tickersLock.readLock().unlock();
         }
         return new ArrayList<>();
+    }
+
+    private List<Ticker> performSearchOnTickers(Predicate<Ticker> predicate, int limit) {
+
+        return allTickers.parallelStream()
+                .filter(predicate)
+                .limit(limit)
+                .collect(Collectors.toList());
     }
 
     /**

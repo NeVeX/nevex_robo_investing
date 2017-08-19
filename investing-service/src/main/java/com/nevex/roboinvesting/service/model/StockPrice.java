@@ -1,6 +1,5 @@
 package com.nevex.roboinvesting.service.model;
 
-import com.nevex.roboinvesting.TickerCache;
 import com.nevex.roboinvesting.database.entity.StockPriceBaseEntity;
 import org.apache.commons.lang3.StringUtils;
 

@@ -42,7 +42,7 @@ public class TickerSearchEndpoint {
     ResponseEntity<?> searchForTicker(
             @NotBlank(message = "Invalid ticker query provided") @RequestParam(value = "name") String inputName) {
         String searchName = StringUtils.trim(inputName);
-        if ( StringUtils.isBlank(searchName) || searchName.length() < 3) {
+        if ( StringUtils.isBlank(searchName) || searchName.length() < 2) {
             return ResponseEntity.status(422).body(new ErrorDto("Search name is not valid"));
         }
 

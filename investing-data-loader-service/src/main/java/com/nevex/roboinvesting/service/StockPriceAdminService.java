@@ -1,6 +1,5 @@
 package com.nevex.roboinvesting.service;
 
-import com.nevex.roboinvesting.TickerCache;
 import com.nevex.roboinvesting.api.ApiStockPrice;
 import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.StockPricesRepository;
@@ -42,6 +41,14 @@ public class StockPriceAdminService extends StockPriceService {
         Optional<StockPriceEntity> existingCurrentPriceOpt = stockPricesRepository.findByTickerId(tickerId);
         if ( existingCurrentPriceOpt.isPresent()) {
             StockPriceEntity existingCurrentPrice = existingCurrentPriceOpt.get();
+
+            // See if the existing price is newer than what we are trying to save
+            if ( existingCurrentPrice.getDate().isAfter(newCurrentPrice.getDate()) ) {
+                // this is bad - we don't want to overwrite a future price with an older price
+                LOGGER.warn("Will not save current price for [{}] since the current price in the db is newer than the price trying to save", symbol);
+                return;
+            }
+
             existingCurrentPrice.merge(newCurrentPrice); // merge in any changes
             newCurrentPrice = existingCurrentPrice; // swap!
         }
@@ -61,7 +68,7 @@ public class StockPriceAdminService extends StockPriceService {
 
         Set<StockPriceHistoricalEntity> newEntitiesToSave = new HashSet<>();
 
-        // We have data to save each one
+        // We have data to save each one - duplicates will be removed by the entity equals/hash
         newEntitiesToSave.addAll(
                 historicalPrices.stream().map(tPrice -> convertToHistoricalEntity(tickerId, tPrice))
                 .collect(Collectors.toList())
