@@ -73,7 +73,7 @@ public class TickerService {
         throw new TickerNotFoundException(symbol);
     }
 
-    private void updateInternalTickerMaps(Map<String, Integer> newSymbolsToIds) {
+    protected void updateInternalTickerMaps(Map<String, Integer> newSymbolsToIds) {
         Map<Integer, String> tickerIdToSymbols = newSymbolsToIds
                 .entrySet()
                 .stream().map( e -> new AbstractMap.SimpleEntry<>(e.getValue(), e.getKey()))
@@ -84,10 +84,14 @@ public class TickerService {
     }
 
     protected void refreshAllTickers() {
+        refreshAllTickers(tickersRepository.findAll());
+    }
+
+    protected void refreshAllTickers(Iterable<TickerEntity> tickerIter) {
         Map<String, Integer> symbolToTickerIdMap = new HashMap<>();
         Set<Ticker> newTickers = new HashSet<>();
 
-        for ( TickerEntity te : tickersRepository.findAll()) {
+        for ( TickerEntity te : tickerIter) {
             symbolToTickerIdMap.put(te.getSymbol(), te.getId());
             newTickers.add(new Ticker(te, StockExchange.fromId(te.getStockExchange()).get()));
         }

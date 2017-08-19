@@ -4,6 +4,7 @@ import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.StockPricesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
+import com.nevex.roboinvesting.service.TickerAdminService;
 import com.nevex.roboinvesting.service.TickerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,8 @@ import org.springframework.context.annotation.Configuration;
 public class DataLoaderServicesConfiguration {
 
     @Autowired
+    private TickersRepository tickersRepository;
+    @Autowired
     private StockPricesRepository stockPricesRepository;
     @Autowired
     private TickerService tickerService;
@@ -25,6 +28,11 @@ public class DataLoaderServicesConfiguration {
     @Bean
     StockPriceAdminService stockPriceAdminService() {
         return new StockPriceAdminService(tickerService, stockPricesRepository, stockPricesHistoricalRepository);
+    }
+
+    @Bean
+    TickerAdminService tickerAdminService() {
+        return new TickerAdminService(tickersRepository);
     }
 
 }
