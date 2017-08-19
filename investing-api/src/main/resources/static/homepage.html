@@ -14,16 +14,18 @@
     </head>
 
     <body >
-        <div class="col-12"></div>
-        <div class="col-12 title">NeVeX Investing</div>
-        <div class="col-12">
-            <input class="ticker-search" type="text" id="ticker-input"
-                   list="tickers-datalist" placeholder="Enter a ticker (at least 3 chars)">
-            <datalist id="tickers-datalist">
-            </datalist>
-        </div>
-        <div class="col-12">
-            <h3 id="ticker-title"></h3>
+        <div class="wrapper">
+            <div class="title-row">
+                <div class="title">NeVeX Investing</div>
+            </div>
+            <div class="ticker-input-row">
+                <input class="ticker-search" type="text" id="ticker-input"
+                       list="tickers-datalist" placeholder="Enter a ticker (at least 3 chars)">
+                <datalist id="tickers-datalist"></datalist>
+            </div>
+            <div class="ticker-base-information-row">
+                <div id="ticker-title" class="ticker-base-information-title"></div>
+            </div>
         </div>
     </body>
 
