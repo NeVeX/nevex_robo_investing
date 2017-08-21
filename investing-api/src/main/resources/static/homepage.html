@@ -22,7 +22,7 @@
             </div>
             <div class="box box-ticker-input">
                 <input class="ticker-search" type="text" id="ticker-input"
-                       list="tickers-datalist" placeholder="Enter a ticker (at least 3 chars)">
+                       list="tickers-datalist" placeholder="Enter some ticker info (at least 3 chars)">
                 <datalist id="tickers-datalist"></datalist>
             </div>
 
@@ -38,7 +38,6 @@
                 <div class="ticker-info-subtitle ticker-info-subtitle-static">Exchange:</div>
                 <div id="ticker-info-exchange" class="ticker-info-subtitle ticker-info-subtitle-dynamic">NASDAQ</div>
 
-
                 <div class="ticker-info-subtitle ticker-info-subtitle-static">Sector:</div>
                 <div id="ticker-info-sector" class="ticker-info-subtitle ticker-info-subtitle-dynamic">Information Tech</div>
 
@@ -50,16 +49,27 @@
 
             </div>
 
+            <div id="stock-price-overview-div" class="box ticker-pricing-overview-box">
+
+                <div id="stock-price" class="stock-price"></div>
+                <div class="ticker-pricing-overview-low-high-box">
+                    <div class="ticker-pricing-overview-low-high-box-static-text">Low</div>
+                    <div id="stock-price-low" ></div>
+                    <div class="ticker-pricing-overview-low-high-box-static-text">High</div>
+                    <div id="stock-price-high"></div>
+                </div>
+                <div id="stock-volume" class="stock-volume">456M</div>
+            </div>
+
             <div class="box stock-chart-box">
                 <div>
                     <!-- TODO: fix this width and height settings -->
                     <!-- like this: https://jsfiddle.net/askhflajsf/xzk6sh1q/ -->
                     <canvas id="stock-chart" width="800" height="400"></canvas>
                 </div>
-
-
-
             </div>
+
+
         </div>
     </body>
 

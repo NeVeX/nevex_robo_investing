@@ -25,100 +25,23 @@ $(document).ready(function() {
         $("#stock-chart").fadeTo(0, 1);
     }
 
-    // function doTest() {
-    //     var ctx = document.getElementById("stock-chart").getContext('2d');
-    //
-    //     var chartDates = ["2017-08-10", "2017-08-09", "2017-08-08", "2017-08-07", "2017-08-06"];
-    //     var chartPrices = [10, 13, 2, 2, 3];
-    //     // for ( var i = 0; i < pricesData.length; i++) {
-    //     //     chartDates.push(pricesData[i].date);
-    //     //     chartPrices.push(pricesData[i].close);
-    //     // }
-    //
-    //     var stockChart = new Chart(ctx, {
-    //         type: 'line',
-    //         data: {
-    //             labels: chartDates,
-    //             datasets: [{
-    //                 label: 'MSFT',
-    //                 data: chartPrices,
-    //                 fontColor: "#ffffff",
-    //                 color: "#ffffff",
-    //                 borderWidth: 1,
-    //
-    //                 backgroundColor: [
-    //                     'rgba(247,61,40, 0.2)'
-    //                 ],
-    //                 borderColor: [
-    //                     'rgba(247,61,40,1)'
-    //                 ]
-    //             }]
-    //         },
-    //         options: {
-    //             maintainAspectRatio: true,
-    //             responsive: true,
-    //             // title:{
-    //             //     text: "MSFT"
-    //             // },
-    //             scales: {
-    //                 xAxes: [{
-    //                     type: "time",
-    //                     ticks: {
-    //                         fontColor : "#ffffff",
-    //                         format: 'YYYY-MM-DD',
-    //                         // callback: function(value) {
-    //                         //     console.log(value);
-    //                         //     return "12324"; //new Date(value).toLocaleDateString('de-DE', {month:'short', year:'numeric'});
-    //                         // }
-    //                     },
-    //                     gridLines: {
-    //                         display: false,
-    //                         color: "#ffffff"
-    //                     },
-    //                     time: {
-    //                         format: 'YYYY-MM-DD',
-    //                         unit: 'day',
-    //                         // tooltipFormat: 'll HH:mm'
-    //                         displayFormats: {
-    //                             'day': 'YYYY-MM-DD'
-    //                         }
-    //                     },
-    //                     scaleLabel: {
-    //                         display: false,
-    //                         format: 'YYYY-MM-DD'
-    //                     }
-    //                 } ],
-    //                 yAxes: [{
-    //                     ticks: {
-    //                         fontColor : "#ffffff"
-    //                     },
-    //                     gridLines: {
-    //                         display: true,
-    //                         color: "#ffffff",
-    //                         lineWidth: 0.2
-    //                     },
-    //                     scaleLabel: {
-    //                         display: true,
-    //                         labelString: 'Price (USD)',
-    //                         fontColor: "#ffffff"
-    //                     }
-    //                 }]
-    //             },
-    //             legend: {
-    //                 display: false,
-    //                 labels: {
-    //                     fontColor: '#ffffff'
-    //                 }
-    //             }
-    //         }
-    //     });
-    //
-    // }
+    function showStockPriceOverview() {
+        $("#stock-price-overview-div").fadeTo(0, 1);
+    }
+
+    function hideStockPriceOverview() {
+        $("#stock-price-overview-div").fadeTo(0, 0);
+    }
+
+    function isTickerStillInUse(tickerSymbol) {
+       return tickerInUse === tickerSymbol;
+    }
 
     function init() {
 
         hideTickerInformation();
         hideStockChart();
+        hideStockPriceOverview();
         // doTest();
 
         $(TICKER_INPUT).on('input', function (event) {
@@ -152,7 +75,7 @@ $(document).ready(function() {
 
         getTickerInformation(tickerSymbol, function (tickerData) {
 
-            if ( ! (tickerInUse === tickerSymbol)) {
+            if ( ! isTickerStillInUse(tickerSymbol) ) {
                 return; // another ticker is selected
             }
 
@@ -168,9 +91,26 @@ $(document).ready(function() {
 
         });
 
+        getCurrentStockPrice(tickerSymbol, function (currentPrice) {
+            if ( ! isTickerStillInUse(tickerSymbol) ) {
+                return; // another ticker is selected
+            }
+            if ( !currentPrice ) {
+                console.log("Did not get any current price info for stock ["+tickerSymbol+"]");
+                return;
+            }
+
+            $("#stock-price").text("$"+roundToAlways2Places(currentPrice.close, 2));
+            $("#stock-price-low").text("$"+roundToAlways2Places(currentPrice.low, 2));
+            $("#stock-price-high").text("$"+roundToAlways2Places(currentPrice.high, 2));
+            $("#stock-volume").text("$"+getNiceNumber(currentPrice.volume));
+
+            showStockPriceOverview();
+        });
+
         getHistoricalStockPrices(tickerSymbol, function (pricesData) {
 
-            if ( ! (tickerInUse === tickerSymbol)) {
+            if ( ! isTickerStillInUse(tickerSymbol) ) {
                 return; // another ticker is selected
             }
 
@@ -217,7 +157,7 @@ $(document).ready(function() {
                         xAxes: [{
                             type: "time",
                             ticks: {
-                                minRotation: 90,
+                                // minRotation: 90,
                                 autoSkip: true,
                                 maxTicksLimit: 15,
                                 fontColor : "#ffffff",
@@ -345,6 +285,19 @@ $(document).ready(function() {
         })
     }
 
+    function getCurrentStockPrice(tickerSymbol, onCurrentStockPriceReturned) {
+        $.ajax({
+            type: "GET",
+            url: "api/tickers/"+tickerSymbol+"/prices",
+            success: function(data) {
+                onCurrentStockPriceReturned(data);
+            },
+            error: function(error) {
+                onError(error);
+            }
+        })
+    }
+
     function getHistoricalStockPrices(tickerSymbol, onHistoricalPricesReturned) {
         $.ajax({
             type: "GET",
@@ -360,6 +313,37 @@ $(document).ready(function() {
 
     function onError(error) {
         console.log("An error occurred: "+error);
+    }
+
+    // https://stackoverflow.com/questions/36734201/how-to-convert-numbers-to-million-in-javascript
+    function getNiceNumber(inputNumber)
+    {
+        var niceNumber;
+        var niceNumberPostFix;
+        // Nine Zeroes for Billions
+        if ( Math.abs(Number(inputNumber)) >= 1.0e+9) {
+            niceNumber = Math.abs(Number(inputNumber)) / 1.0e+9;
+            niceNumberPostFix = "B";
+        } else if (Math.abs(Number(inputNumber)) >= 1.0e+6) {
+            niceNumber = Math.abs(Number(inputNumber)) / 1.0e+6;
+            niceNumberPostFix = "M";
+        } else if (Math.abs(Number(inputNumber)) >= 1.0e+3) {
+            niceNumber = Math.abs(Number(inputNumber)) / 1.0e+3;
+            niceNumberPostFix = "K";
+        } else {
+            niceNumber = Math.abs(Number(inputNumber));
+        }
+        var roundedNumber = round(niceNumber, 2);
+        return roundedNumber + niceNumberPostFix;
+    }
+
+    // http://www.jacklmoore.com/notes/rounding-in-javascript/
+    function round(value, decimals) {
+        return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+    }
+
+    function roundToAlways2Places(value) {
+        return round(value, 2).toFixed(2);
     }
 
 });
