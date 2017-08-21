@@ -5,12 +5,21 @@ $(document).ready(function() {
     var TICKER_SYMBOL_ATTR_NAME = "data-ticker-symbol";
     var TICKER_INPUT_MINIMUM_LENGTH = 2;
 
-    var searchTextInFlight;
+    var tickerInUse;
+    var searchInputInFlight;
     init();
 
+    function hideTickerInformation() {
+        $("#ticker-info-div").fadeTo(0, 0);
+    }
+
+    function showTickerInformation() {
+        $("#ticker-info-div").fadeTo(0, 1);
+    }
+
     function init() {
-        
-        // $(TICKER_INPUT).on('keyup', onTickerInputKeyUp);
+
+        hideTickerInformation();
 
         $(TICKER_INPUT).on('input', function (event) {
             console.log("Input Event: "+event.type +" - "+event.which);
@@ -22,10 +31,8 @@ $(document).ready(function() {
                 var optionValue = option.value;
                 if ( optionValue === val) {
 
-                    // don't search for this ticker anymore
-                    searchTextInFlight = optionValue;
-
                     var tickerValue = option.getAttribute(TICKER_SYMBOL_ATTR_NAME);
+
                     console.log("Selected "+optionValue);
                     console.log("Selected ticker data attr "+tickerValue);
                     onTickerSelected(tickerValue, optionValue);
@@ -36,37 +43,31 @@ $(document).ready(function() {
 
         // keep looping on if there's any input to the text box
         setInterval(performSearchForTickerInput, 500);
-
-
-        // $(TICKER_DATALIST).on('click change', function (event) {
-        //     console.log(event.type + " -- " + event.which);
-        // });
-        //
-        // $(TICKER_INPUT).on('keyup', function (event) {
-        //     console.log("KeyUp Event: "+event.type +" - "+event.which);
-        //     onTickerInput(this);
-        //     // if ( event.which == 13) { // enter key
-        //     //     // We are selecting something, so don't search anymore
-        //     //     var val = this.value;
-        //     //
-        //     //     var optionSelected = $(TICKER_DATALIST+" option").filter(function(){
-        //     //         return this.value === val;
-        //     //     });
-        //     //
-        //     //     if ( optionSelected && optionSelected.length > 0 ) {
-        //     //         onTickerSelected(optionSelected[0].getAttribute("data-ticker-symbol"));
-        //     //     }
-        //     // } else {
-        //     //     // search!
-        //     //     onTickerInput(this);
-        //     // }
-        //
-        // });
     }
 
     function onTickerSelected(tickerSymbol, tickerTitle) {
-        //console.log("Ticker "+tickerSymbol);
-        $("#ticker-title").text(tickerTitle);
+
+        // don't search for this ticker anymore
+        tickerInUse = tickerSymbol;
+
+        getTickerInformation(tickerSymbol, function (tickerData) {
+
+            if ( ! (tickerInUse === tickerSymbol)) {
+                return; // another ticker is selected
+            }
+
+            $("#ticker-info-title").text(tickerTitle);
+            $("#ticker-info-symbol").text(tickerData.ticker);
+            $("#ticker-info-name").text(tickerData.name);
+            $("#ticker-info-sector").text(tickerData.sector);
+            $("#ticker-info-industry").text(tickerData.industry);
+            $("#ticker-info-exchange").text(tickerData.stock_exchange);
+            $("#ticker-info-isTradable").text(tickerData.is_tradable == "true" ? "Yes" : "No");
+
+            showTickerInformation();
+        });
+
+
     }
     
     function performSearchForTickerInput() {
@@ -74,7 +75,7 @@ $(document).ready(function() {
 
         var selectedText = tickerInput.val();
 
-        if ( searchTextInFlight === selectedText) {
+        if ( searchInputInFlight === selectedText) {
             return; // already searched this
         }
 
@@ -84,13 +85,13 @@ $(document).ready(function() {
         }
 
         console.log("Will search for text ["+selectedText+"]");
-        searchTextInFlight = selectedText;
+        searchInputInFlight = selectedText;
 
         $(TICKER_DATALIST).empty();
 
         searchForTicker(selectedText, function (data) {
             // console.log("Received search data ["+data+"]");
-            if ( ! (selectedText === searchTextInFlight) ) {
+            if ( ! (selectedText === searchInputInFlight) ) {
                 // the search has changed - so don't do anything here
                 return;
             }
@@ -118,6 +119,19 @@ $(document).ready(function() {
             url: "api/search?name="+text,
             success: function(data) {
                 onSearchReturned(data);
+            },
+            error: function(error) {
+                onError(error);
+            }
+        })
+    }
+
+    function getTickerInformation(tickerSymbol, onTickerInfoReturned) {
+        $.ajax({
+            type: "GET",
+            url: "api/tickers/"+tickerSymbol,
+            success: function(data) {
+                onTickerInfoReturned(data);
             },
             error: function(error) {
                 onError(error);
