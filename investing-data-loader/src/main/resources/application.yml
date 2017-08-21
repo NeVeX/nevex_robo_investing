@@ -34,7 +34,7 @@ nevex-investing:
     api-key: b685d125ea02159884511a9c8198da5d9fee8007
     host: https://api.tiingo.com
   testing:
-    enabled: true
+    enabled: false
     allowed-symbols: LC, NVDA, FB, APPL, NAKD, GOOGL, MSFT
 
 

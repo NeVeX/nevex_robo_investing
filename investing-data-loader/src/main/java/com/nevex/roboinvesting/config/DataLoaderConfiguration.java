@@ -6,7 +6,9 @@ import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.dataloader.DataLoaderManager;
 import com.nevex.roboinvesting.dataloader.DataLoaderWorker;
 import com.nevex.roboinvesting.dataloader.ReferenceDataLoader;
+import com.nevex.roboinvesting.dataloader.TickerCacheLoader;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
+import com.nevex.roboinvesting.service.TickerAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +35,9 @@ public class DataLoaderConfiguration {
     private TiingoApiClient tiingoApiClient;
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
+    @Autowired
+    private TickerAdminService tickerAdminService;
+
     @Valid
     @Min(value = 0, message = "Invalid wait time in ms specified")
     private Long waitTimeBetweenTickersMs;
@@ -57,4 +62,6 @@ public class DataLoaderConfiguration {
         return new ReferenceDataLoader(stockExchangesRepository);
     }
 
+    @Bean
+    TickerCacheLoader tickerCacheLoader() { return new TickerCacheLoader(tickerAdminService); }
 }
