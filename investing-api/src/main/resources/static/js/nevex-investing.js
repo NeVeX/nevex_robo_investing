@@ -17,9 +17,109 @@ $(document).ready(function() {
         $("#ticker-info-div").fadeTo(0, 1);
     }
 
+    function hideStockChart() {
+        $("#stock-chart").fadeTo(0, 0);
+    }
+
+    function showStockChart() {
+        $("#stock-chart").fadeTo(0, 1);
+    }
+
+    // function doTest() {
+    //     var ctx = document.getElementById("stock-chart").getContext('2d');
+    //
+    //     var chartDates = ["2017-08-10", "2017-08-09", "2017-08-08", "2017-08-07", "2017-08-06"];
+    //     var chartPrices = [10, 13, 2, 2, 3];
+    //     // for ( var i = 0; i < pricesData.length; i++) {
+    //     //     chartDates.push(pricesData[i].date);
+    //     //     chartPrices.push(pricesData[i].close);
+    //     // }
+    //
+    //     var stockChart = new Chart(ctx, {
+    //         type: 'line',
+    //         data: {
+    //             labels: chartDates,
+    //             datasets: [{
+    //                 label: 'MSFT',
+    //                 data: chartPrices,
+    //                 fontColor: "#ffffff",
+    //                 color: "#ffffff",
+    //                 borderWidth: 1,
+    //
+    //                 backgroundColor: [
+    //                     'rgba(247,61,40, 0.2)'
+    //                 ],
+    //                 borderColor: [
+    //                     'rgba(247,61,40,1)'
+    //                 ]
+    //             }]
+    //         },
+    //         options: {
+    //             maintainAspectRatio: true,
+    //             responsive: true,
+    //             // title:{
+    //             //     text: "MSFT"
+    //             // },
+    //             scales: {
+    //                 xAxes: [{
+    //                     type: "time",
+    //                     ticks: {
+    //                         fontColor : "#ffffff",
+    //                         format: 'YYYY-MM-DD',
+    //                         // callback: function(value) {
+    //                         //     console.log(value);
+    //                         //     return "12324"; //new Date(value).toLocaleDateString('de-DE', {month:'short', year:'numeric'});
+    //                         // }
+    //                     },
+    //                     gridLines: {
+    //                         display: false,
+    //                         color: "#ffffff"
+    //                     },
+    //                     time: {
+    //                         format: 'YYYY-MM-DD',
+    //                         unit: 'day',
+    //                         // tooltipFormat: 'll HH:mm'
+    //                         displayFormats: {
+    //                             'day': 'YYYY-MM-DD'
+    //                         }
+    //                     },
+    //                     scaleLabel: {
+    //                         display: false,
+    //                         format: 'YYYY-MM-DD'
+    //                     }
+    //                 } ],
+    //                 yAxes: [{
+    //                     ticks: {
+    //                         fontColor : "#ffffff"
+    //                     },
+    //                     gridLines: {
+    //                         display: true,
+    //                         color: "#ffffff",
+    //                         lineWidth: 0.2
+    //                     },
+    //                     scaleLabel: {
+    //                         display: true,
+    //                         labelString: 'Price (USD)',
+    //                         fontColor: "#ffffff"
+    //                     }
+    //                 }]
+    //             },
+    //             legend: {
+    //                 display: false,
+    //                 labels: {
+    //                     fontColor: '#ffffff'
+    //                 }
+    //             }
+    //         }
+    //     });
+    //
+    // }
+
     function init() {
 
         hideTickerInformation();
+        hideStockChart();
+        // doTest();
 
         $(TICKER_INPUT).on('input', function (event) {
             console.log("Input Event: "+event.type +" - "+event.which);
@@ -65,6 +165,112 @@ $(document).ready(function() {
             $("#ticker-info-isTradable").text(tickerData.is_tradable == "true" ? "Yes" : "No");
 
             showTickerInformation();
+
+        });
+
+        getHistoricalStockPrices(tickerSymbol, function (pricesData) {
+
+            if ( ! (tickerInUse === tickerSymbol)) {
+                return; // another ticker is selected
+            }
+
+            if ( ! pricesData || pricesData.length == 0) {
+                console.log("No prices data returned for "+tickerSymbol);
+            }
+
+            var ctx = document.getElementById("stock-chart").getContext('2d');
+
+            var chartDates = [];
+            var chartPrices = [];
+            for ( var i = 0; i < pricesData.length; i++) {
+                chartDates.push(pricesData[i].date);
+                chartPrices.push(pricesData[i].close);
+            }
+            var dateFormat = "YYYY-MM-DD";
+
+            var stockChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartDates,
+                    datasets: [{
+                        label: tickerSymbol,
+                        data: chartPrices,
+                        fontColor: "#ffffff",
+                        color: "#ffffff",
+                        borderWidth: 1,
+
+                        backgroundColor: [
+                            'rgba(247,61,40, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(247,61,40,1)'
+                        ]
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    responsive: true,
+                    // title:{
+                    //     text: "MSFT"
+                    // },
+                    scales: {
+                        xAxes: [{
+                            type: "time",
+                            ticks: {
+                                minRotation: 90,
+                                autoSkip: true,
+                                maxTicksLimit: 15,
+                                fontColor : "#ffffff",
+                                format: dateFormat
+                                // callback: function(value) {
+                                //     console.log(value);
+                                //     return "12324"; //new Date(value).toLocaleDateString('de-DE', {month:'short', year:'numeric'});
+                                // }
+                            },
+                            gridLines: {
+                                display: false,
+                                color: "#ffffff"
+                            },
+                            time: {
+                                format: dateFormat,
+                                unit: 'day',
+                                // tooltipFormat: 'll HH:mm'
+                                displayFormats: {
+                                    'day': dateFormat
+                                }
+                            },
+                            scaleLabel: {
+                                display: false,
+                                format: dateFormat
+                            }
+                        } ],
+                        yAxes: [{
+                            ticks: {
+                                fontColor : "#ffffff"
+                            },
+                            gridLines: {
+                                display: true,
+                                color: "#ffffff",
+                                lineWidth: 0.2
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Price (USD)',
+                                fontColor: "#ffffff"
+                            }
+                        }]
+                    },
+                    legend: {
+                        display: false,
+                        labels: {
+                            fontColor: '#ffffff'
+                        }
+                    }
+                }
+            });
+
+            showStockChart();
+
         });
 
 
@@ -132,6 +338,19 @@ $(document).ready(function() {
             url: "api/tickers/"+tickerSymbol,
             success: function(data) {
                 onTickerInfoReturned(data);
+            },
+            error: function(error) {
+                onError(error);
+            }
+        })
+    }
+
+    function getHistoricalStockPrices(tickerSymbol, onHistoricalPricesReturned) {
+        $.ajax({
+            type: "GET",
+            url: "api/tickers/"+tickerSymbol+"/prices/historical",
+            success: function(data) {
+                onHistoricalPricesReturned(data);
             },
             error: function(error) {
                 onError(error);

@@ -57,6 +57,16 @@ html {
     padding: 0em;
 }
 
+.stock-chart-box {
+    grid-column: 1/13;
+    grid-row: 4;
+}
+
+/*.chart-canvas {*/
+    /*display: block;*/
+    /*width: 100%;*/
+/*}*/
+
 .title {
     font-weight: 600;
     font-size: 3em;
