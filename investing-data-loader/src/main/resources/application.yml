@@ -31,7 +31,6 @@ nevex-investing:
     enabled: true
     wait-time-between-tickers-ms: 1000
   tiingo:
-    api-key: b685d125ea02159884511a9c8198da5d9fee8007
     host: https://api.tiingo.com
   testing:
     enabled: false
