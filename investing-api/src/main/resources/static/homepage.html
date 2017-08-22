@@ -12,6 +12,7 @@
         <script src="js/moment-2.18.1.js"></script>
         <script src="js/jchart-2.6.0.js"></script>
         <script src="js/nevex-investing.js"></script>
+        <!--<script src="js/nevex-investing-test.js"></script>-->
         <link href="css/nevex-investing.css" rel="stylesheet"/>
     </head>
 
@@ -51,22 +52,32 @@
 
             <div id="stock-price-overview-div" class="box ticker-pricing-overview-box">
 
-                <div id="stock-price" class="stock-price"></div>
+                <div id="stock-price" class="stock-price">$5.80</div>
                 <div class="ticker-pricing-overview-low-high-box">
                     <div class="ticker-pricing-overview-low-high-box-static-text">Low</div>
-                    <div id="stock-price-low" ></div>
+                    <div id="stock-price-low" >$5.90</div>
                     <div class="ticker-pricing-overview-low-high-box-static-text">High</div>
-                    <div id="stock-price-high"></div>
+                    <div id="stock-price-high">13.05M</div>
                 </div>
                 <div id="stock-volume" class="stock-volume">456M</div>
             </div>
 
-            <div class="box stock-chart-box">
-                <div>
-                    <!-- TODO: fix this width and height settings -->
-                    <!-- like this: https://jsfiddle.net/askhflajsf/xzk6sh1q/ -->
-                    <canvas id="stock-chart" width="800" height="400"></canvas>
+            <div id="stock-chart-div" class="box stock-chart-box">
+                <div class="stock-price-chart-options">
+                    <div><input type="checkbox" id="stock_price_option_seven_days" data-name="seven_days" title="7 Days"></div>
+                    <div>7 Days</div>
+
+                    <div><input type="checkbox" id="stock_price_option_one_month" data-name="one_month" title="1 Month"></div>
+                    <div>1 Month</div>
+
+                    <div><input type="checkbox" id="stock_price_option_three_months" data-name="three_months" title="3 Months"></div>
+                    <div>3 Months</div>
+
+                    <div><input type="checkbox" id="stock_price_option_all" data-name="all" title="All"></div>
+                    <div>All</div>
+
                 </div>
+                <canvas id="stock-chart" class="stock-price-chart-canvas"></canvas>
             </div>
 
 

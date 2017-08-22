@@ -9,6 +9,8 @@ import com.nevex.roboinvesting.service.model.Ticker;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
  * Created by Mark Cunningham on 8/8/2017.
  */
 @Transactional(readOnly = true)
-public class TickerService {
+public class TickerService implements ApplicationListener<ApplicationReadyEvent> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TickerService.class);
     private final ConcurrentHashMap<String, Integer> symbolToTickerIdMap = new ConcurrentHashMap<>();
@@ -39,9 +41,15 @@ public class TickerService {
         if ( tickersRepository == null ) { throw new IllegalArgumentException("Provided ticker repository is null"); }
         this.tickersRepository = tickersRepository;
 
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        Runnable refreshTickersTask = this::refreshAllTickers;
-        executor.scheduleAtFixedRate(refreshTickersTask, 10, TimeUnit.MINUTES.toSeconds(10), TimeUnit.SECONDS);
+//        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+//        Runnable refreshTickersTask = this::refreshAllTickers;
+//        executor.scheduleAtFixedRate(refreshTickersTask, 10, TimeUnit.MINUTES.toSeconds(10), TimeUnit.SECONDS);
+    }
+
+
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+        refreshAllTickers();
     }
 
     public Optional<Integer> tryGetIdForSymbol(String symbol) {
@@ -73,7 +81,7 @@ public class TickerService {
         throw new TickerNotFoundException(symbol);
     }
 
-    protected void updateInternalTickerMaps(Map<String, Integer> newSymbolsToIds) {
+    void updateInternalTickerMaps(Map<String, Integer> newSymbolsToIds) {
         Map<Integer, String> tickerIdToSymbols = newSymbolsToIds
                 .entrySet()
                 .stream().map( e -> new AbstractMap.SimpleEntry<>(e.getValue(), e.getKey()))
@@ -183,5 +191,4 @@ public class TickerService {
         }
         return Optional.empty();
     }
-
 }
