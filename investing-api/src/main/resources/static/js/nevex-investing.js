@@ -7,6 +7,7 @@ $(document).ready(function() {
 
     var tickerInUse;
     var searchInputInFlight;
+    var currentStockPriceChart;
     init();
 
     function hideTickerInformation() {
@@ -85,7 +86,7 @@ $(document).ready(function() {
             $("#ticker-info-sector").text(tickerData.sector);
             $("#ticker-info-industry").text(tickerData.industry);
             $("#ticker-info-exchange").text(tickerData.stock_exchange);
-            $("#ticker-info-isTradable").text(tickerData.is_tradable == "true" ? "Yes" : "No");
+            $("#ticker-info-isTradable").text(tickerData.is_tradable ? "Yes" : "No");
 
             showTickerInformation();
 
@@ -103,7 +104,7 @@ $(document).ready(function() {
             $("#stock-price").text("$"+roundToAlways2Places(currentPrice.close, 2));
             $("#stock-price-low").text("$"+roundToAlways2Places(currentPrice.low, 2));
             $("#stock-price-high").text("$"+roundToAlways2Places(currentPrice.high, 2));
-            $("#stock-volume").text("$"+getNiceNumber(currentPrice.volume));
+            $("#stock-volume").text(getNiceNumber(currentPrice.volume));
 
             showStockPriceOverview();
         });
@@ -118,6 +119,11 @@ $(document).ready(function() {
                 console.log("No prices data returned for "+tickerSymbol);
             }
 
+            if ( currentStockPriceChart ) {
+                // destroy it
+                currentStockPriceChart.destroy();
+            }
+
             var ctx = document.getElementById("stock-chart").getContext('2d');
 
             var chartDates = [];
@@ -128,7 +134,7 @@ $(document).ready(function() {
             }
             var dateFormat = "YYYY-MM-DD";
 
-            var stockChart = new Chart(ctx, {
+            currentStockPriceChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: chartDates,

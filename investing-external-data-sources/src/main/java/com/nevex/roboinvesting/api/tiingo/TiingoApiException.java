@@ -5,6 +5,10 @@ package com.nevex.roboinvesting.api.tiingo;
  */
 public class TiingoApiException extends Exception {
 
+    public TiingoApiException(String message) {
+        super(message);
+    }
+
     public TiingoApiException(String message, Throwable throwable) {
         super(message, throwable);
     }

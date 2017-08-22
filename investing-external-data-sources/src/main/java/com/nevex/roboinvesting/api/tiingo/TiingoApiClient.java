@@ -7,6 +7,7 @@ import com.nevex.roboinvesting.api.tiingo.model.TiingoPriceDto;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 
@@ -75,14 +76,23 @@ public class TiingoApiClient {
     }
 
     private Set<TiingoPriceDto> getStockPrices(Request request) throws TiingoApiException {
+        ResponseBody responseBody = null;
         try {
             Response response = httpClient.newCall(request).execute();
             if ( response.isSuccessful()) {
-                return objectMapper.readValue(response.body().byteStream(), new TypeReference<Set<TiingoPriceDto>>(){});
+                responseBody = response.body();
+                if ( responseBody == null ) {
+                    throw new TiingoApiException("Expected a body in the response from the Tiingo API, but there was none. "+request);
+                }
+                return objectMapper.readValue(responseBody.byteStream(), new TypeReference<Set<TiingoPriceDto>>(){});
             }
             return new HashSet<>();
         } catch (IOException ioException ) {
             throw new TiingoApiException("Could not get the current price using the Tiingo API for url ["+request.url()+"]", ioException);
+        } finally {
+            if ( responseBody != null) {
+                responseBody.close();
+            }
         }
     }
 
