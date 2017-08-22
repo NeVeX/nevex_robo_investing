@@ -10,6 +10,7 @@ $(document).ready(function() {
     var currentStockPriceChart;
     var currentStockPriceChartData = [];
     var stockPriceChartOptionNames = ["#stock_price_option_seven_days", "#stock_price_option_one_month", "#stock_price_option_three_months", "#stock_price_option_all"]
+
     init();
 
     function hideTickerInformation() {
@@ -147,8 +148,8 @@ $(document).ready(function() {
             }
 
             currentStockPriceChartData.sort(function(a,b) {
-                if (a.date < b.date) {return -1;}
-                if (a.date > b.date) {return 1;}
+                if (a.date < b.date) { return 1; }
+                if (a.date > b.date) { return -1; }
                 return 0;
             });
 
