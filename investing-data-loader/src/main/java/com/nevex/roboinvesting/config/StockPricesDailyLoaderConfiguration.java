@@ -1,6 +1,7 @@
 package com.nevex.roboinvesting.config;
 
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
+import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.dataloader.CurrentStockPriceLoader;
@@ -36,6 +37,8 @@ class StockPricesDailyLoaderConfiguration {
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
     @Autowired
+    private DataLoaderErrorsRepository dataLoaderErrorsRepository;
+    @Autowired
     private TickersRepository tickersRepository;
     @Autowired
     private StockPricesHistoricalRepository stockPricesHistoricalRepository;
@@ -47,10 +50,12 @@ class StockPricesDailyLoaderConfiguration {
     @Valid
     @NotNull(message = "The 'enabled' property cannot be null")
     private Boolean enabled;
-
     @Valid
     @Min(value = 0, message = "Invalid wait time in ms specified")
     private Long waitTimeBetweenTickersMs;
+    @Valid
+    @NotNull(message = "Invalid forceStartOnActivation specified")
+    private Boolean forceStartOnActivation;
 
     @PostConstruct
     void init() throws Exception {
@@ -59,7 +64,8 @@ class StockPricesDailyLoaderConfiguration {
 
     @Bean
     CurrentStockPriceLoader currentStockPriceLoader() {
-        return new CurrentStockPriceLoader(tickersRepository, tiingoApiClient, stockPriceAdminService, waitTimeBetweenTickersMs);
+        return new CurrentStockPriceLoader(tickersRepository, tiingoApiClient,
+                stockPriceAdminService, dataLoaderErrorsRepository, waitTimeBetweenTickersMs, forceStartOnActivation);
     }
 
     public void setEnabled(Boolean enabled) {
@@ -70,11 +76,16 @@ class StockPricesDailyLoaderConfiguration {
         this.waitTimeBetweenTickersMs = waitTimeBetweenTickersMs;
     }
 
+    public void setForceStartOnActivation(Boolean forceStartOnActivation) {
+        this.forceStartOnActivation = forceStartOnActivation;
+    }
+
     @Override
     public String toString() {
         return "StockPricesDailyLoaderConfiguration{" +
                 "enabled=" + enabled +
                 ", waitTimeBetweenTickersMs=" + waitTimeBetweenTickersMs +
+                ", forceStartOnActivation=" + forceStartOnActivation +
                 '}';
     }
 }

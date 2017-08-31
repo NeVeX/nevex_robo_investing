@@ -3,6 +3,7 @@ package com.nevex.roboinvesting.dataloader;
 import com.nevex.roboinvesting.TestingControlUtil;
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.api.tiingo.model.TiingoPriceDto;
+import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.database.entity.TickerEntity;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
@@ -22,9 +23,15 @@ public class TickerCacheLoader extends DataLoaderWorker {
     private final static Logger LOGGER = LoggerFactory.getLogger(TickerCacheLoader.class);
     private final TickerAdminService tickerAdminService;
 
-    public TickerCacheLoader(TickerAdminService tickerAdminService) {
+    public TickerCacheLoader(TickerAdminService tickerAdminService, DataLoaderErrorsRepository errorsRepository) {
+        super(errorsRepository);
         if ( tickerAdminService == null ) { throw new IllegalArgumentException("ticker admin service is null"); }
         this.tickerAdminService = tickerAdminService;
+    }
+
+    @Override
+    String getName() {
+        return "ticker-cache-loader";
     }
 
     @Override
@@ -33,7 +40,7 @@ public class TickerCacheLoader extends DataLoaderWorker {
     }
 
     @Override
-    int orderNumber() {
+    int getOrderNumber() {
         return DataLoaderOrder.TICKER_CACHE_LOADER;
     }
 

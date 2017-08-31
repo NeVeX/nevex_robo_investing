@@ -1,5 +1,6 @@
 package com.nevex.roboinvesting.dataloader;
 
+import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.entity.StockExchangeEntity;
 import com.nevex.roboinvesting.service.model.StockExchange;
@@ -17,9 +18,15 @@ public class ReferenceDataLoader extends DataLoaderWorker {
     private final static Logger LOGGER = LoggerFactory.getLogger(ReferenceDataLoader.class);
     private final StockExchangesRepository stockExchangesRepository;
 
-    public ReferenceDataLoader(StockExchangesRepository stockExchangesRepository) {
+    public ReferenceDataLoader(StockExchangesRepository stockExchangesRepository, DataLoaderErrorsRepository errorsRepository) {
+        super(errorsRepository);
         if ( stockExchangesRepository == null) { throw new IllegalArgumentException("Provided stockExchangesRepository is null"); }
         this.stockExchangesRepository = stockExchangesRepository;
+    }
+
+    @Override
+    String getName() {
+        return "reference-data-loader";
     }
 
     @Override
@@ -55,7 +62,7 @@ public class ReferenceDataLoader extends DataLoaderWorker {
     }
 
     @Override
-    int orderNumber() {
+    int getOrderNumber() {
         return DataLoaderOrder.REFERENCE_DATA_LOADER;
     }
 }

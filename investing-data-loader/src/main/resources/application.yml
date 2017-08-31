@@ -30,12 +30,12 @@ nevex-investing:
   daily-stock-price-loader:
     enabled: true
     wait-time-between-tickers-ms: 1000
+    force-start-on-activation: false
   tiingo:
     host: https://api.tiingo.com
   testing:
     enabled: false
     allowed-symbols: LC, NVDA, FB, APPL, NAKD, GOOGL, MSFT
-
 
 # Tiingo API: https://api.tiingo.com/
 

@@ -3,6 +3,7 @@ package com.nevex.roboinvesting.dataloader;
 import com.nevex.roboinvesting.TestingControlUtil;
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.api.tiingo.model.TiingoPriceDto;
+import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.database.entity.TickerEntity;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
@@ -20,15 +21,20 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CurrentStockPriceLoader.class);
     private final AtomicBoolean isUnlockedFromDataLoaders = new AtomicBoolean(false);
+    private final AtomicBoolean isWorkerRunning = new AtomicBoolean(false);
     private final TickersRepository tickersRepository;
     private final TiingoApiClient tiingoApiClient;
     private final StockPriceAdminService stockPriceAdminService;
     private final long waitTimeBetweenTickersMs;
+    private final boolean forceStartOnActivation;
 
     public CurrentStockPriceLoader(TickersRepository tickersRepository,
                                    TiingoApiClient tiingoApiClient,
                                    StockPriceAdminService stockPriceAdminService,
-                                   long waitTimeBetweenTickersMs) {
+                                   DataLoaderErrorsRepository errorsRepository,
+                                   long waitTimeBetweenTickersMs,
+                                   boolean forceStartOnActivation) {
+        super(errorsRepository);
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( tiingoApiClient == null) { throw new IllegalArgumentException("Provided tiingoApiClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
@@ -37,6 +43,7 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
         this.tickersRepository = tickersRepository;
         this.tiingoApiClient = tiingoApiClient;
         this.stockPriceAdminService = stockPriceAdminService;
+        this.forceStartOnActivation = forceStartOnActivation;
     }
 
     @Override
@@ -45,8 +52,13 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
     }
 
     @Override
-    int orderNumber() {
+    int getOrderNumber() {
         return DataLoaderOrder.STOCK_PRICE_CURRENT_LOADER;
+    }
+
+    @Override
+    String getName() {
+        return "current-stock-price-loader";
     }
 
     @Override
@@ -54,6 +66,10 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
         // unlock this loader
         isUnlockedFromDataLoaders.set(true);
         LOGGER.info("Unlocked the lock so this loader can now fetch current price data on it's schedule");
+        if ( forceStartOnActivation ) {
+            LOGGER.info("Will start the [{}] immediately since it is told to force start", getName());
+            getAllCurrentPrices();
+        }
     }
 
     // Run this Monday to Friday, at 8pm
@@ -65,10 +81,18 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
         if ( !isUnlockedFromDataLoaders.get()) {
             LOGGER.warn("Cannot continue job since the loader lock is not released yet");
         }
+        boolean isWorkerAlreadyRunning = isWorkerRunning.getAndSet(true); // get the current value and set to true for now
+        if ( isWorkerAlreadyRunning ) {
+            LOGGER.warn("There is already a current stock price loader running - will not invoke another worker");
+            return;
+        }
 
-        // Fetch all the ticker symbols we have
-        super.processAllPagesForRepo(tickersRepository, this::loadCurrentPrice, waitTimeBetweenTickersMs);
-
+        try {
+            // Fetch all the ticker symbols we have
+            super.processAllPagesForRepo(tickersRepository, this::loadCurrentPrice, waitTimeBetweenTickersMs);
+        } finally {
+            isWorkerRunning.set(false); // reset it
+        }
         LOGGER.info("Current prices job has finished!");
     }
 
@@ -88,7 +112,8 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
             }
 
         } catch (Exception e) {
-            LOGGER.error("An error occured trying to get current price for symbol [{}]", tickerEntity.getSymbol(), e);
+            saveExceptionToDatabase("Could not save current price for ticker ["+tickerEntity.getSymbol()+"]. Reason: ["+e.getMessage()+"]");
+            LOGGER.error("An error occurred trying to get current price for symbol [{}]", tickerEntity.getSymbol(), e);
         }
     }
 

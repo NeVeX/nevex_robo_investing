@@ -1,5 +1,6 @@
 package com.nevex.roboinvesting.dataloader;
 
+import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.database.entity.StockExchangeEntity;
@@ -31,7 +32,9 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     private final TickerAdminService tickerAdminService;
     private final Map<StockExchange, String> tickersToLoad = new HashMap<>();
 
-    public TickerSymbolLoader(TickerAdminService tickerAdminService, StockExchangesRepository stockExchangesRepository, TickersRepository tickersRepository) {
+    public TickerSymbolLoader(TickerAdminService tickerAdminService, StockExchangesRepository stockExchangesRepository,
+                              TickersRepository tickersRepository, DataLoaderErrorsRepository errorsRepository) {
+        super(errorsRepository);
         if ( tickerAdminService == null ) { throw new IllegalArgumentException("ticker admin service is null"); }
         if ( stockExchangesRepository == null ) { throw new IllegalArgumentException("stock exchange repository is null"); }
         if ( tickersRepository == null ) { throw new IllegalArgumentException("tickers repository is null"); }
@@ -48,6 +51,11 @@ public class TickerSymbolLoader extends DataLoaderWorker {
         }
     }
 
+    @Override
+    String getName() {
+        return "ticker-symbol-loader";
+    }
+
     private void printAllExchangesAvailable() {
         StringBuilder sb = new StringBuilder("The list of exchanges available to the application are:\n");
         Iterable<StockExchangeEntity> stockExchanges = stockExchangesRepository.findAll();
@@ -61,7 +69,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     }
 
     @Override
-    int orderNumber() {
+    int getOrderNumber() {
         return DataLoaderOrder.TICKER_SYMBOL_LOADER;
     }
 
@@ -148,10 +156,12 @@ public class TickerSymbolLoader extends DataLoaderWorker {
         try {
             didSave = tickersRepository.save(entity) != null;
         } catch (Exception ex ) {
+            saveExceptionToDatabase("Failed to save ticker entity ["+entity.getSymbol()+"]. Reason: ["+ex.getMessage()+"]");
             throw new DataLoadWorkerException("Failed to save ticker entity ["+entity+"]", ex);
         }
 
         if ( !didSave) {
+            saveExceptionToDatabase("The ticker entity ["+entity.getSymbol()+"] was not saved into the database");
             throw new DataLoadWorkerException("The new ticker entity was not saved. ["+entity+"]");
         }
     }

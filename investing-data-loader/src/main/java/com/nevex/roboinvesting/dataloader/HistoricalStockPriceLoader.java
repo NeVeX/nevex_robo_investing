@@ -3,6 +3,7 @@ package com.nevex.roboinvesting.dataloader;
 import com.nevex.roboinvesting.TestingControlUtil;
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.api.tiingo.model.TiingoPriceDto;
+import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.database.entity.TickerEntity;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
@@ -27,7 +28,9 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     public HistoricalStockPriceLoader(TickersRepository tickersRepository,
                                       TiingoApiClient tiingoApiClient,
                                       StockPriceAdminService stockPriceAdminService,
+                                      DataLoaderErrorsRepository errorsRepository,
                                       long waitTimeBetweenTickersMs) {
+        super(errorsRepository);
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( tiingoApiClient == null) { throw new IllegalArgumentException("Provided tiingoApiClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
@@ -36,6 +39,11 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         this.tickersRepository = tickersRepository;
         this.tiingoApiClient = tiingoApiClient;
         this.stockPriceAdminService = stockPriceAdminService;
+    }
+
+    @Override
+    String getName() {
+        return "historical-stock-price-loader";
     }
 
     @Override
@@ -70,6 +78,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
             LOGGER.info("Successfully loaded [{}] historical prices for [{}]", historicalPrices.size(), tickerEntity.getSymbol());
 
         } catch (Exception e ) {
+            saveExceptionToDatabase("Could not save historical price for symbol ["+tickerEntity.getSymbol()+"]. Reason: ["+e.getMessage()+"]");
             LOGGER.error("Could not get historical prices for symbol [{}]", tickerEntity.getSymbol(), e);
         }
     }
@@ -81,7 +90,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     }
 
     @Override
-    public int orderNumber() {
+    public int getOrderNumber() {
         return DataLoaderOrder.STOCK_PRICE_HISTORICAL_LOADER;
     }
 

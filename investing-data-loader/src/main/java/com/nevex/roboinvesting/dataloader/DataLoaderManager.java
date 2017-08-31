@@ -37,6 +37,7 @@ public class DataLoaderManager implements ApplicationListener<ApplicationReadyEv
             LOGGER.error("Data loader failed - shutting application down", e);
             SpringApplication.exit(event.getApplicationContext(), (ExitCodeGenerator) () -> EXIT_CODE_ON_EXCEPTION);
         }
+        LOGGER.info("Data loader manager has finished invoking all [{}] data workers", workers.size());
     }
 
     @PreDestroy
@@ -46,15 +47,20 @@ public class DataLoaderManager implements ApplicationListener<ApplicationReadyEv
 
     private void start() {
         for ( DataLoaderWorker dw : workers ) {
+            long startTimeMs = System.currentTimeMillis();
+            dw.saveExceptionToDatabase("Testing");
             try {
                 dw.doWork();
             } catch (DataLoadWorkerException ex) {
+                dw.saveExceptionToDatabase("Data loader has encountered a fatal exception. Reason: ["+ex.getMessage()+"]");
                 if (dw.canHaveExceptions()) {
-                    LOGGER.warn("DataLoaderWorker [{}] failed - will still allow other jobs to continue", dw.getClass(), ex);
+                    LOGGER.warn("DataLoaderWorker [{}] failed - will still allow other jobs to continue", dw.getName(), ex);
                 } else {
                     // nope
-                    throw new IllegalStateException("Data loader workers will be stopped since the data worked ["+dw.getClass()+"] failed and has indicated it cannot continue", ex);
+                    throw new IllegalStateException("Data loader workers will be stopped since the data worked ["+dw.getName()+"] failed and has indicated it cannot continue", ex);
                 }
+            } finally {
+                LOGGER.info("Data loader worker [{}] finished it's work in [{}] ms", dw.getName(), (System.currentTimeMillis() - startTimeMs));
             }
         }
     }

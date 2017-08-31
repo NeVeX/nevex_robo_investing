@@ -1,6 +1,7 @@
 package com.nevex.roboinvesting.config;
 
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
+import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.dataloader.DataLoaderManager;
@@ -32,6 +33,8 @@ public class DataLoaderConfiguration {
     @Autowired
     private StockExchangesRepository stockExchangesRepository;
     @Autowired
+    private DataLoaderErrorsRepository dataLoaderErrorsRepository;
+    @Autowired
     private TiingoApiClient tiingoApiClient;
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
@@ -59,9 +62,9 @@ public class DataLoaderConfiguration {
 
     @Bean
     ReferenceDataLoader referenceDataLoader() {
-        return new ReferenceDataLoader(stockExchangesRepository);
+        return new ReferenceDataLoader(stockExchangesRepository, dataLoaderErrorsRepository);
     }
 
     @Bean
-    TickerCacheLoader tickerCacheLoader() { return new TickerCacheLoader(tickerAdminService); }
+    TickerCacheLoader tickerCacheLoader() { return new TickerCacheLoader(tickerAdminService, dataLoaderErrorsRepository); }
 }
