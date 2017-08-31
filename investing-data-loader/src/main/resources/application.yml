@@ -25,7 +25,7 @@ nevex-investing:
     nasdaq-file: D:\Coding\Git\nevex_investing\data\nasdaq_tickers_08_07_2017.csv
     nyse-file: D:\Coding\Git\nevex_investing\data\nyse_tickers_08_07_2017.csv
   stock-historical-loader:
-    enabled: true
+    enabled: false
     wait-time-between-tickers-ms: 1000
   daily-stock-price-loader:
     enabled: true

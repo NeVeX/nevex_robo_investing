@@ -59,8 +59,8 @@ public class MockTickerService extends TickerService {
     }
 
     @Override
-    protected void refreshAllTickers() {
-
+    protected int refreshAllTickers() {
+        return 0;
     }
 
     /**

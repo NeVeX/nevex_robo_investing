@@ -27,8 +27,8 @@ public class TickerAdminService extends TickerService {
         super(tickersRepository);
     }
 
-    public void refreshAllTickers() {
-        super.refreshAllTickers();
+    public int refreshAllTickers() {
+        return super.refreshAllTickers();
     }
 
 }

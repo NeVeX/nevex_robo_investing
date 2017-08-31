@@ -91,11 +91,11 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
         tickerIdToSymbolMap.putAll(tickerIdToSymbols);
     }
 
-    protected void refreshAllTickers() {
-        refreshAllTickers(tickersRepository.findAll());
+    protected int refreshAllTickers() {
+        return refreshAllTickers(tickersRepository.findAll());
     }
 
-    protected void refreshAllTickers(Iterable<TickerEntity> tickerIter) {
+    protected int refreshAllTickers(Iterable<TickerEntity> tickerIter) {
         Map<String, Integer> symbolToTickerIdMap = new HashMap<>();
         Set<Ticker> newTickers = new HashSet<>();
 
@@ -115,6 +115,7 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
             tickersLock.writeLock().unlock();
         }
         LOGGER.info("Refreshed all tickers");
+        return allTickers.size();
     }
 
     // TODO: Need to search by ticker first

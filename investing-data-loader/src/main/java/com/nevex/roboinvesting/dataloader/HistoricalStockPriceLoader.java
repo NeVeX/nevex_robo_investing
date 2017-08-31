@@ -48,13 +48,14 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
 
     @Override
     @Transactional
-    public void doWork() throws DataLoadWorkerException {
+    public DataLoaderWorkerResult doWork() throws DataLoadWorkerException {
         LOGGER.info("{} will start to do it's work", this.getClass());
 
         // Fetch all the ticker symbols we have
-        super.processAllPagesForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, waitTimeBetweenTickersMs);
+        int totalRecordsProcessed = super.processAllPagesForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, waitTimeBetweenTickersMs);
 
         LOGGER.info("{} has completed all it's work", this.getClass());
+        return new DataLoaderWorkerResult(totalRecordsProcessed);
     }
 
     private void loadHistoricalPricesForSymbol(TickerEntity tickerEntity) {

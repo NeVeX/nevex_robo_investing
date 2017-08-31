@@ -31,13 +31,13 @@ public class ReferenceDataLoader extends DataLoaderWorker {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    void doWork() throws DataLoadWorkerException {
-        LOGGER.info("Loader started");
-        loadStockExchanges();
-        LOGGER.info("Loader finished");
+    DataLoaderWorkerResult doWork() throws DataLoadWorkerException {
+        int totalExchangesAdded = loadStockExchanges();
+        return new DataLoaderWorkerResult(totalExchangesAdded);
     }
 
-    private void loadStockExchanges() throws DataLoadWorkerException {
+    private int loadStockExchanges() throws DataLoadWorkerException {
+        int stockExchangesAdded = 0;
         for (StockExchange se : StockExchange.values()) {
             StockExchangeEntity entity = stockExchangesRepository.findOne(se.getId());
             if ( entity == null ) {
@@ -48,12 +48,14 @@ public class ReferenceDataLoader extends DataLoaderWorker {
                 if ( stockExchangesRepository.save(newEntity) == null) {
                     throw new DataLoadWorkerException("Could not save new stock exchange ["+newEntity+"]");
                 }
+                stockExchangesAdded++;
             } else {
                 if (entity.getId() != se.getId()) {
                     throw new DataLoadWorkerException("DB entity ["+entity+"] does not match code entity id ["+se+"]");
                 }
             }
         }
+        return stockExchangesAdded;
     }
 
     @Override

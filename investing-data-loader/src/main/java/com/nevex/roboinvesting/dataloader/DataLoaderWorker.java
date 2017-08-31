@@ -40,7 +40,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
      */
     abstract String getName();
 
-    abstract void doWork() throws DataLoadWorkerException;
+    abstract DataLoaderWorkerResult doWork() throws DataLoadWorkerException;
 
     @Override
     public final int compareTo(DataLoaderWorker that) {
@@ -49,10 +49,11 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
     /**
      * Helper function to page across a pageable repository
+     * @return the total records processed
      */
-    <T, ID extends Serializable> void processAllPagesForRepo(
+    <T, ID extends Serializable> int processAllPagesForRepo(
             PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer, long waitTimeBetweenTickersMs) {
-
+        int totalRecordsProcessed = 0;
         // Fetch all the ticker symbols we have
         Pageable pageable = new PageRequest(0, 20);
         while ( pageable != null ) {
@@ -62,10 +63,11 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
             if ( page != null && page.hasContent()) {
                 for ( T data : page) {
                     consumer.accept(data);
+                    totalRecordsProcessed++;
                     if ( waitTimeBetweenTickersMs > 0 ) {
                         boolean exceptionOccurred = tryPauseThreadForMs(waitTimeBetweenTickersMs, sortingRepository.getClass().getName(), pageable);
                         if ( exceptionOccurred ) {
-                            return;
+                            return totalRecordsProcessed;
                         }
                     }
                 }
@@ -73,6 +75,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
             pageable = page != null && page.hasNext() ? page.nextPageable() : null;
         }
+        return totalRecordsProcessed;
     }
 
     // Tries to pause the thread for a certain amount of time

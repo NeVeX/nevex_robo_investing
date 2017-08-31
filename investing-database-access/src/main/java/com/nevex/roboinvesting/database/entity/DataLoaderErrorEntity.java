@@ -20,7 +20,7 @@ public class DataLoaderErrorEntity {
     private String name;
     @Column(name = "error_message")
     private String errorMessage;
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", columnDefinition = "timestamptz")
     private OffsetDateTime timestamp;
 
     public int getId() {

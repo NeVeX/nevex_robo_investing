@@ -75,18 +75,20 @@ public class TickerSymbolLoader extends DataLoaderWorker {
 
     @Override
     @Transactional
-    public void doWork() throws DataLoadWorkerException {
+    public DataLoaderWorkerResult doWork() throws DataLoadWorkerException {
         LOGGER.info("{} will start to do it's work", this.getClass());
         printAllExchangesAvailable();
+        int totalTickersAdded = 0;
         for (Map.Entry<StockExchange, String> entry : tickersToLoad.entrySet()) {
-            loadTickers(entry.getKey(), entry.getValue());
+            totalTickersAdded += loadTickers(entry.getKey(), entry.getValue());
         }
         tickerAdminService.refreshAllTickers();
         LOGGER.info("{} has completed all it's work", this.getClass());
+        return new DataLoaderWorkerResult(totalTickersAdded);
     }
 
     @Transactional
-    public void loadTickers(StockExchange stockExchange, String fileLocation) throws DataLoadWorkerException {
+    public int loadTickers(StockExchange stockExchange, String fileLocation) throws DataLoadWorkerException {
         LOGGER.info("Will attempt to load all tickers in file [{}] for exchange [{}]", fileLocation, stockExchange);
         if ( !doesStockExchangeExists(stockExchange)) {
             throw new DataLoadWorkerException("Stock exchange ["+stockExchange+"] does not exist in the database");
@@ -99,6 +101,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
         if ( !parsedTickers.isEmpty()) {
             saveTickers(stockExchange, parsedTickers);
         }
+        return parsedTickers.size();
     }
 
     // TODO: Support updates to existing tickers!

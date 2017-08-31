@@ -45,10 +45,11 @@ public class TickerCacheLoader extends DataLoaderWorker {
     }
 
     @Override
-    void doWork() throws DataLoadWorkerException {
+    DataLoaderWorkerResult doWork() throws DataLoadWorkerException {
         // unlock this loader
-        tickerAdminService.refreshAllTickers();
+        int totalTickersRefreshed = tickerAdminService.refreshAllTickers();
         LOGGER.info("Ticker cache loader job completed");
+        return new DataLoaderWorkerResult(totalTickersRefreshed);
     }
 
 }

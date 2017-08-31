@@ -2,6 +2,7 @@ package com.nevex.roboinvesting.config;
 
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
+import com.nevex.roboinvesting.database.DataLoaderRunsRepository;
 import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.dataloader.CurrentStockPriceLoader;
@@ -37,6 +38,8 @@ class StockPricesDailyLoaderConfiguration {
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
     @Autowired
+    private DataLoaderRunsRepository dataLoaderRunsRepository;
+    @Autowired
     private DataLoaderErrorsRepository dataLoaderErrorsRepository;
     @Autowired
     private TickersRepository tickersRepository;
@@ -64,8 +67,10 @@ class StockPricesDailyLoaderConfiguration {
 
     @Bean
     CurrentStockPriceLoader currentStockPriceLoader() {
+        // TODO: This loader is getting too big!
         return new CurrentStockPriceLoader(tickersRepository, tiingoApiClient,
-                stockPriceAdminService, dataLoaderErrorsRepository, waitTimeBetweenTickersMs, forceStartOnActivation);
+                stockPriceAdminService, dataLoaderRunsRepository,
+                dataLoaderErrorsRepository, waitTimeBetweenTickersMs, forceStartOnActivation);
     }
 
     public void setEnabled(Boolean enabled) {
