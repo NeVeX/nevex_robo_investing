@@ -10,6 +10,7 @@ import com.nevex.roboinvesting.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -71,6 +72,7 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
 
     // Run this Monday to Friday, at 8pm
     @Scheduled(cron = "0 0 20 * * MON-FRI", zone = "America/Los_Angeles")
+    @Transactional
 //    @Scheduled(cron = "*/10 * * * * *", zone = "America/Los_Angeles") // Every 10 seconds
     void onScheduleStart() {
         LOGGER.info("[{}] has started!", getName());

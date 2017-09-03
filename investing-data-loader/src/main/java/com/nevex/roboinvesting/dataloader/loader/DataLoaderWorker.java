@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -41,6 +42,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
     /**
      * Entry point to start the loader
      */
+    @Transactional
     public void start() {
         doStart(this::doWork);
     }
@@ -48,6 +50,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
     /**
      * Start the loader, by invoking the given supplier
      */
+    @Transactional
     void doStart(DataWorkerSupplier worker) {
         OffsetDateTime startTime = OffsetDateTime.now();
         long startTimeMs = System.currentTimeMillis();

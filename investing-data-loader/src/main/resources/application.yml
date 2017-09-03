@@ -34,6 +34,8 @@ nevex-investing:
     enabled: false
     wait-time-between-tickers-ms: 1000
     force-start-on-activation: false
+  edgar-ticker-to-cik-loader:
+    enabled: true
   tiingo:
     host: https://api.tiingo.com
   testing:

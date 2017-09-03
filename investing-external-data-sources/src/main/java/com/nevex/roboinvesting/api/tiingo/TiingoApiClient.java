@@ -3,6 +3,7 @@ package com.nevex.roboinvesting.api.tiingo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.nevex.roboinvesting.api.ApiException;
 import com.nevex.roboinvesting.api.tiingo.model.TiingoPriceDto;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -31,7 +32,6 @@ public class TiingoApiClient {
     private final String currentStockPriceUrl;
     private final String historicalStockPriceUrl;
 
-
     public TiingoApiClient(String apiKey, String tiingoHost) {
         if (StringUtils.isBlank(apiKey)) { throw new IllegalArgumentException("Provided apiKey is blank"); }
         if (StringUtils.isBlank(tiingoHost)) { throw new IllegalArgumentException("Provided tiingoHost is blank"); }
@@ -42,7 +42,7 @@ public class TiingoApiClient {
         objectMapper.registerModule(new JavaTimeModule()); // For better support of LocalDate...etc
     }
 
-    public Optional<TiingoPriceDto> getCurrentPriceForSymbol(String symbol) throws TiingoApiException {
+    public Optional<TiingoPriceDto> getCurrentPriceForSymbol(String symbol) throws ApiException {
 
         String url = StringUtils.replace(currentStockPriceUrl, "{SYMBOL}", symbol);
         Request request = buildDefaultRequest().url(url).build();
@@ -54,12 +54,11 @@ public class TiingoApiClient {
             if ( firstPrice.isPresent()) {
                 priceDto = firstPrice.get();
             }
-
         }
         return Optional.ofNullable(priceDto);
     }
 
-    public Set<TiingoPriceDto> getHistoricalPricesForSymbol(String symbol, int maxDaysToFetch) throws TiingoApiException {
+    public Set<TiingoPriceDto> getHistoricalPricesForSymbol(String symbol, int maxDaysToFetch) throws ApiException {
         // Build the date to use
         LocalDate todaysDate = LocalDate.now();
         LocalDate earliestDate = todaysDate.minus(maxDaysToFetch, ChronoUnit.DAYS);
@@ -71,28 +70,21 @@ public class TiingoApiClient {
         url = StringUtils.replace(url, "{START_DATE}", earliestDateAsString);
         url = StringUtils.replace(url, "{END_DATE}", todaysDateAsString);
         Request request = buildDefaultRequest().url(url).build();
-        Set<TiingoPriceDto> allPrices = getStockPrices(request);
-        return allPrices;
+        return getStockPrices(request);
     }
 
-    private Set<TiingoPriceDto> getStockPrices(Request request) throws TiingoApiException {
-        ResponseBody responseBody = null;
-        try {
-            Response response = httpClient.newCall(request).execute();
+    private Set<TiingoPriceDto> getStockPrices(Request request) throws ApiException {
+        try(Response response = httpClient.newCall(request).execute()) {
             if ( response.isSuccessful()) {
-                responseBody = response.body();
+                ResponseBody responseBody = response.body();
                 if ( responseBody == null ) {
-                    throw new TiingoApiException("Expected a body in the response from the Tiingo API, but there was none. "+request);
+                    throw new ApiException("Expected a body in the response from the Tiingo API, but there was none. "+request);
                 }
                 return objectMapper.readValue(responseBody.byteStream(), new TypeReference<Set<TiingoPriceDto>>(){});
             }
             return new HashSet<>();
         } catch (IOException ioException ) {
-            throw new TiingoApiException("Could not get the current price using the Tiingo API for url ["+request.url()+"]", ioException);
-        } finally {
-            if ( responseBody != null) {
-                responseBody.close();
-            }
+            throw new ApiException("Could not get the current price using the Tiingo API for url ["+request.url()+"]", ioException);
         }
     }
 
