@@ -53,7 +53,7 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
 
     @Override
     DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
-        int tickersProcessed = super.processAllPagesForRepo(tickersRepository, this::processTicker, 500);
+        int tickersProcessed = super.processAllPagesForRepo(tickersRepository, this::processTicker, 750);
         return new DataLoaderWorkerResult(tickersProcessed);
     }
 
@@ -99,8 +99,5 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
             LOGGER.error("Could not save cik [{}] for ticker [{}]", cik, tickerSymbol, e);
         }
     }
-
-
-
 
 }
