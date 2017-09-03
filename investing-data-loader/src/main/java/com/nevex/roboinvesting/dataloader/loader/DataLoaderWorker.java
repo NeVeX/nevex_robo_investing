@@ -1,7 +1,6 @@
-package com.nevex.roboinvesting.dataloader;
+package com.nevex.roboinvesting.dataloader.loader;
 
-import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
-import com.nevex.roboinvesting.database.entity.DataLoaderErrorEntity;
+import com.nevex.roboinvesting.dataloader.DataLoaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -19,28 +18,49 @@ import java.util.function.Consumer;
 public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(DataLoaderWorker.class);
-    final DataLoaderErrorsRepository dataLoaderErrorsRepository;
+    private final DataLoaderService dataLoaderService;
 
-    DataLoaderWorker(DataLoaderErrorsRepository dataLoaderErrorsRepository) {
-        if ( dataLoaderErrorsRepository == null ) { throw new IllegalArgumentException("Provided dataLoaderErrorsRepository is null"); }
-        this.dataLoaderErrorsRepository = dataLoaderErrorsRepository;
+    DataLoaderWorker(DataLoaderService dataLoaderService) {
+        if ( dataLoaderService == null ) { throw new IllegalArgumentException("Provided dataLoaderService is null"); }
+        this.dataLoaderService = dataLoaderService;
     }
 
-    @Deprecated // Not necessary anymore
-    abstract boolean canHaveExceptions();
-
     /**
-     * The order in which this worker should execute (relative to other workers).
+     * The order in which this loader should execute (relative to other workers).
      * Lower number is a higher precedence. E.g. 1 will go first, then 2, then 3....
      */
     abstract int getOrderNumber();
 
     /**
-     * The simple name of this worker
+     * The simple name of this loader
      */
     abstract String getName();
 
-    abstract DataLoaderWorkerResult doWork() throws DataLoadWorkerException;
+    abstract DataLoaderWorkerResult doWork() throws DataLoaderWorkerException;
+
+    /**
+     * Entry point to start the loader
+     */
+    public void start() {
+        doStart(this::doWork);
+    }
+
+    /**
+     * Start the loader, by invoking the given supplier
+     */
+    void doStart(DataWorkerSupplier worker) {
+        OffsetDateTime startTime = OffsetDateTime.now();
+        long startTimeMs = System.currentTimeMillis();
+        try {
+            DataLoaderWorkerResult result = worker.doWork();
+            // Save the work done
+            dataLoaderService.saveRun(getName(), startTime, result.getRecordsProcessed());
+            LOGGER.info("Data loader loader [{}] finished it's work in [{}] ms", getName(), (System.currentTimeMillis() - startTimeMs));
+        } catch (DataLoaderWorkerException ex) {
+            dataLoaderService.saveError(getName(), "Data loader has encountered a fatal exception. Reason: ["+ex.getMessage()+"]");
+            throw new IllegalStateException("Data loader ["+getName()+"] failed", ex);
+        }
+    }
 
     @Override
     public final int compareTo(DataLoaderWorker that) {
@@ -51,7 +71,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
      * Helper function to page across a pageable repository
      * @return the total records processed
      */
-    <T, ID extends Serializable> int processAllPagesForRepo(
+    <T, ID extends Serializable> int processAllPagesForRepo (
             PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer, long waitTimeBetweenTickersMs) {
         int totalRecordsProcessed = 0;
         // Fetch all the ticker symbols we have
@@ -94,15 +114,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
     }
 
     void saveExceptionToDatabase(String message) {
-        DataLoaderErrorEntity errorEntity = new DataLoaderErrorEntity();
-        errorEntity.setErrorMessage(message);
-        errorEntity.setName(getName());
-        errorEntity.setTimestamp(OffsetDateTime.now());
-        try {
-            dataLoaderErrorsRepository.save(errorEntity);
-        } catch (Exception e ) {
-            LOGGER.error("Could not save error entity [{}] into the database. Reason [{}]", errorEntity, e.getMessage());
-        }
+        dataLoaderService.saveError(getName(), message);
     }
 
 }

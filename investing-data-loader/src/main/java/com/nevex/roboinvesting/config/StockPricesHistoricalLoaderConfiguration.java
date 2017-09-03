@@ -4,7 +4,8 @@ import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.dataloader.HistoricalStockPriceLoader;
+import com.nevex.roboinvesting.dataloader.DataLoaderService;
+import com.nevex.roboinvesting.dataloader.loader.HistoricalStockPriceLoader;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,11 +38,9 @@ class StockPricesHistoricalLoaderConfiguration {
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
     @Autowired
-    private DataLoaderErrorsRepository dataLoaderErrorsRepository;
+    private DataLoaderService dataLoaderService;
     @Autowired
     private TickersRepository tickersRepository;
-    @Autowired
-    private StockPricesHistoricalRepository stockPricesHistoricalRepository;
     @Autowired
     private TiingoApiClient tiingoApiClient;
     @Autowired
@@ -62,7 +61,7 @@ class StockPricesHistoricalLoaderConfiguration {
 
     @Bean
     HistoricalStockPriceLoader historicalStockPriceLoader() {
-        return new HistoricalStockPriceLoader(tickersRepository, tiingoApiClient, stockPriceAdminService, dataLoaderErrorsRepository, waitTimeBetweenTickersMs);
+        return new HistoricalStockPriceLoader(tickersRepository, tiingoApiClient, stockPriceAdminService, dataLoaderService, waitTimeBetweenTickersMs);
     }
 
     public void setEnabled(Boolean enabled) {

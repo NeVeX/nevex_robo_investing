@@ -1,11 +1,11 @@
-package com.nevex.roboinvesting.dataloader;
+package com.nevex.roboinvesting.dataloader.loader;
 
 import com.nevex.roboinvesting.TestingControlUtil;
 import com.nevex.roboinvesting.api.tiingo.TiingoApiClient;
 import com.nevex.roboinvesting.api.tiingo.model.TiingoPriceDto;
-import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.database.entity.TickerEntity;
+import com.nevex.roboinvesting.dataloader.DataLoaderService;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +28,9 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     public HistoricalStockPriceLoader(TickersRepository tickersRepository,
                                       TiingoApiClient tiingoApiClient,
                                       StockPriceAdminService stockPriceAdminService,
-                                      DataLoaderErrorsRepository errorsRepository,
+                                      DataLoaderService dataLoaderService,
                                       long waitTimeBetweenTickersMs) {
-        super(errorsRepository);
+        super(dataLoaderService);
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( tiingoApiClient == null) { throw new IllegalArgumentException("Provided tiingoApiClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
@@ -48,7 +48,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
 
     @Override
     @Transactional
-    public DataLoaderWorkerResult doWork() throws DataLoadWorkerException {
+    DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
         LOGGER.info("{} will start to do it's work", this.getClass());
 
         // Fetch all the ticker symbols we have
@@ -84,14 +84,8 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         }
     }
 
-
     @Override
-    boolean canHaveExceptions() {
-        return false;
-    }
-
-    @Override
-    public int getOrderNumber() {
+    int getOrderNumber() {
         return DataLoaderOrder.STOCK_PRICE_HISTORICAL_LOADER;
     }
 

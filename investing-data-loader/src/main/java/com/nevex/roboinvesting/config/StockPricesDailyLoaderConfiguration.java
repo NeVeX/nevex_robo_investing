@@ -5,7 +5,8 @@ import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.DataLoaderRunsRepository;
 import com.nevex.roboinvesting.database.StockPricesHistoricalRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.dataloader.CurrentStockPriceLoader;
+import com.nevex.roboinvesting.dataloader.DataLoaderService;
+import com.nevex.roboinvesting.dataloader.loader.CurrentStockPriceLoader;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +39,9 @@ class StockPricesDailyLoaderConfiguration {
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
     @Autowired
-    private DataLoaderRunsRepository dataLoaderRunsRepository;
-    @Autowired
-    private DataLoaderErrorsRepository dataLoaderErrorsRepository;
+    private DataLoaderService dataLoaderService;
     @Autowired
     private TickersRepository tickersRepository;
-    @Autowired
-    private StockPricesHistoricalRepository stockPricesHistoricalRepository;
     @Autowired
     private TiingoApiClient tiingoApiClient;
     @Autowired
@@ -69,8 +66,7 @@ class StockPricesDailyLoaderConfiguration {
     CurrentStockPriceLoader currentStockPriceLoader() {
         // TODO: This loader is getting too big!
         return new CurrentStockPriceLoader(tickersRepository, tiingoApiClient,
-                stockPriceAdminService, dataLoaderRunsRepository,
-                dataLoaderErrorsRepository, waitTimeBetweenTickersMs, forceStartOnActivation);
+                stockPriceAdminService, dataLoaderService, waitTimeBetweenTickersMs, forceStartOnActivation);
     }
 
     public void setEnabled(Boolean enabled) {

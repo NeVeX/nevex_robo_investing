@@ -5,10 +5,11 @@ import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.DataLoaderRunsRepository;
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.dataloader.DataLoaderManager;
-import com.nevex.roboinvesting.dataloader.DataLoaderWorker;
-import com.nevex.roboinvesting.dataloader.ReferenceDataLoader;
-import com.nevex.roboinvesting.dataloader.TickerCacheLoader;
+import com.nevex.roboinvesting.dataloader.DataLoaderService;
+import com.nevex.roboinvesting.dataloader.DataLoaderStarter;
+import com.nevex.roboinvesting.dataloader.loader.DataLoaderWorker;
+import com.nevex.roboinvesting.dataloader.loader.ReferenceDataLoader;
+import com.nevex.roboinvesting.dataloader.loader.TickerCacheLoader;
 import com.nevex.roboinvesting.service.StockPriceAdminService;
 import com.nevex.roboinvesting.service.TickerAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +39,6 @@ public class DataLoaderConfiguration {
     @Autowired
     private DataLoaderErrorsRepository dataLoaderErrorsRepository;
     @Autowired
-    private TiingoApiClient tiingoApiClient;
-    @Autowired
-    private StockPriceAdminService stockPriceAdminService;
-    @Autowired
     private TickerAdminService tickerAdminService;
 
     @Valid
@@ -59,15 +56,20 @@ public class DataLoaderConfiguration {
     }
 
     @Bean
-    DataLoaderManager dataLoaderManager() {
-        return new DataLoaderManager(dataLoaderRunsRepository);
+    DataLoaderService dataLoaderService() {
+        return new DataLoaderService(dataLoaderRunsRepository, dataLoaderErrorsRepository);
+    }
+
+    @Bean
+    DataLoaderStarter dataLoaderManager() {
+        return new DataLoaderStarter();
     }
 
     @Bean
     ReferenceDataLoader referenceDataLoader() {
-        return new ReferenceDataLoader(stockExchangesRepository, dataLoaderErrorsRepository);
+        return new ReferenceDataLoader(stockExchangesRepository, dataLoaderService());
     }
 
     @Bean
-    TickerCacheLoader tickerCacheLoader() { return new TickerCacheLoader(tickerAdminService, dataLoaderErrorsRepository); }
+    TickerCacheLoader tickerCacheLoader() { return new TickerCacheLoader(tickerAdminService, dataLoaderService()); }
 }

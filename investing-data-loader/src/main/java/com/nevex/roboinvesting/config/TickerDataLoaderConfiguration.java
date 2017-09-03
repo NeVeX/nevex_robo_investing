@@ -3,9 +3,9 @@ package com.nevex.roboinvesting.config;
 import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
-import com.nevex.roboinvesting.dataloader.TickerSymbolLoader;
+import com.nevex.roboinvesting.dataloader.DataLoaderService;
+import com.nevex.roboinvesting.dataloader.loader.TickerSymbolLoader;
 import com.nevex.roboinvesting.service.TickerAdminService;
-import com.nevex.roboinvesting.service.TickerService;
 import com.nevex.roboinvesting.service.model.StockExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ class TickerDataLoaderConfiguration {
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
     @Autowired
-    private DataLoaderErrorsRepository dataLoaderErrorsRepository;
+    private DataLoaderService dataLoaderService;
     @Autowired
     private StockExchangesRepository stockExchangesRepository;
     @Autowired
@@ -58,7 +58,7 @@ class TickerDataLoaderConfiguration {
 
     @Bean
     TickerSymbolLoader tickerSymbolLoader() {
-        TickerSymbolLoader loader = new TickerSymbolLoader(tickerAdminService, stockExchangesRepository, tickersRepository, dataLoaderErrorsRepository);
+        TickerSymbolLoader loader = new TickerSymbolLoader(tickerAdminService, stockExchangesRepository, tickersRepository, dataLoaderService);
         loader.addTickerFileToLoad(StockExchange.Nasdaq, nasdaqFile);
         loader.addTickerFileToLoad(StockExchange.Nyse, nyseFile);
         return loader;

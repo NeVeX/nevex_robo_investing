@@ -1,8 +1,8 @@
-package com.nevex.roboinvesting.dataloader;
+package com.nevex.roboinvesting.dataloader.loader;
 
-import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.entity.StockExchangeEntity;
+import com.nevex.roboinvesting.dataloader.DataLoaderService;
 import com.nevex.roboinvesting.service.model.StockExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +18,8 @@ public class ReferenceDataLoader extends DataLoaderWorker {
     private final static Logger LOGGER = LoggerFactory.getLogger(ReferenceDataLoader.class);
     private final StockExchangesRepository stockExchangesRepository;
 
-    public ReferenceDataLoader(StockExchangesRepository stockExchangesRepository, DataLoaderErrorsRepository errorsRepository) {
-        super(errorsRepository);
+    public ReferenceDataLoader(StockExchangesRepository stockExchangesRepository, DataLoaderService dataLoaderService) {
+        super(dataLoaderService);
         if ( stockExchangesRepository == null) { throw new IllegalArgumentException("Provided stockExchangesRepository is null"); }
         this.stockExchangesRepository = stockExchangesRepository;
     }
@@ -31,12 +31,12 @@ public class ReferenceDataLoader extends DataLoaderWorker {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    DataLoaderWorkerResult doWork() throws DataLoadWorkerException {
+    DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
         int totalExchangesAdded = loadStockExchanges();
         return new DataLoaderWorkerResult(totalExchangesAdded);
     }
 
-    private int loadStockExchanges() throws DataLoadWorkerException {
+    private int loadStockExchanges() throws DataLoaderWorkerException {
         int stockExchangesAdded = 0;
         for (StockExchange se : StockExchange.values()) {
             StockExchangeEntity entity = stockExchangesRepository.findOne(se.getId());
@@ -46,21 +46,16 @@ public class ReferenceDataLoader extends DataLoaderWorker {
                 newEntity.setId(se.getId());
                 newEntity.setName(se.name());
                 if ( stockExchangesRepository.save(newEntity) == null) {
-                    throw new DataLoadWorkerException("Could not save new stock exchange ["+newEntity+"]");
+                    throw new DataLoaderWorkerException("Could not save new stock exchange ["+newEntity+"]");
                 }
                 stockExchangesAdded++;
             } else {
                 if (entity.getId() != se.getId()) {
-                    throw new DataLoadWorkerException("DB entity ["+entity+"] does not match code entity id ["+se+"]");
+                    throw new DataLoaderWorkerException("DB entity ["+entity+"] does not match code entity id ["+se+"]");
                 }
             }
         }
         return stockExchangesAdded;
-    }
-
-    @Override
-    boolean canHaveExceptions() {
-        return false;
     }
 
     @Override

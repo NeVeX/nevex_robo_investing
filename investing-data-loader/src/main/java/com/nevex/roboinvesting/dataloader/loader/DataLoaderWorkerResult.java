@@ -1,9 +1,9 @@
-package com.nevex.roboinvesting.dataloader;
+package com.nevex.roboinvesting.dataloader.loader;
 
 /**
  * Created by Mark Cunningham on 8/30/2017.
  */
-public class DataLoaderWorkerResult {
+class DataLoaderWorkerResult {
 
     private final int recordsProcessed;
 
@@ -11,8 +11,12 @@ public class DataLoaderWorkerResult {
         this.recordsProcessed = recordsProcessed;
     }
 
-    public int getRecordsProcessed() {
+    int getRecordsProcessed() {
         return recordsProcessed;
+    }
+
+    static DataLoaderWorkerResult nothingDone() {
+        return new DataLoaderWorkerResult(0);
     }
 
 }

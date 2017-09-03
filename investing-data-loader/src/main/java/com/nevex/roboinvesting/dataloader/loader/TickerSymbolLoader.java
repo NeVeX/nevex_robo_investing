@@ -1,12 +1,11 @@
-package com.nevex.roboinvesting.dataloader;
+package com.nevex.roboinvesting.dataloader.loader;
 
-import com.nevex.roboinvesting.database.DataLoaderErrorsRepository;
 import com.nevex.roboinvesting.database.StockExchangesRepository;
 import com.nevex.roboinvesting.database.TickersRepository;
 import com.nevex.roboinvesting.database.entity.StockExchangeEntity;
 import com.nevex.roboinvesting.database.entity.TickerEntity;
+import com.nevex.roboinvesting.dataloader.DataLoaderService;
 import com.nevex.roboinvesting.service.TickerAdminService;
-import com.nevex.roboinvesting.service.TickerService;
 import com.nevex.roboinvesting.service.model.StockExchange;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -33,8 +32,8 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     private final Map<StockExchange, String> tickersToLoad = new HashMap<>();
 
     public TickerSymbolLoader(TickerAdminService tickerAdminService, StockExchangesRepository stockExchangesRepository,
-                              TickersRepository tickersRepository, DataLoaderErrorsRepository errorsRepository) {
-        super(errorsRepository);
+                              TickersRepository tickersRepository, DataLoaderService dataLoaderService) {
+        super(dataLoaderService);
         if ( tickerAdminService == null ) { throw new IllegalArgumentException("ticker admin service is null"); }
         if ( stockExchangesRepository == null ) { throw new IllegalArgumentException("stock exchange repository is null"); }
         if ( tickersRepository == null ) { throw new IllegalArgumentException("tickers repository is null"); }
@@ -64,18 +63,13 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     }
 
     @Override
-    boolean canHaveExceptions() {
-        return false;
-    }
-
-    @Override
     int getOrderNumber() {
         return DataLoaderOrder.TICKER_SYMBOL_LOADER;
     }
 
     @Override
     @Transactional
-    public DataLoaderWorkerResult doWork() throws DataLoadWorkerException {
+    DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
         LOGGER.info("{} will start to do it's work", this.getClass());
         printAllExchangesAvailable();
         int totalTickersAdded = 0;
@@ -88,14 +82,14 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     }
 
     @Transactional
-    public int loadTickers(StockExchange stockExchange, String fileLocation) throws DataLoadWorkerException {
+    private int loadTickers(StockExchange stockExchange, String fileLocation) throws DataLoaderWorkerException {
         LOGGER.info("Will attempt to load all tickers in file [{}] for exchange [{}]", fileLocation, stockExchange);
         if ( !doesStockExchangeExists(stockExchange)) {
-            throw new DataLoadWorkerException("Stock exchange ["+stockExchange+"] does not exist in the database");
+            throw new DataLoaderWorkerException("Stock exchange ["+stockExchange+"] does not exist in the database");
         }
         File file = new File(fileLocation);
         if ( !file.exists()) {
-            throw new DataLoadWorkerException("Could not find the file ["+fileLocation+"] to load");
+            throw new DataLoaderWorkerException("Could not find the file ["+fileLocation+"] to load");
         }
         Set<CSVParsedTicker> parsedTickers = loadTickers(file);
         if ( !parsedTickers.isEmpty()) {
@@ -105,7 +99,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     }
 
     // TODO: Support updates to existing tickers!
-    private Set<CSVParsedTicker> loadTickers(File tickersFile) throws DataLoadWorkerException {
+    private Set<CSVParsedTicker> loadTickers(File tickersFile) throws DataLoaderWorkerException {
         try {
             Set<CSVParsedTicker> csvParsedTickers = new HashSet<>();
             FileReader fileReader = new FileReader(tickersFile);
@@ -135,17 +129,17 @@ public class TickerSymbolLoader extends DataLoaderWorker {
             LOGGER.info("Successfully loaded a total of [{}] ticker records into the database from the file [{}]", csvParsedTickers.size(), tickersFile.getAbsolutePath());
             return csvParsedTickers;
         } catch (Exception e ) {
-            throw new DataLoadWorkerException("Could not load file ["+tickersFile+"]", e);
+            throw new DataLoaderWorkerException("Could not load file ["+tickersFile+"]", e);
         }
     }
 
-    private void saveTickers(StockExchange stockExchange, Set<CSVParsedTicker> csvParsedTickers) throws DataLoadWorkerException {
+    private void saveTickers(StockExchange stockExchange, Set<CSVParsedTicker> csvParsedTickers) throws DataLoaderWorkerException {
         for ( CSVParsedTicker t : csvParsedTickers ) {
             saveTicker(stockExchange.getId(), t);
         }
     }
 
-    private void saveTicker(short stockExchangeId, CSVParsedTicker CSVParsedTicker) throws DataLoadWorkerException {
+    private void saveTicker(short stockExchangeId, CSVParsedTicker CSVParsedTicker) throws DataLoaderWorkerException {
         TickerEntity entity = new TickerEntity();
         entity.setCreatedDate(OffsetDateTime.now());
         entity.setStockExchange(stockExchangeId);
@@ -160,12 +154,12 @@ public class TickerSymbolLoader extends DataLoaderWorker {
             didSave = tickersRepository.save(entity) != null;
         } catch (Exception ex ) {
             saveExceptionToDatabase("Failed to save ticker entity ["+entity.getSymbol()+"]. Reason: ["+ex.getMessage()+"]");
-            throw new DataLoadWorkerException("Failed to save ticker entity ["+entity+"]", ex);
+            throw new DataLoaderWorkerException("Failed to save ticker entity ["+entity+"]", ex);
         }
 
         if ( !didSave) {
             saveExceptionToDatabase("The ticker entity ["+entity.getSymbol()+"] was not saved into the database");
-            throw new DataLoadWorkerException("The new ticker entity was not saved. ["+entity+"]");
+            throw new DataLoaderWorkerException("The new ticker entity was not saved. ["+entity+"]");
         }
     }
 
