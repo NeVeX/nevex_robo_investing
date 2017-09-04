@@ -47,6 +47,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
         doStart(this::doWork);
     }
 
+
     /**
      * Start the loader, by invoking the given supplier
      */

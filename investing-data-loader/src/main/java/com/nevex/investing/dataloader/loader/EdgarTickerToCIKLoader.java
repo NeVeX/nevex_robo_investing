@@ -61,7 +61,7 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
 
         if ( onlyLookupMissingCiks ) {
             // check we don't have this cik already
-            if ( tickerToCikRepository.findByTickerId(tickerEntity.getId()) != null ) {
+            if ( tickerToCikRepository.findByTickerId(tickerEntity.getId()).isPresent()) {
                 return; // skip this guy, we already have him....
             }
         }
