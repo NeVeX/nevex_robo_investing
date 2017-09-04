@@ -52,6 +52,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
      */
     @Transactional
     void doStart(DataWorkerSupplier worker) {
+        LOGGER.info("Started data loader worker [{}]", getName());
         OffsetDateTime startTime = OffsetDateTime.now();
         long startTimeMs = System.currentTimeMillis();
         try {
