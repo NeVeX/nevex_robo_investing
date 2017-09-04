@@ -36,6 +36,7 @@ nevex-investing:
     force-start-on-activation: false
   edgar-ticker-to-cik-loader:
     enabled: false
+    only-lookup-missing-ticker-ciks: true # For any ciks that are missing, only get those (not values in the ticker_to_cik table)
   tiingo:
     host: https://api.tiingo.com
   testing:

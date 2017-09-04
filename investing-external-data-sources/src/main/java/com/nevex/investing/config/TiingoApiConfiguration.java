@@ -1,0 +1,48 @@
+package com.nevex.investing.config;
+
+import com.nevex.investing.PropertyNames;
+import com.nevex.investing.api.tiingo.TiingoApiClient;
+import org.hibernate.validator.constraints.NotBlank;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
+
+import static com.nevex.investing.config.TiingoApiConfiguration.TIINGO_PREFIX;
+
+/**
+ * Created by Mark Cunningham on 8/8/2017.
+ */
+@Validated
+@Configuration
+@ConfigurationProperties(prefix = PropertyNames.NEVEX_INVESTING + TIINGO_PREFIX)
+public class TiingoApiConfiguration {
+
+    static final String TIINGO_PREFIX = ".tiingo";
+
+    @NotBlank
+    private String apiKey;
+    @NotBlank
+    private String host;
+
+    @Bean
+    TiingoApiClient tiingoApiClient() {
+        return new TiingoApiClient(apiKey, host);
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    @Override
+    public String toString() {
+        return "TiingoApiConfiguration{" +
+                "apiKey='" + apiKey + '\'' +
+                ", host='" + host + '\'' +
+                '}';
+    }
+}
