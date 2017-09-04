@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 
 import javax.annotation.PreDestroy;
@@ -30,13 +31,9 @@ public class DataLoaderStarter implements ApplicationListener<ApplicationReadyEv
     }
 
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        Future future = executorService.submit(this::start);
-        try {
-            future.get();
-        } catch (Exception e ) {
-            LOGGER.error("Data loader failed - shutting application down", e);
-            SpringApplication.exit(event.getApplicationContext(), (ExitCodeGenerator) () -> EXIT_CODE_ON_EXCEPTION);
-        }
+        // let's get off the main thread
+        executorService.submit( () -> this.startAllTheWorkers(event.getApplicationContext()));
+        executorService.shutdown();
         LOGGER.info("Data loader manager has finished invoking all [{}] data workers", workers.size());
     }
 
@@ -45,9 +42,14 @@ public class DataLoaderStarter implements ApplicationListener<ApplicationReadyEv
         executorService.shutdownNow();
     }
 
-    private void start() {
-        for ( DataLoaderWorker dw : workers ) {
-            dw.start();
+    private void startAllTheWorkers(ApplicationContext applicationContext) {
+        try {
+            for ( DataLoaderWorker dw : workers ) {
+                dw.start();
+            }
+        } catch (Exception e ) {
+            LOGGER.error("Data loader failed - shutting application down", e);
+            SpringApplication.exit(applicationContext, (ExitCodeGenerator) () -> EXIT_CODE_ON_EXCEPTION);
         }
     }
 

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -57,7 +58,8 @@ public class DataLoaderAdminEndpoint {
         ResponseEntity<?> forbiddenResponse = checkHeaderKey(adminHeaderKey);
         if ( forbiddenResponse != null ) { return forbiddenResponse; }
 
-        Pageable pageable = new PageRequest(pageNumber, DEFAULT_PAGE_SIZE);
+        Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "id")); // get the latest first
+        Pageable pageable = new PageRequest(pageNumber, DEFAULT_PAGE_SIZE, sort);
         Page<DataLoaderRunEntity> pageData = dataLoaderRunsRepository.findAll(pageable);
         if ( pageData == null || !pageData.hasContent() ) {
             return ResponseEntity.ok(new PageableDataDto<>()); // empty response
@@ -73,7 +75,8 @@ public class DataLoaderAdminEndpoint {
         ResponseEntity<?> forbiddenResponse = checkHeaderKey(adminHeaderKey);
         if ( forbiddenResponse != null ) { return forbiddenResponse; }
 
-        Pageable pageable = new PageRequest(pageNumber, DEFAULT_PAGE_SIZE);
+        Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "id")); // get the latest first
+        Pageable pageable = new PageRequest(pageNumber, DEFAULT_PAGE_SIZE, sort);
         Page<DataLoaderErrorEntity> pageData = dataLoaderErrorsRepository.findAll(pageable);
         if ( pageData == null || !pageData.hasContent() ) {
             return ResponseEntity.ok(new PageableDataDto<>()); // empty response

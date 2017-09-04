@@ -37,11 +37,15 @@ nevex-investing:
   edgar-ticker-to-cik-loader:
     enabled: false
     only-lookup-missing-ticker-ciks: true # For any ciks that are missing, only get those (not values in the ticker_to_cik table)
+  ticker-fundamentals-loader:
+    enabled: true
+    host: api.usfundamentals.com
+    api-key:
   tiingo:
     host: https://api.tiingo.com
   testing:
     enabled: false
-    allowed-symbols: LC, NVDA, FB, APPL, NAKD, GOOGL, MSFT
+    allowed-symbols: LC, NVDA, FB, APPL, NAKD, GOOGL, MSFT, AMD
 
 # Tiingo API: https://api.tiingo.com/
 

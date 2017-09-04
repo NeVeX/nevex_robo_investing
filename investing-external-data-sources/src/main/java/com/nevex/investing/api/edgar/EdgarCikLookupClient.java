@@ -47,7 +47,7 @@ public class EdgarCikLookupClient {
             if ( response.getStatusCode().is2xxSuccessful()) {
                 return response.getBody();
             }
-            return null;
+            throw new ApiException("Response was not successful from the cik search. Api used ["+urlToInvoke+"]");
         } catch (RestClientException restClientEx ) {
             throw new ApiException("Could not perform cik search ["+urlToInvoke+"]", restClientEx);
         }

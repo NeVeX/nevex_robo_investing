@@ -82,7 +82,7 @@ public class TiingoApiClient {
                 }
                 return objectMapper.readValue(responseBody.byteStream(), new TypeReference<Set<TiingoPriceDto>>(){});
             }
-            return new HashSet<>();
+            throw new ApiException("Response was not successful from the Tiingo API. Request ["+request+"]");
         } catch (IOException ioException ) {
             throw new ApiException("Could not get the current price using the Tiingo API for url ["+request.url()+"]", ioException);
         }
