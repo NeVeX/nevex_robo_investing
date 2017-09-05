@@ -6,14 +6,14 @@ import java.time.LocalDate;
 /**
  * Created by Mark Cunningham on 9/4/2017.
  */
-public class UsFundamentalIndicator implements Comparable<UsFundamentalIndicator> {
+public class UsFundamentalIndicatorDto implements Comparable<UsFundamentalIndicatorDto> {
 
     private final LocalDate endPeriod;
     private BigDecimal earningsPerShareBasic;
     private Long commonStockSharesOutstanding;
     private Long stockHoldersEquity;
 
-    public UsFundamentalIndicator(LocalDate endPeriod) {
+    public UsFundamentalIndicatorDto(LocalDate endPeriod) {
         this.endPeriod = endPeriod;
     }
 
@@ -46,7 +46,7 @@ public class UsFundamentalIndicator implements Comparable<UsFundamentalIndicator
     }
 
     @Override
-    public int compareTo(UsFundamentalIndicator that) {
+    public int compareTo(UsFundamentalIndicatorDto that) {
         return this.endPeriod.compareTo(that.endPeriod);
 //        return -result; // reverse the order
     }

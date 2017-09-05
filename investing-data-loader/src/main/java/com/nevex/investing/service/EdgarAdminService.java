@@ -2,6 +2,7 @@ package com.nevex.investing.service;
 
 import com.nevex.investing.database.TickerToCikRepository;
 import com.nevex.investing.database.entity.TickerToCikEntity;
+import com.nevex.investing.util.CikUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +27,10 @@ public class EdgarAdminService {
     }
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public Optional<String> getCikForTicker(int tickerId) {
+    public Optional<Long> getCikForTicker(int tickerId) {
         Optional<TickerToCikEntity> tickerToCikEntityOpt = tickerToCikRepository.findByTickerId(tickerId);
         if ( tickerToCikEntityOpt.isPresent()) {
-            return Optional.ofNullable(tickerToCikEntityOpt.get().getCik());
+            return CikUtils.parseCik(tickerToCikEntityOpt.get().getCik());
         }
         return Optional.empty();
     }

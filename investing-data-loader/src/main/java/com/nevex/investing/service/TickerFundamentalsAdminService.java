@@ -1,16 +1,22 @@
 package com.nevex.investing.service;
 
-import com.nevex.investing.api.usfundamentals.model.UsFundamentalIndicator;
-import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponse;
+import com.nevex.investing.api.usfundamentals.model.UsFundamentalIndicatorDto;
+import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponseDto;
 import com.nevex.investing.database.TickerFundamentalsRepository;
 import com.nevex.investing.database.TickerFundamentalsSyncRepository;
 import com.nevex.investing.database.entity.TickerFundamentalsEntity;
 import com.nevex.investing.database.entity.TickerFundamentalsSyncEntity;
+import com.nevex.investing.service.model.TickerFundamentalsSync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -32,31 +38,54 @@ public class TickerFundamentalsAdminService {
         this.tickerFundamentalsSyncRepository = tickerFundamentalsSyncRepository;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveHistoricalFundamentals(int tickerId, UsFundamentalsResponse usFundamentalsResponse) throws ServiceException {
+    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public Optional<TickerFundamentalsEntity> getFundamentals(int tickerId, LocalDate localDate, char periodType) {
+        return tickerFundamentalsRepository.findByTickerIdAndPeriodEndAndPeriodType(tickerId, localDate, periodType);
+    }
 
-        Set<TickerFundamentalsEntity> quarterlyEntities = parseFundamentalsIntoEntities(tickerId, 'q', usFundamentalsResponse.getQuarterlyIndicators());
-        Set<TickerFundamentalsEntity> yearlyEntities = parseFundamentalsIntoEntities(tickerId, 'y', usFundamentalsResponse.getYearlyIndicators());
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveHistoricalFundamentals(int tickerId, UsFundamentalsResponseDto usFundamentalsResponseDto) throws ServiceException {
+
+        Set<TickerFundamentalsEntity> quarterlyEntities = parseFundamentalsIntoEntities(tickerId, 'q', usFundamentalsResponseDto.getQuarterlyIndicators());
+        Set<TickerFundamentalsEntity> yearlyEntities = parseFundamentalsIntoEntities(tickerId, 'y', usFundamentalsResponseDto.getYearlyIndicators());
 
         saveEntities(quarterlyEntities);
         saveEntities(yearlyEntities);
-
-        saveInitialSyncData(tickerId, usFundamentalsResponse.getDownloadStartTimeNanoseconds());
     }
 
-    private void saveInitialSyncData(int tickerId, long downloadStartTimeNanoseconds) throws ServiceException {
-        TickerFundamentalsSyncEntity syncEntity = new TickerFundamentalsSyncEntity(tickerId, downloadStartTimeNanoseconds);
-        TickerFundamentalsSyncEntity savedEntity;
+//    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+//    public Optional<TickerFundamentalsSync> getFundamentalsSyncForTickerId(int tickerId) {
+//        Optional<TickerFundamentalsSyncEntity> foundEntity = tickerFundamentalsSyncRepository.findByTickerId(tickerId);
+//        if ( !foundEntity.isPresent()) {
+//            return Optional.empty();
+//        }
+//        TickerFundamentalsSyncEntity entity = foundEntity.get();
+//        TickerFundamentalsSync syncData = new TickerFundamentalsSync(entity.getId(), entity.getTickerId(), entity.getInitialDownloadNano(), entity.getLastUpdateId());
+//        return Optional.of(syncData);
+//    }
+
+    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public Optional<Long> getLatestNanoTime() {
+        PageRequest earliestNanoRequest = new PageRequest(0, 1, new Sort(Sort.Direction.DESC, "id"));
+
+        Page<TickerFundamentalsSyncEntity> page = tickerFundamentalsSyncRepository.findAll(earliestNanoRequest);
+        if ( page != null && page.hasContent()) {
+            Optional<TickerFundamentalsSyncEntity> firstEntity = page.getContent().stream().findFirst();
+            if ( firstEntity.isPresent()) {
+                return Optional.of(firstEntity.get().getNanoSeconds());
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveSync(long nanoSeconds) throws ServiceException {
+        TickerFundamentalsSyncEntity syncEntity = new TickerFundamentalsSyncEntity(nanoSeconds);
         try {
-            savedEntity = tickerFundamentalsSyncRepository.save(syncEntity);
+            tickerFundamentalsSyncRepository.save(syncEntity);
         } catch (Exception e) {
             throw new ServiceException("Could not save sync entity for fundamentals ["+syncEntity+"]", e);
         }
-
-        if ( savedEntity == null) {
-            throw new ServiceException("The sync entity did not get saved into the database ["+syncEntity+"]");
-        }
-
     }
 
     private void saveEntities(Set<TickerFundamentalsEntity> entities) throws ServiceException {
@@ -93,7 +122,7 @@ public class TickerFundamentalsAdminService {
         }
     }
 
-    private TreeSet<TickerFundamentalsEntity> parseFundamentalsIntoEntities(int tickerId, char periodType, Set<UsFundamentalIndicator> indicators) {
+    private TreeSet<TickerFundamentalsEntity> parseFundamentalsIntoEntities(int tickerId, char periodType, Set<UsFundamentalIndicatorDto> indicators) {
         return indicators.stream()
                 .map( ind -> new TickerFundamentalsEntity(
                     tickerId, ind.getEndPeriod(), periodType, ind.getEarningsPerShareBasic(),
@@ -102,4 +131,13 @@ public class TickerFundamentalsAdminService {
                 .collect(Collectors.toCollection(TreeSet<TickerFundamentalsEntity>::new));
     }
 
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    public void updateFundamentalsSync(TickerFundamentalsSync tickerFundamentalsSync) throws ServiceException {
+//        TickerFundamentalsSyncEntity syncEntity = new TickerFundamentalsSyncEntity(tickerFundamentalsSync);
+//        try {
+//            tickerFundamentalsSyncRepository.save(syncEntity);
+//        } catch (Exception e) {
+//            throw new ServiceException("Could not save updated sync entity ["+syncEntity+"]", e);
+//        }
+//    }
 }

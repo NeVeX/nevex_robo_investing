@@ -15,8 +15,6 @@ public class DataLoaderServicesConfiguration {
     @Autowired
     private TickerFundamentalsRepository tickerFundamentalsRepository;
     @Autowired
-    private TickerFundamentalsSyncRepository tickerFundamentalsSyncRepository;
-    @Autowired
     private TickersRepository tickersRepository;
     @Autowired
     private StockPricesRepository stockPricesRepository;
@@ -42,7 +40,7 @@ public class DataLoaderServicesConfiguration {
 
     @Bean
     TickerFundamentalsAdminService tickerFundamentalsService() {
-        return new TickerFundamentalsAdminService(tickerFundamentalsRepository, tickerFundamentalsSyncRepository);
+        return new TickerFundamentalsAdminService(tickerFundamentalsRepository);
     }
 
     @Bean

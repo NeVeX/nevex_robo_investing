@@ -3,13 +3,14 @@ package com.nevex.investing.dataloader.loader;
 import com.nevex.investing.TestingControlUtil;
 import com.nevex.investing.api.ApiException;
 import com.nevex.investing.api.usfundamentals.UsFundamentalsApiClient;
-import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponse;
+import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponseDto;
 import com.nevex.investing.database.TickerToCikRepository;
 import com.nevex.investing.database.entity.TickerToCikEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.service.ServiceException;
 import com.nevex.investing.service.TickerFundamentalsAdminService;
 import com.nevex.investing.service.TickerService;
+import com.nevex.investing.util.CikUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
@@ -25,6 +26,7 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderWorker {
     private final TickerToCikRepository tickerToCikRepository;
     private final TickerService tickerService;
     private final TickerFundamentalsAdminService tickerFundamentalsAdminService;
+    private final ThreadLocal<Long> threadLocalNanoSecondsStart = new ThreadLocal<>();
 
     public TickerHistoricalFundamentalsLoader(DataLoaderService dataLoaderService,
                                               TickerToCikRepository tickerToCikRepository,
@@ -54,7 +56,15 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderWorker {
 
     @Override
     DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
+        long nanoSeconds = System.nanoTime();
         int amountProcessed = super.processAllPagesInIterable(tickerToCikRepository::findAll, this::processCik, 500);
+
+        try {
+            tickerFundamentalsAdminService.saveSync(nanoSeconds);
+        } catch (Exception e) {
+            saveExceptionToDatabase("Could not save nanoSeconds time ["+nanoSeconds+"] into the fundamentals sync table. Reason: "+e.getMessage());
+        }
+
         return new DataLoaderWorkerResult(amountProcessed);
     }
 
@@ -69,13 +79,14 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderWorker {
             return; // testing control in place - we cannot proceed
         }
 
-        Long cik = parseRawCik(tickerToCikEntity.getCik());
-        if ( cik == null ) {
+        Optional<Long> parsedCik = CikUtils.parseCik(tickerToCikEntity.getCik());
+        if ( !parsedCik.isPresent() ) {
+            saveExceptionToDatabase("Could not parse raw cik ["+tickerToCikEntity.getCik()+"] into a long");
             return;
         }
-
+        long cik = parsedCik.get();
         try {
-            UsFundamentalsResponse fundamentalsResponse = apiClient.getAllFundamentalsForCik(cik);
+            UsFundamentalsResponseDto fundamentalsResponse = apiClient.getAllFundamentalsForCik(cik);
             if ( fundamentalsResponse != null ) {
                 tickerFundamentalsAdminService.saveHistoricalFundamentals(tickerToCikEntity.getTickerId(), fundamentalsResponse);
             } else {
@@ -89,13 +100,4 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderWorker {
 
     }
 
-    private Long parseRawCik(String cik) {
-        String strippedCik = StringUtils.stripStart(cik, "0");
-        try {
-            return Long.valueOf(strippedCik);
-        } catch (Exception e) {
-            saveExceptionToDatabase("Could not convert raw cik ["+cik+"] into a long number. Reason: "+e.getMessage());
-        }
-        return null;
-    }
 }

@@ -1,5 +1,6 @@
 package com.nevex.investing.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nevex.investing.PropertyNames;
 import com.nevex.investing.api.usfundamentals.UsFundamentalsApiClient;
 import com.nevex.investing.config.property.TickerFundamentalsLoaderProperties;
@@ -29,6 +30,8 @@ public class DataLoaderApiConfiguration {
     private DataLoaderErrorsRepository dataLoaderErrorsRepository;
     @Autowired
     private TickerFundamentalsLoaderProperties tickerFundamentalsLoaderProperties;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Bean
     DataLoaderAdminEndpoint dataLoaderAdminEndpoint() {
@@ -43,7 +46,8 @@ public class DataLoaderApiConfiguration {
     UsFundamentalsApiClient usFundamentalsApiClient() {
         return new UsFundamentalsApiClient(
                 tickerFundamentalsLoaderProperties.getHost(),
-                tickerFundamentalsLoaderProperties.getApiKey()
+                tickerFundamentalsLoaderProperties.getApiKey(),
+                objectMapper
         );
     }
 
