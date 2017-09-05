@@ -41,9 +41,9 @@ nevex-investing:
     host: api.usfundamentals.com
     api-key:
   ticker-historical-fundamentals-loader:
-    enabled: false
-  ticker-fundamentals-snyc-loader:
     enabled: true
+#  ticker-fundamentals-snyc-loader:
+#    enabled: true
   tiingo:
     host: https://api.tiingo.com
     api-key:

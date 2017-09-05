@@ -73,7 +73,6 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
     @Scheduled(cron = "0 0 20 * * MON-FRI", zone = "America/Los_Angeles")
 //    @Scheduled(cron = "*/10 * * * * *", zone = "America/Los_Angeles") // Every 10 seconds
     void onScheduleStart() {
-        LOGGER.info("[{}] has started!", getName());
         doStart(this::doScheduleWork);
     }
 

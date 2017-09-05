@@ -12,9 +12,36 @@ public class UsFundamentalIndicatorDto implements Comparable<UsFundamentalIndica
     private BigDecimal earningsPerShareBasic;
     private Long commonStockSharesOutstanding;
     private Long stockHoldersEquity;
+    private Long assets;
+    private Long liabilities;
+    private Long cashAndCashEquivalentsAtCarryingValue;
 
     public UsFundamentalIndicatorDto(LocalDate endPeriod) {
         this.endPeriod = endPeriod;
+    }
+
+    public Long getAssets() {
+        return assets;
+    }
+
+    public void setAssets(Long assets) {
+        this.assets = assets;
+    }
+
+    public Long getLiabilities() {
+        return liabilities;
+    }
+
+    public void setLiabilities(Long liabilities) {
+        this.liabilities = liabilities;
+    }
+
+    public Long getCashAndCashEquivalentsAtCarryingValue() {
+        return cashAndCashEquivalentsAtCarryingValue;
+    }
+
+    public void setCashAndCashEquivalentsAtCarryingValue(Long cashAndCashEquivalentsAtCarryingValue) {
+        this.cashAndCashEquivalentsAtCarryingValue = cashAndCashEquivalentsAtCarryingValue;
     }
 
     public BigDecimal getEarningsPerShareBasic() {

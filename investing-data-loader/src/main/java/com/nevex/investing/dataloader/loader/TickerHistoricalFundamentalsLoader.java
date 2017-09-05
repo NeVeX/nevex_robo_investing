@@ -12,8 +12,13 @@ import com.nevex.investing.service.TickerFundamentalsAdminService;
 import com.nevex.investing.service.TickerService;
 import com.nevex.investing.util.CikUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.nevex.investing.dataloader.loader.DataLoaderOrder.TICKER_HISTORICAL_FUNDAMENTALS_LOADER;
 
@@ -22,11 +27,12 @@ import static com.nevex.investing.dataloader.loader.DataLoaderOrder.TICKER_HISTO
  */
 public class TickerHistoricalFundamentalsLoader extends DataLoaderWorker {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(TickerHistoricalFundamentalsLoader.class);
     private final UsFundamentalsApiClient apiClient;
     private final TickerToCikRepository tickerToCikRepository;
     private final TickerService tickerService;
     private final TickerFundamentalsAdminService tickerFundamentalsAdminService;
-    private final ThreadLocal<Long> threadLocalNanoSecondsStart = new ThreadLocal<>();
+    private final AtomicBoolean isWorkerIsRunning = new AtomicBoolean(false);
 
     public TickerHistoricalFundamentalsLoader(DataLoaderService dataLoaderService,
                                               TickerToCikRepository tickerToCikRepository,
@@ -54,17 +60,25 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderWorker {
         return "ticker-historical-fundamentals-loader";
     }
 
+    @Scheduled(initialDelay = 43200000L, fixedDelay = 43200000L) // 12 hours
+    void onScheduleStart() {
+        doStart(this::doScheduleWork);
+    }
+
+    private DataLoaderWorkerResult doScheduleWork() throws DataLoaderWorkerException {
+        return doWork();
+    }
+
     @Override
     DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
-        long nanoSeconds = System.nanoTime();
-        int amountProcessed = super.processAllPagesInIterable(tickerToCikRepository::findAll, this::processCik, 500);
-
-        try {
-            tickerFundamentalsAdminService.saveSync(nanoSeconds);
-        } catch (Exception e) {
-            saveExceptionToDatabase("Could not save nanoSeconds time ["+nanoSeconds+"] into the fundamentals sync table. Reason: "+e.getMessage());
+        boolean workerIsRunningAlready = this.isWorkerIsRunning.getAndSet(true);
+        if ( workerIsRunningAlready ) {
+            LOGGER.warn("There is already a worker running for job [{}] - will not start this worker", getName());
+            return DataLoaderWorkerResult.nothingDone();
         }
 
+        int amountProcessed = super.processAllPagesInIterable(tickerToCikRepository::findAll, this::processCik, 500);
+        isWorkerIsRunning.set(false);
         return new DataLoaderWorkerResult(amountProcessed);
     }
 

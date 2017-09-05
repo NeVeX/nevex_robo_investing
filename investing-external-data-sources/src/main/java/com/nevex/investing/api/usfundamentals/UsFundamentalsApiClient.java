@@ -36,6 +36,9 @@ public class UsFundamentalsApiClient {
     private final static String EARNINGS_PER_SHARE_BASIC = "EarningsPerShareBasic";
     private final static String COMMON_STOCK_SHARES_OUTSTANDING = "CommonStockSharesOutstanding";
     private final static String STOCK_HOLDERS_EQUITY = "StockholdersEquity";
+    private final static String ASSETS = "Assets";
+    private final static String LIABILITIES = "Liabilities";
+    private final static String CASH_AND_CASH_EQUIVALENTS_AT_CARRYING_VALUE = "CashAndCashEquivalentsAtCarryingValue";
     private final OkHttpClient httpClient = new OkHttpClient();
     private final ObjectMapper objectMapper;
     private final String host;
@@ -54,6 +57,9 @@ public class UsFundamentalsApiClient {
         indicatorsToGet.add(EARNINGS_PER_SHARE_BASIC);
         indicatorsToGet.add(COMMON_STOCK_SHARES_OUTSTANDING);
         indicatorsToGet.add(STOCK_HOLDERS_EQUITY);
+        indicatorsToGet.add(ASSETS);
+        indicatorsToGet.add(LIABILITIES);
+        indicatorsToGet.add(CASH_AND_CASH_EQUIVALENTS_AT_CARRYING_VALUE);
         this.indicatorsToGet = StringUtils.join(indicatorsToGet, ",");
     }
 
@@ -195,12 +201,19 @@ public class UsFundamentalsApiClient {
                 String indicatorName = csvRecord.get(1);
                 final ParseDateColumnIndicatorValue mapperToInvoke;
 
+                // TODO: replace with a map!
                 if ( StringUtils.equalsIgnoreCase(indicatorName, EARNINGS_PER_SHARE_BASIC)) {
                     mapperToInvoke = this::setEarningsPerShareBasic;
                 } else if (StringUtils.equalsIgnoreCase(indicatorName, COMMON_STOCK_SHARES_OUTSTANDING)) {
                     mapperToInvoke = this::setCommonStockSharesOutstanding;
                 } else if (StringUtils.equalsIgnoreCase(indicatorName, STOCK_HOLDERS_EQUITY)) {
                     mapperToInvoke = this::setStockHoldersEquity;
+                } else if (StringUtils.equalsIgnoreCase(indicatorName, ASSETS)) {
+                    mapperToInvoke = this::setAssets;
+                } else if (StringUtils.equalsIgnoreCase(indicatorName, LIABILITIES)) {
+                    mapperToInvoke = this::setLiabilities;
+                } else if (StringUtils.equalsIgnoreCase(indicatorName, CASH_AND_CASH_EQUIVALENTS_AT_CARRYING_VALUE)) {
+                    mapperToInvoke = this::setCashAndCashEquivalentsAtCarryingValue;
                 } else {
                     continue; // no mapper for this indicator, so we don't do anything
                 }
@@ -230,6 +243,19 @@ public class UsFundamentalsApiClient {
     private void setStockHoldersEquity(String value, UsFundamentalIndicatorDto indicator) {
         indicator.setStockHoldersEquity(Long.valueOf(value));
     }
+
+    private void setAssets(String value, UsFundamentalIndicatorDto indicator) {
+        indicator.setAssets(Long.valueOf(value));
+    }
+
+    private void setCashAndCashEquivalentsAtCarryingValue(String value, UsFundamentalIndicatorDto indicator) {
+        indicator.setCashAndCashEquivalentsAtCarryingValue(Long.valueOf(value));
+    }
+
+    private void setLiabilities(String value, UsFundamentalIndicatorDto indicator) {
+        indicator.setLiabilities(Long.valueOf(value));
+    }
+
 
     private String getFundamentalsForRequest(Request request) throws ApiException {
         try(Response response = httpClient.newCall(request).execute()) {

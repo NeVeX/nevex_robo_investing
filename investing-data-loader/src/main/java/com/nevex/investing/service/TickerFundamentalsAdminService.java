@@ -3,9 +3,7 @@ package com.nevex.investing.service;
 import com.nevex.investing.api.usfundamentals.model.UsFundamentalIndicatorDto;
 import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponseDto;
 import com.nevex.investing.database.TickerFundamentalsRepository;
-import com.nevex.investing.database.TickerFundamentalsSyncRepository;
 import com.nevex.investing.database.entity.TickerFundamentalsEntity;
-import com.nevex.investing.database.entity.TickerFundamentalsSyncEntity;
 import com.nevex.investing.service.model.TickerFundamentalsSync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,18 +27,10 @@ public class TickerFundamentalsAdminService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TickerFundamentalsAdminService.class);
     private final TickerFundamentalsRepository tickerFundamentalsRepository;
-    private final TickerFundamentalsSyncRepository tickerFundamentalsSyncRepository;
 
-    public TickerFundamentalsAdminService(TickerFundamentalsRepository tickerFundamentalsRepository, TickerFundamentalsSyncRepository tickerFundamentalsSyncRepository) {
+    public TickerFundamentalsAdminService(TickerFundamentalsRepository tickerFundamentalsRepository) {
         if ( tickerFundamentalsRepository == null ) { throw new IllegalArgumentException("Provided tickerFundamentalsRepository is null"); }
-        if ( tickerFundamentalsSyncRepository == null ) { throw new IllegalArgumentException("Provided tickerFundamentalsSyncRepository is null"); }
         this.tickerFundamentalsRepository = tickerFundamentalsRepository;
-        this.tickerFundamentalsSyncRepository = tickerFundamentalsSyncRepository;
-    }
-
-    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public Optional<TickerFundamentalsEntity> getFundamentals(int tickerId, LocalDate localDate, char periodType) {
-        return tickerFundamentalsRepository.findByTickerIdAndPeriodEndAndPeriodType(tickerId, localDate, periodType);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -53,41 +43,6 @@ public class TickerFundamentalsAdminService {
         saveEntities(yearlyEntities);
     }
 
-//    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-//    public Optional<TickerFundamentalsSync> getFundamentalsSyncForTickerId(int tickerId) {
-//        Optional<TickerFundamentalsSyncEntity> foundEntity = tickerFundamentalsSyncRepository.findByTickerId(tickerId);
-//        if ( !foundEntity.isPresent()) {
-//            return Optional.empty();
-//        }
-//        TickerFundamentalsSyncEntity entity = foundEntity.get();
-//        TickerFundamentalsSync syncData = new TickerFundamentalsSync(entity.getId(), entity.getTickerId(), entity.getInitialDownloadNano(), entity.getLastUpdateId());
-//        return Optional.of(syncData);
-//    }
-
-    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public Optional<Long> getLatestNanoTime() {
-        PageRequest earliestNanoRequest = new PageRequest(0, 1, new Sort(Sort.Direction.DESC, "id"));
-
-        Page<TickerFundamentalsSyncEntity> page = tickerFundamentalsSyncRepository.findAll(earliestNanoRequest);
-        if ( page != null && page.hasContent()) {
-            Optional<TickerFundamentalsSyncEntity> firstEntity = page.getContent().stream().findFirst();
-            if ( firstEntity.isPresent()) {
-                return Optional.of(firstEntity.get().getNanoSeconds());
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveSync(long nanoSeconds) throws ServiceException {
-        TickerFundamentalsSyncEntity syncEntity = new TickerFundamentalsSyncEntity(nanoSeconds);
-        try {
-            tickerFundamentalsSyncRepository.save(syncEntity);
-        } catch (Exception e) {
-            throw new ServiceException("Could not save sync entity for fundamentals ["+syncEntity+"]", e);
-        }
-    }
-
     private void saveEntities(Set<TickerFundamentalsEntity> entities) throws ServiceException {
         for ( TickerFundamentalsEntity entity : entities ) {
             saveEntity(entity);
@@ -97,7 +52,7 @@ public class TickerFundamentalsAdminService {
     private void saveEntity(TickerFundamentalsEntity tickerFundamentalsEntity) throws ServiceException {
         // check if it already exists
         Optional<TickerFundamentalsEntity> existingEntityOpt = tickerFundamentalsRepository.findByTickerIdAndPeriodEndAndPeriodType(
-                tickerFundamentalsEntity.getId(), tickerFundamentalsEntity.getPeriodEnd(), tickerFundamentalsEntity.getPeriodType());
+                tickerFundamentalsEntity.getTickerId(), tickerFundamentalsEntity.getPeriodEnd(), tickerFundamentalsEntity.getPeriodType());
 
         final TickerFundamentalsEntity entityToSave;
         if ( existingEntityOpt.isPresent()) {
@@ -126,18 +81,9 @@ public class TickerFundamentalsAdminService {
         return indicators.stream()
                 .map( ind -> new TickerFundamentalsEntity(
                     tickerId, ind.getEndPeriod(), periodType, ind.getEarningsPerShareBasic(),
-                        ind.getCommonStockSharesOutstanding(), ind.getStockHoldersEquity()
+                        ind.getCommonStockSharesOutstanding(), ind.getStockHoldersEquity(),
+                        ind.getAssets(), ind.getLiabilities(), ind.getCashAndCashEquivalentsAtCarryingValue()
                 ))
                 .collect(Collectors.toCollection(TreeSet<TickerFundamentalsEntity>::new));
     }
-
-//    @Transactional(propagation = Propagation.REQUIRES_NEW)
-//    public void updateFundamentalsSync(TickerFundamentalsSync tickerFundamentalsSync) throws ServiceException {
-//        TickerFundamentalsSyncEntity syncEntity = new TickerFundamentalsSyncEntity(tickerFundamentalsSync);
-//        try {
-//            tickerFundamentalsSyncRepository.save(syncEntity);
-//        } catch (Exception e) {
-//            throw new ServiceException("Could not save updated sync entity ["+syncEntity+"]", e);
-//        }
-//    }
 }

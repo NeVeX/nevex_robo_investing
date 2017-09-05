@@ -29,22 +29,34 @@ public class TickerFundamentalsEntity implements Comparable<TickerFundamentalsEn
     private Long commonSharesOutstanding;
     @Column(name = "stock_holders_equity")
     private Long stockHoldersEquity;
+    @Column(name = "assets")
+    private Long assets;
+    @Column(name = "liabilities")
+    private Long liabilities;
+    @Column(name = "cash_and_cash_equivalents_at_carrying_value")
+    private Long cashAndCashEquivalentsAtCarryingValue;
 
     public TickerFundamentalsEntity() {  }
 
-    public TickerFundamentalsEntity(int tickerId, LocalDate periodEnd, char periodType, BigDecimal earningsPerShare, Long commonSharesOutstanding, Long stockHoldersEquity) {
+    public TickerFundamentalsEntity(int tickerId, LocalDate periodEnd, char periodType, BigDecimal earningsPerShare, Long commonSharesOutstanding, Long stockHoldersEquity, Long assets, Long liabilities, Long cashAndCashEquivalentsAtCarryingValue) {
         this.tickerId = tickerId;
         this.periodEnd = periodEnd;
         this.periodType = periodType;
         this.earningsPerShare = earningsPerShare;
         this.commonSharesOutstanding = commonSharesOutstanding;
         this.stockHoldersEquity = stockHoldersEquity;
+        this.assets = assets;
+        this.liabilities = liabilities;
+        this.cashAndCashEquivalentsAtCarryingValue = cashAndCashEquivalentsAtCarryingValue;
     }
 
     public void merge(TickerFundamentalsEntity newData) {
         this.earningsPerShare = newData.earningsPerShare;
         this.commonSharesOutstanding = newData.commonSharesOutstanding;
         this.stockHoldersEquity = newData.stockHoldersEquity;
+        this.assets = newData.assets;
+        this.cashAndCashEquivalentsAtCarryingValue = newData.cashAndCashEquivalentsAtCarryingValue;
+        this.liabilities = newData.liabilities;
     }
 
     @Override
@@ -77,6 +89,9 @@ public class TickerFundamentalsEntity implements Comparable<TickerFundamentalsEn
                 ", earningsPerShare=" + earningsPerShare +
                 ", commonSharesOutstanding=" + commonSharesOutstanding +
                 ", stockHoldersEquity=" + stockHoldersEquity +
+                ", assets=" + assets +
+                ", liabilities=" + liabilities +
+                ", cashAndCashEquivalentsAtCarryingValue=" + cashAndCashEquivalentsAtCarryingValue +
                 '}';
     }
 
@@ -136,4 +151,27 @@ public class TickerFundamentalsEntity implements Comparable<TickerFundamentalsEn
         this.stockHoldersEquity = stockHoldersEquity;
     }
 
+    public Long getAssets() {
+        return assets;
+    }
+
+    public void setAssets(Long assets) {
+        this.assets = assets;
+    }
+
+    public Long getLiabilities() {
+        return liabilities;
+    }
+
+    public void setLiabilities(Long liabilities) {
+        this.liabilities = liabilities;
+    }
+
+    public Long getCashAndCashEquivalentsAtCarryingValue() {
+        return cashAndCashEquivalentsAtCarryingValue;
+    }
+
+    public void setCashAndCashEquivalentsAtCarryingValue(Long cashAndCashEquivalentsAtCarryingValue) {
+        this.cashAndCashEquivalentsAtCarryingValue = cashAndCashEquivalentsAtCarryingValue;
+    }
 }
