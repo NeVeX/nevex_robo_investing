@@ -1,15 +1,10 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.database.*;
-import com.nevex.investing.service.StockPriceAdminService;
-import com.nevex.investing.service.TickerAdminService;
-import com.nevex.investing.service.TickerFundamentalsService;
-import com.nevex.investing.service.TickerService;
+import com.nevex.investing.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.persistence.Basic;
 
 /**
  * Created by Mark Cunningham on 9/4/2017.
@@ -29,6 +24,11 @@ public class DataLoaderServicesConfiguration {
     private TickerService tickerService;
     @Autowired
     private StockPricesHistoricalRepository stockPricesHistoricalRepository;
+    @Autowired
+    private TickerToCikRepository tickerToCikRepository;
+    @Autowired
+    private StockExchangesRepository stockExchangesRepository;
+
 
     @Bean
     StockPriceAdminService stockPriceAdminService() {
@@ -41,8 +41,18 @@ public class DataLoaderServicesConfiguration {
     }
 
     @Bean
-    TickerFundamentalsService tickerFundamentalsService() {
-        return new TickerFundamentalsService(tickerFundamentalsRepository, tickerFundamentalsSyncRepository);
+    TickerFundamentalsAdminService tickerFundamentalsService() {
+        return new TickerFundamentalsAdminService(tickerFundamentalsRepository, tickerFundamentalsSyncRepository);
+    }
+
+    @Bean
+    EdgarAdminService edgarAdminService() {
+        return new EdgarAdminService(tickerToCikRepository);
+    }
+
+    @Bean
+    StockExchangeAdminService stockExchangeAdminService() {
+        return new StockExchangeAdminService(stockExchangesRepository);
     }
 
 }

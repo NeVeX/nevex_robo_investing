@@ -1,27 +1,24 @@
 package com.nevex.investing.dataloader.loader;
 
-import com.nevex.investing.database.StockExchangesRepository;
-import com.nevex.investing.database.entity.StockExchangeEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
+import com.nevex.investing.service.ServiceException;
+import com.nevex.investing.service.StockExchangeAdminService;
 import com.nevex.investing.service.model.StockExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by Mark Cunningham on 8/10/2017.
  */
 public class ReferenceDataLoader extends DataLoaderWorker {
 
-    // TODO: make this loader accept all reference data points
     private final static Logger LOGGER = LoggerFactory.getLogger(ReferenceDataLoader.class);
-    private final StockExchangesRepository stockExchangesRepository;
+    private final StockExchangeAdminService stockExchangeAdminService;
 
-    public ReferenceDataLoader(StockExchangesRepository stockExchangesRepository, DataLoaderService dataLoaderService) {
+    public ReferenceDataLoader(StockExchangeAdminService stockExchangeAdminService, DataLoaderService dataLoaderService) {
         super(dataLoaderService);
-        if ( stockExchangesRepository == null) { throw new IllegalArgumentException("Provided stockExchangesRepository is null"); }
-        this.stockExchangesRepository = stockExchangesRepository;
+        if ( stockExchangeAdminService == null) { throw new IllegalArgumentException("Provided stockExchangeAdminService is null"); }
+        this.stockExchangeAdminService = stockExchangeAdminService;
     }
 
     @Override
@@ -30,7 +27,6 @@ public class ReferenceDataLoader extends DataLoaderWorker {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
         int totalExchangesAdded = loadStockExchanges();
         return new DataLoaderWorkerResult(totalExchangesAdded);
@@ -39,21 +35,24 @@ public class ReferenceDataLoader extends DataLoaderWorker {
     private int loadStockExchanges() throws DataLoaderWorkerException {
         int stockExchangesAdded = 0;
         for (StockExchange se : StockExchange.values()) {
-            StockExchangeEntity entity = stockExchangesRepository.findOne(se.getId());
-            if ( entity == null ) {
-                // add it
-                StockExchangeEntity newEntity = new StockExchangeEntity();
-                newEntity.setId(se.getId());
-                newEntity.setName(se.name());
-                if ( stockExchangesRepository.save(newEntity) == null) {
-                    throw new DataLoaderWorkerException("Could not save new stock exchange ["+newEntity+"]");
+
+            boolean doesExchangeExist = stockExchangeAdminService.doesExchangeExist(se.getId());
+
+            if ( doesExchangeExist ) {
+                try {
+                    stockExchangeAdminService.addExchange(se.getId(), se.name());
+                } catch (ServiceException serviceEx ) {
+                    // Don't continue...
+                    throw new DataLoaderWorkerException("Could not add exchange ["+se+"] to database", serviceEx);
                 }
                 stockExchangesAdded++;
-            } else {
-                if (entity.getId() != se.getId()) {
-                    throw new DataLoaderWorkerException("DB entity ["+entity+"] does not match code entity id ["+se+"]");
-                }
             }
+            // TODO: Add this check back in....
+//            else {
+//                if (entity.getId() != se.getId()) {
+//                    throw new DataLoaderWorkerException("DB entity ["+entity+"] does not match code entity id ["+se+"]");
+//                }
+//            }
         }
         return stockExchangesAdded;
     }

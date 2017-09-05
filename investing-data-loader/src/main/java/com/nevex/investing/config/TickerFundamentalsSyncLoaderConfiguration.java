@@ -3,7 +3,7 @@ package com.nevex.investing.config;
 import com.nevex.investing.api.usfundamentals.UsFundamentalsApiClient;
 import com.nevex.investing.database.TickerToCikRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
-import com.nevex.investing.dataloader.loader.TickerHistoricalFundamentalsLoader;
+import com.nevex.investing.dataloader.loader.TickerFundamentalsSyncLoader;
 import com.nevex.investing.service.TickerFundamentalsAdminService;
 import com.nevex.investing.service.TickerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +18,11 @@ import static com.nevex.investing.PropertyNames.NEVEX_INVESTING;
  * Created by Mark Cunningham on 9/4/2017.
  */
 @Configuration
-@ConfigurationProperties(prefix = TickerHistoricalFundamentalsLoaderConfiguration.CONFIGURATION_PREFIX_KEY)
-@ConditionalOnProperty(name = TickerHistoricalFundamentalsLoaderConfiguration.CONFIGURATION_ENABLED_KEY, havingValue = "true")
-public class TickerHistoricalFundamentalsLoaderConfiguration {
+@ConfigurationProperties(prefix = TickerFundamentalsSyncLoaderConfiguration.CONFIGURATION_PREFIX_KEY)
+@ConditionalOnProperty(name = TickerFundamentalsSyncLoaderConfiguration.CONFIGURATION_ENABLED_KEY, havingValue = "true")
+public class TickerFundamentalsSyncLoaderConfiguration {
 
-    static final String CONFIGURATION_PREFIX_KEY = NEVEX_INVESTING + ".ticker-historical-fundamentals-loader";
+    static final String CONFIGURATION_PREFIX_KEY = NEVEX_INVESTING + ".ticker-fundamentals-snyc-loader";
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
     @Autowired
@@ -37,8 +37,7 @@ public class TickerHistoricalFundamentalsLoaderConfiguration {
     private UsFundamentalsApiClient usFundamentalsApiClient;
 
     @Bean
-    TickerHistoricalFundamentalsLoader tickerHistoricalFundamentalsLoader() {
-        return new TickerHistoricalFundamentalsLoader(dataLoaderService, tickerToCikRepository, tickerFundamentalsAdminService,
-                tickerService, usFundamentalsApiClient);
+    TickerFundamentalsSyncLoader tickerFundamentalsSyncLoader() {
+        return new TickerFundamentalsSyncLoader(dataLoaderService);
     }
 }

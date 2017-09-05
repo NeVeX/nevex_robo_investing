@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 /**
  * Created by Mark Cunningham on 9/4/2017.
  */
-public class TickerFundamentalsService {
+public class TickerFundamentalsAdminService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(TickerFundamentalsService.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(TickerFundamentalsAdminService.class);
     private final TickerFundamentalsRepository tickerFundamentalsRepository;
     private final TickerFundamentalsSyncRepository tickerFundamentalsSyncRepository;
 
-    public TickerFundamentalsService(TickerFundamentalsRepository tickerFundamentalsRepository, TickerFundamentalsSyncRepository tickerFundamentalsSyncRepository) {
+    public TickerFundamentalsAdminService(TickerFundamentalsRepository tickerFundamentalsRepository, TickerFundamentalsSyncRepository tickerFundamentalsSyncRepository) {
         if ( tickerFundamentalsRepository == null ) { throw new IllegalArgumentException("Provided tickerFundamentalsRepository is null"); }
         if ( tickerFundamentalsSyncRepository == null ) { throw new IllegalArgumentException("Provided tickerFundamentalsSyncRepository is null"); }
         this.tickerFundamentalsRepository = tickerFundamentalsRepository;

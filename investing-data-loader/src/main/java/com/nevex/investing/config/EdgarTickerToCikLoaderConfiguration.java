@@ -5,6 +5,7 @@ import com.nevex.investing.database.TickerToCikRepository;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.dataloader.loader.EdgarTickerToCIKLoader;
+import com.nevex.investing.service.EdgarAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import static com.nevex.investing.PropertyNames.NEVEX_INVESTING;
 class EdgarTickerToCikLoaderConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EdgarTickerToCikLoaderConfiguration.class);
+
     static final String CONFIGURATION_PREFIX_KEY = NEVEX_INVESTING + ".edgar-ticker-to-cik-loader";
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
@@ -40,10 +42,12 @@ class EdgarTickerToCikLoaderConfiguration {
     private TickerToCikRepository tickerToCikRepository;
     @Autowired
     private DataLoaderService dataLoaderService;
+    @Autowired
+    private EdgarAdminService edgarAdminService;
 
     @Bean
     EdgarTickerToCIKLoader edgarTickerToCIKLoader() {
-        return new EdgarTickerToCIKLoader(dataLoaderService, tickersRepository, edgarCikLookupClient(), tickerToCikRepository, onlyLookupMissingTickerCiks);
+        return new EdgarTickerToCIKLoader(dataLoaderService, tickersRepository, edgarCikLookupClient(), edgarAdminService, onlyLookupMissingTickerCiks);
     }
 
     @Bean

@@ -2,14 +2,14 @@ package com.nevex.investing.dataloader.loader;
 
 import com.nevex.investing.TestingControlUtil;
 import com.nevex.investing.api.ApiException;
+import com.nevex.investing.api.usfundamentals.UsFundamentalsApiClient;
+import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponse;
 import com.nevex.investing.database.TickerToCikRepository;
 import com.nevex.investing.database.entity.TickerToCikEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.service.ServiceException;
-import com.nevex.investing.service.TickerFundamentalsService;
+import com.nevex.investing.service.TickerFundamentalsAdminService;
 import com.nevex.investing.service.TickerService;
-import com.nevex.investing.api.usfundamentals.UsFundamentalsApiClient;
-import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponse;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
@@ -24,22 +24,22 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderWorker {
     private final UsFundamentalsApiClient apiClient;
     private final TickerToCikRepository tickerToCikRepository;
     private final TickerService tickerService;
-    private final TickerFundamentalsService tickerFundamentalsService;
+    private final TickerFundamentalsAdminService tickerFundamentalsAdminService;
 
     public TickerHistoricalFundamentalsLoader(DataLoaderService dataLoaderService,
                                               TickerToCikRepository tickerToCikRepository,
-                                              TickerFundamentalsService tickerFundamentalsService,
+                                              TickerFundamentalsAdminService tickerFundamentalsAdminService,
                                               TickerService tickerService,
                                               UsFundamentalsApiClient apiClient) {
         super(dataLoaderService);
         if ( apiClient == null ) { throw new IllegalArgumentException("Provided apiClient is null"); }
         if ( tickerToCikRepository == null ) { throw new IllegalArgumentException("Provided tickerToCikRepository is null"); }
         if ( tickerService == null ) { throw new IllegalArgumentException("Provided tickerService is null"); }
-        if ( tickerFundamentalsService == null ) { throw new IllegalArgumentException("Provided tickerFundamentalsService is null"); }
+        if ( tickerFundamentalsAdminService == null ) { throw new IllegalArgumentException("Provided tickerFundamentalsAdminService is null"); }
         this.apiClient = apiClient;
         this.tickerToCikRepository = tickerToCikRepository;
         this.tickerService = tickerService;
-        this.tickerFundamentalsService = tickerFundamentalsService;
+        this.tickerFundamentalsAdminService = tickerFundamentalsAdminService;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderWorker {
         try {
             UsFundamentalsResponse fundamentalsResponse = apiClient.getAllFundamentalsForCik(cik);
             if ( fundamentalsResponse != null ) {
-                tickerFundamentalsService.saveHistoricalFundamentals(tickerToCikEntity.getTickerId(), fundamentalsResponse);
+                tickerFundamentalsAdminService.saveHistoricalFundamentals(tickerToCikEntity.getTickerId(), fundamentalsResponse);
             } else {
                 saveExceptionToDatabase("No data was returned from us-fundamentals for ticker ["+symbol+"]");
             }

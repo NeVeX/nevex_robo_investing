@@ -9,6 +9,7 @@ import com.nevex.investing.dataloader.DataLoaderStarter;
 import com.nevex.investing.dataloader.loader.DataLoaderWorker;
 import com.nevex.investing.dataloader.loader.ReferenceDataLoader;
 import com.nevex.investing.dataloader.loader.TickerCacheLoader;
+import com.nevex.investing.service.StockExchangeAdminService;
 import com.nevex.investing.service.TickerAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -38,6 +39,8 @@ public class DataLoaderConfiguration {
     private DataLoaderErrorsRepository dataLoaderErrorsRepository;
     @Autowired
     private TickerAdminService tickerAdminService;
+    @Autowired
+    private StockExchangeAdminService stockExchangeAdminService;
 
     @Valid
     @Min(value = 0, message = "Invalid wait time in ms specified")
@@ -65,7 +68,7 @@ public class DataLoaderConfiguration {
 
     @Bean
     ReferenceDataLoader referenceDataLoader() {
-        return new ReferenceDataLoader(stockExchangesRepository, dataLoaderService());
+        return new ReferenceDataLoader(stockExchangeAdminService, dataLoaderService());
     }
 
     @Bean

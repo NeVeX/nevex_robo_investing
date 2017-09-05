@@ -1,11 +1,9 @@
 package com.nevex.investing.database;
 
-import com.nevex.investing.database.entity.StockPriceHistoricalEntity;
 import com.nevex.investing.database.entity.TickerFundamentalsEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.Optional;
 

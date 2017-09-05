@@ -14,9 +14,6 @@ public class UsFundamentalsApiClientTest {
         String apiKey = "";
         String host = "api.usfundamentals.com";
 
-
-        long nanoTime = System.nanoTime();
-
         UsFundamentalsResponse response = new UsFundamentalsApiClient(host, apiKey).getAllFundamentalsForCik(cik);
 
 //        BigDecimal marketCap = response.getQuarterlyIndicators().

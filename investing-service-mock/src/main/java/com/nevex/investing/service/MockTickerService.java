@@ -8,7 +8,9 @@ import com.nevex.investing.service.model.Ticker;
 import org.springframework.data.domain.PageImpl;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by Mark Cunningham on 8/8/2017.

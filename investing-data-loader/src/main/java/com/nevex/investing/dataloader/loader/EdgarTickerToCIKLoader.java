@@ -2,16 +2,14 @@ package com.nevex.investing.dataloader.loader;
 
 import com.nevex.investing.api.ApiException;
 import com.nevex.investing.api.edgar.EdgarCikLookupClient;
-import com.nevex.investing.database.TickerToCikRepository;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
-import com.nevex.investing.database.entity.TickerToCikEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
-import org.apache.commons.lang3.StringUtils;
+import com.nevex.investing.service.EdgarAdminService;
+import com.nevex.investing.service.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static com.nevex.investing.dataloader.loader.DataLoaderOrder.TICKER_TO_CIK_LOADER;
@@ -26,18 +24,18 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
     private final static Logger LOGGER = LoggerFactory.getLogger(EdgarTickerToCIKLoader.class);
     private final TickersRepository tickersRepository;
     private final EdgarCikLookupClient edgarCikLookupClient;
-    private final TickerToCikRepository tickerToCikRepository;
+    private final EdgarAdminService edgarAdminService;
     private final boolean onlyLookupMissingCiks;
 
     public EdgarTickerToCIKLoader(DataLoaderService dataLoaderService, TickersRepository tickersRepository,
-                                  EdgarCikLookupClient edgarCikLookupClient, TickerToCikRepository tickerToCikRepository, boolean onlyLookupMissingCiks) {
+                                  EdgarCikLookupClient edgarCikLookupClient, EdgarAdminService edgarAdminService, boolean onlyLookupMissingCiks) {
         super(dataLoaderService);
         if ( tickersRepository == null ) { throw new IllegalArgumentException("Provided tickersRepository is null"); }
         if ( edgarCikLookupClient == null ) { throw new IllegalArgumentException("Provided edgarCikLookupClient is null"); }
-        if ( tickerToCikRepository == null ) { throw new IllegalArgumentException("Provided tickerToCikRepository is null"); }
+        if ( edgarAdminService == null ) { throw new IllegalArgumentException("Provided edgarAdminService is null"); }
         this.tickersRepository = tickersRepository;
         this.edgarCikLookupClient = edgarCikLookupClient;
-        this.tickerToCikRepository = tickerToCikRepository;
+        this.edgarAdminService = edgarAdminService;
         this.onlyLookupMissingCiks = onlyLookupMissingCiks;
     }
 
@@ -61,78 +59,52 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
 
         if ( onlyLookupMissingCiks ) {
             // check we don't have this cik already
-            if ( tickerToCikRepository.findByTickerId(tickerEntity.getId()).isPresent()) {
+            if ( edgarAdminService.getCikForTicker(tickerEntity.getId()).isPresent()) {
                 return; // skip this guy, we already have him....
             }
         }
 
-        if ( !getCikForTickerSymbol(tickerEntity)) {
+        Optional<String> cikFound = getCikForTickerSymbol(tickerEntity);
+        if ( !cikFound.isPresent()) {
             // we didn't get a cik for the symbol, so let's try the company name
-            LOGGER.info("Did not find cik for ticker [{}], but will try the company name instead now", tickerEntity.getSymbol());
-            getCikForCompanyName(tickerEntity);
+            LOGGER.info("Did not find CIK for ticker [{}], but will try the company name instead now", tickerEntity.getSymbol());
+            cikFound = getCikForCompanyName(tickerEntity);
+        }
+
+        if ( !cikFound.isPresent()) {
+            // if it's still not found, then let's save it as en exception
+            saveExceptionToDatabase("Could not find CIK for ticker ["+tickerEntity.getSymbol()+"], even after trying both ticker and company name lookups");
+        } else {
+            saveNewCik(tickerEntity, cikFound.get());
         }
     }
 
-    private boolean getCikForCompanyName(TickerEntity tickerEntity) {
-        String companyName = tickerEntity.getName();
+    private void saveNewCik(TickerEntity tickerEntity, String cik) {
         try {
-            Optional<String> cikOptional = edgarCikLookupClient.getCikForCompanyName(companyName);
-            if ( cikOptional.isPresent()) {
-                saveCikForTicker(tickerEntity.getId(), tickerEntity.getSymbol(), cikOptional.get());
-                return true;
-            } else {
-                saveExceptionToDatabase("CIK search returned nothing for company name ["+companyName+"]");
-            }
-        } catch (ApiException apiException) {
-            saveExceptionToDatabase("An error occurred trying to get the CIK for company name ["+companyName+"]. Error: "+apiException.getMessage());
+            edgarAdminService.saveCikForTicker(tickerEntity.getId(), tickerEntity.getSymbol(), cik);
+        } catch (ServiceException serviceEx ) {
+            saveExceptionToDatabase("An error occurred while trying to save cik into the database for ticker ["+tickerEntity.getSymbol()+"]. Reason: "+serviceEx.getMessage());
         }
-        return false;
     }
 
-    private boolean getCikForTickerSymbol(TickerEntity tickerEntity) {
+    private Optional<String> getCikForTickerSymbol(TickerEntity tickerEntity) {
         String ticker = tickerEntity.getSymbol();
         try {
-            Optional<String> cikOptional = edgarCikLookupClient.getCikForTicker(ticker);
-            if ( cikOptional.isPresent()) {
-                saveCikForTicker(tickerEntity.getId(), tickerEntity.getSymbol(), cikOptional.get());
-                return true;
-            } else {
-                saveExceptionToDatabase("CIK search returned nothing for ticker symbol ["+ticker+"]");
-            }
+            return edgarCikLookupClient.getCikForTicker(ticker);
         } catch (ApiException apiException) {
             saveExceptionToDatabase("An error occurred trying to get the CIK for ticker ["+ticker+"]. Error: "+apiException.getMessage());
         }
-        return false;
+        return Optional.empty();
     }
 
-
-    private void saveCikForTicker(int tickerId, String tickerSymbol, String cik) {
-
+    private Optional<String> getCikForCompanyName(TickerEntity tickerEntity) {
+        String companyName = tickerEntity.getName();
         try {
-            TickerToCikEntity entityToSave = new TickerToCikEntity();
-            Optional<TickerToCikEntity> existingEntityOptional = tickerToCikRepository.findByTickerId(tickerId);
-            if ( existingEntityOptional.isPresent()) {
-                TickerToCikEntity existingEntity = existingEntityOptional.get();
-                if ( StringUtils.equalsIgnoreCase(cik, existingEntity.getCik())) {
-                    // no need to save
-                    return;
-                } else {
-                    // they are different - so replace the existing one
-                    LOGGER.info("Replacing existing cik [{}] for ticker [{}] with new cik [{}]", existingEntity.getCik(), tickerSymbol, cik);
-                    entityToSave = existingEntity; // re-save the existing one with the id already set now
-                }
-            }
-
-            entityToSave.setCik(cik);
-            entityToSave.setTickerId(tickerId);
-            entityToSave.setUpdatedTimestamp(OffsetDateTime.now());
-
-            tickerToCikRepository.save(entityToSave);
-            LOGGER.info("Saved cik [{}] for ticker [{}]", cik, tickerSymbol);
-        } catch (Exception e) {
-            saveExceptionToDatabase("Could not save cik ["+cik+"] for ticker ["+tickerSymbol+"]. Reason: "+e.getMessage());
-            LOGGER.error("Could not save cik [{}] for ticker [{}]", cik, tickerSymbol, e);
+            return edgarCikLookupClient.getCikForCompanyName(companyName);
+        } catch (ApiException apiException) {
+            saveExceptionToDatabase("An error occurred trying to get the CIK for company name ["+companyName+"]. Error: "+apiException.getMessage());
         }
+        return Optional.empty();
     }
 
 }

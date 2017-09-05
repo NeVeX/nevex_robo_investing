@@ -1,6 +1,7 @@
 package com.nevex.investing.api.usfundamentals.model;
 
-import java.util.*;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Created by Mark Cunningham on 9/4/2017.
