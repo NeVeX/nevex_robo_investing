@@ -51,7 +51,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     }
 
     @Override
-    String getName() {
+    public String getName() {
         return "ticker-symbol-loader";
     }
 
@@ -63,7 +63,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
     }
 
     @Override
-    int getOrderNumber() {
+    public int getOrderNumber() {
         return DataLoaderOrder.TICKER_SYMBOL_LOADER;
     }
 

@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Mark Cunningham on 8/9/2017.
@@ -43,6 +43,9 @@ public class DataLoaderStarter implements ApplicationListener<ApplicationReadyEv
     }
 
     private void startAllTheWorkers(ApplicationContext applicationContext) {
+
+        logInfoAboutAllWorkers();
+
         try {
             for ( DataLoaderWorker dw : workers ) {
                 dw.start();
@@ -50,6 +53,24 @@ public class DataLoaderStarter implements ApplicationListener<ApplicationReadyEv
         } catch (Exception e ) {
             LOGGER.error("Data loader failed - shutting application down", e);
             SpringApplication.exit(applicationContext, (ExitCodeGenerator) () -> EXIT_CODE_ON_EXCEPTION);
+        }
+    }
+
+    /**
+     * Give a heads up about the workers that will be invoked
+     */
+    private void logInfoAboutAllWorkers() {
+
+        StringBuilder sb = new StringBuilder("\n\n\nThe following data workers will be invoked:\n");
+        for( DataLoaderWorker dw : workers ) {
+            sb.append("    ").append(dw.getOrderNumber()).append(") ").append(dw.getName()).append("\n");
+        }
+        int secondsToWait = 10;
+        LOGGER.info(sb.append("\nThe workers will be invoked in the above order, starting in [").append(secondsToWait).append("] seconds...\n\n").toString());
+        try {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(secondsToWait));
+        } catch (Exception e ) {
+            // who cares...
         }
     }
 

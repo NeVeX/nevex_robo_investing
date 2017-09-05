@@ -48,12 +48,12 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
     }
 
     @Override
-    int getOrderNumber() {
+    public int getOrderNumber() {
         return DataLoaderOrder.STOCK_PRICE_CURRENT_LOADER;
     }
 
     @Override
-    String getName() {
+    public String getName() {
         return "current-stock-price-loader";
     }
 

@@ -42,12 +42,12 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
     }
 
     @Override
-    int getOrderNumber() {
+    public int getOrderNumber() {
         return TICKER_TO_CIK_LOADER;
     }
 
     @Override
-    String getName() {
+    public String getName() {
         return "ticker-to-cik-loader";
     }
 

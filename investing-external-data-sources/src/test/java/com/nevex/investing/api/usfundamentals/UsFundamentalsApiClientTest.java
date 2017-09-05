@@ -1,7 +1,6 @@
 package com.nevex.investing.api.usfundamentals;
 
-import com.nevex.investing.usfundamentals.UsFundamentalsApiClient;
-import com.nevex.investing.usfundamentals.model.UsFundamentalsResponse;
+import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponse;
 import org.junit.Test;
 
 /**
@@ -16,10 +15,13 @@ public class UsFundamentalsApiClientTest {
         String host = "api.usfundamentals.com";
 
 
-        UsFundamentalsResponse response = new UsFundamentalsApiClient(host, apiKey).getFundamentalsForCik(cik);
+        long nanoTime = System.nanoTime();
+
+        UsFundamentalsResponse response = new UsFundamentalsApiClient(host, apiKey).getAllFundamentalsForCik(cik);
+
+//        BigDecimal marketCap = response.getQuarterlyIndicators().
+
         response.toString();
-
-
 
     }
 }

@@ -30,12 +30,12 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
      * The order in which this loader should execute (relative to other workers).
      * Lower number is a higher precedence. E.g. 1 will go first, then 2, then 3....
      */
-    abstract int getOrderNumber();
+    public abstract int getOrderNumber();
 
     /**
      * The simple name of this loader
      */
-    abstract String getName();
+    public abstract String getName();
 
     abstract DataLoaderWorkerResult doWork() throws DataLoaderWorkerException;
 
@@ -78,19 +78,29 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
      */
     <T, ID extends Serializable> int processAllPagesForRepo (
             PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer, long waitTimeBetweenTickersMs) {
+        return processAllPagesInIterable(sortingRepository::findAll, consumer, waitTimeBetweenTickersMs);
+    }
+
+    /**
+     * Helper function to page across a pageable repository
+     * @return the total records processed
+     */
+    <T> int processAllPagesInIterable (
+            PageableIterable<T> iterable,
+            Consumer<T> consumer, long waitTimeBetweenTickersMs) {
         int totalRecordsProcessed = 0;
         // Fetch all the ticker symbols we have
         Pageable pageable = new PageRequest(0, 20);
         while ( pageable != null ) {
             // At some point the pageable will turn null
 
-            Page<T> page = sortingRepository.findAll(pageable);
+            Page<T> page = iterable.iterate(pageable);
             if ( page != null && page.hasContent()) {
                 for ( T data : page) {
                     consumer.accept(data);
                     totalRecordsProcessed++;
                     if ( waitTimeBetweenTickersMs > 0 ) {
-                        boolean exceptionOccurred = tryPauseThreadForMs(waitTimeBetweenTickersMs, sortingRepository.getClass().getName(), pageable);
+                        boolean exceptionOccurred = tryPauseThreadForMs(waitTimeBetweenTickersMs, iterable.getClass().getName(), pageable);
                         if ( exceptionOccurred ) {
                             return totalRecordsProcessed;
                         }
@@ -99,6 +109,9 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
             }
 
             pageable = page != null && page.hasNext() ? page.nextPageable() : null;
+            long totalElements = page != null ? page.getTotalElements() : 0;
+            long percentDone = totalElements == 0 ? 100 : ((totalRecordsProcessed / totalElements) * 100);
+            LOGGER.info("[{}] job is {}% done. It has processed [{}] items of a total of [{}]", getName(), percentDone, totalRecordsProcessed, totalElements);
         }
         return totalRecordsProcessed;
     }
@@ -120,6 +133,11 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
     void saveExceptionToDatabase(String message) {
         dataLoaderService.saveError(getName(), message);
+    }
+
+    @FunctionalInterface
+    interface PageableIterable<T> {
+        Page<T> iterate(Pageable pageable);
     }
 
 }

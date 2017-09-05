@@ -1,6 +1,5 @@
-package com.nevex.investing.usfundamentals.model;
+package com.nevex.investing.api.usfundamentals.model;
 
-import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -9,15 +8,21 @@ import java.util.*;
 public class UsFundamentalsResponse {
 
     private final long cik;
+    private final long downloadStartTimeNanoseconds;
     private final Set<UsFundamentalIndicator> quarterlyIndicators = new TreeSet<>();
     private final Set<UsFundamentalIndicator> yearlyIndicators = new TreeSet<>();
 
-    public UsFundamentalsResponse(long cik) {
+    public UsFundamentalsResponse(long cik, long downloadStartTimeNanoseconds) {
         this.cik = cik;
+        this.downloadStartTimeNanoseconds = downloadStartTimeNanoseconds;
     }
 
     public long getCik() {
         return cik;
+    }
+
+    public long getDownloadStartTimeNanoseconds() {
+        return downloadStartTimeNanoseconds;
     }
 
     public void addQuarterlyIndicator(UsFundamentalIndicator usFundamentalIndicator) {
@@ -36,3 +41,5 @@ public class UsFundamentalsResponse {
         return yearlyIndicators;
     }
 }
+
+

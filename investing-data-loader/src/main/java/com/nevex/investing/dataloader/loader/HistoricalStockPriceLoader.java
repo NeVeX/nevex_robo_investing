@@ -42,7 +42,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     }
 
     @Override
-    String getName() {
+    public String getName() {
         return "historical-stock-price-loader";
     }
 
@@ -85,7 +85,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     }
 
     @Override
-    int getOrderNumber() {
+    public int getOrderNumber() {
         return DataLoaderOrder.STOCK_PRICE_HISTORICAL_LOADER;
     }
 

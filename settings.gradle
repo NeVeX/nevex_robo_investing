@@ -6,5 +6,4 @@ include 'investing-service'
 include 'investing-service-mock'
 include 'investing-external-data-sources'
 include 'investing-common'
-include 'investing-data-loader-service'
 

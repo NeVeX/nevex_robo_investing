@@ -1,6 +1,8 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.PropertyNames;
+import com.nevex.investing.api.usfundamentals.UsFundamentalsApiClient;
+import com.nevex.investing.config.property.TickerFundamentalsLoaderProperties;
 import com.nevex.investing.database.DataLoaderErrorsRepository;
 import com.nevex.investing.database.DataLoaderRunsRepository;
 import com.nevex.investing.ws.DataLoaderAdminEndpoint;
@@ -25,6 +27,8 @@ public class DataLoaderApiConfiguration {
     private DataLoaderRunsRepository dataLoaderRunsRepository;
     @Autowired
     private DataLoaderErrorsRepository dataLoaderErrorsRepository;
+    @Autowired
+    private TickerFundamentalsLoaderProperties tickerFundamentalsLoaderProperties;
 
     @Bean
     DataLoaderAdminEndpoint dataLoaderAdminEndpoint() {
@@ -34,4 +38,13 @@ public class DataLoaderApiConfiguration {
     public void setApiAdminKey(String apiAdminKey) {
         this.apiAdminKey = apiAdminKey;
     }
+
+    @Bean
+    UsFundamentalsApiClient usFundamentalsApiClient() {
+        return new UsFundamentalsApiClient(
+                tickerFundamentalsLoaderProperties.getHost(),
+                tickerFundamentalsLoaderProperties.getApiKey()
+        );
+    }
+
 }

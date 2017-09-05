@@ -5,7 +5,7 @@ bootRepackage {
 
 dependencies {
     compile project(':investing-database-access')
-    compile project(':investing-data-loader-service')
+    compile project(':investing-service')
     compile project(':investing-external-data-sources')
     compile project(':investing-common')
 }

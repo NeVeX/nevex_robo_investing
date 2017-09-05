@@ -25,7 +25,7 @@ public class ReferenceDataLoader extends DataLoaderWorker {
     }
 
     @Override
-    String getName() {
+    public String getName() {
         return "reference-data-loader";
     }
 
@@ -59,7 +59,7 @@ public class ReferenceDataLoader extends DataLoaderWorker {
     }
 
     @Override
-    int getOrderNumber() {
+    public int getOrderNumber() {
         return DataLoaderOrder.REFERENCE_DATA_LOADER;
     }
 }

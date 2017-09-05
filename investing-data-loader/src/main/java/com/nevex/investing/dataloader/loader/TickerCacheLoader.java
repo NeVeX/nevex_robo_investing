@@ -20,12 +20,12 @@ public class TickerCacheLoader extends DataLoaderWorker {
     }
 
     @Override
-    String getName() {
+    public String getName() {
         return "ticker-cache-loader";
     }
 
     @Override
-    int getOrderNumber() {
+    public int getOrderNumber() {
         return DataLoaderOrder.TICKER_CACHE_LOADER;
     }
 

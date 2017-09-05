@@ -9,7 +9,8 @@ import java.util.Objects;
  * Created by Mark Cunningham on 8/7/2017.
  */
 @Entity
-@Table(schema = "investing", name = "stock_prices_historical", uniqueConstraints = @UniqueConstraint(columnNames = {"ticker_id", "date"}))
+@Table(schema = "investing", name = "stock_prices_historical",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"ticker_id", "date"}))
 public class StockPriceHistoricalEntity implements StockPriceBaseEntity {
 
     @Id
