@@ -3,7 +3,7 @@ package com.nevex.investing.config;
 import com.nevex.investing.api.tiingo.TiingoApiClient;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
-import com.nevex.investing.dataloader.loader.CurrentStockPriceLoader;
+import com.nevex.investing.dataloader.loader.DailyStockPriceLoader;
 import com.nevex.investing.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,14 +45,14 @@ class StockPricesDailyLoaderConfiguration {
     private StockPriceAdminService stockPriceAdminService;
 
     @Valid
-    @NotNull(message = "The 'enabled' property cannot be null")
+    @NotNull
     private Boolean enabled;
     @Valid
-    @Min(value = 0, message = "Invalid wait time in ms specified")
+    @Min(value = 0)
     private Long waitTimeBetweenTickersMs;
     @Valid
-    @NotNull(message = "Invalid forceStartOnActivation specified")
-    private Boolean forceStartOnActivation;
+    @NotNull
+    private Boolean forceStartOnAppStartup;
 
     @PostConstruct
     void init() throws Exception {
@@ -60,10 +60,10 @@ class StockPricesDailyLoaderConfiguration {
     }
 
     @Bean
-    CurrentStockPriceLoader currentStockPriceLoader() {
+    DailyStockPriceLoader currentStockPriceLoader() {
         // TODO: This loader is getting too big!
-        return new CurrentStockPriceLoader(tickersRepository, tiingoApiClient,
-                stockPriceAdminService, dataLoaderService, waitTimeBetweenTickersMs, forceStartOnActivation);
+        return new DailyStockPriceLoader(tickersRepository, tiingoApiClient,
+                stockPriceAdminService, dataLoaderService, waitTimeBetweenTickersMs, forceStartOnAppStartup);
     }
 
     public void setEnabled(Boolean enabled) {
@@ -74,8 +74,8 @@ class StockPricesDailyLoaderConfiguration {
         this.waitTimeBetweenTickersMs = waitTimeBetweenTickersMs;
     }
 
-    public void setForceStartOnActivation(Boolean forceStartOnActivation) {
-        this.forceStartOnActivation = forceStartOnActivation;
+    public void setForceStartOnAppStartup(Boolean forceStartOnAppStartup) {
+        this.forceStartOnAppStartup = forceStartOnAppStartup;
     }
 
     @Override
@@ -83,7 +83,7 @@ class StockPricesDailyLoaderConfiguration {
         return "StockPricesDailyLoaderConfiguration{" +
                 "enabled=" + enabled +
                 ", waitTimeBetweenTickersMs=" + waitTimeBetweenTickersMs +
-                ", forceStartOnActivation=" + forceStartOnActivation +
+                ", forceStartOnAppStartup=" + forceStartOnAppStartup +
                 '}';
     }
 }

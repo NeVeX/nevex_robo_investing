@@ -1,4 +1,9 @@
 
 dependencies {
     compile project(':investing-common')
+
+
+    // https://mvnrepository.com/artifact/com.yahoofinance-api/YahooFinanceAPI
+    compile group: 'com.yahoofinance-api', name: 'YahooFinanceAPI', version: '3.9.0'
+
 }

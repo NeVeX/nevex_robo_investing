@@ -12,6 +12,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import static com.nevex.investing.PropertyNames.NEVEX_INVESTING;
 
 /**
@@ -24,6 +27,10 @@ public class TickerHistoricalFundamentalsLoaderConfiguration {
 
     static final String CONFIGURATION_PREFIX_KEY = NEVEX_INVESTING + ".ticker-historical-fundamentals-loader";
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
+
+    @Valid
+    @NotNull
+    private Boolean forceStartOnAppStartup;
 
     @Autowired
     private DataLoaderService dataLoaderService;
@@ -39,6 +46,10 @@ public class TickerHistoricalFundamentalsLoaderConfiguration {
     @Bean
     TickerHistoricalFundamentalsLoader tickerHistoricalFundamentalsLoader() {
         return new TickerHistoricalFundamentalsLoader(dataLoaderService, tickerToCikRepository, tickerFundamentalsAdminService,
-                tickerService, usFundamentalsApiClient);
+                tickerService, usFundamentalsApiClient, forceStartOnAppStartup);
+    }
+
+    public void setForceStartOnAppStartup(Boolean forceStartOnAppStartup) {
+        this.forceStartOnAppStartup = forceStartOnAppStartup;
     }
 }

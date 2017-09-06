@@ -65,7 +65,7 @@ public class DataLoaderStarter implements ApplicationListener<ApplicationReadyEv
         for( DataLoaderWorker dw : workers ) {
             sb.append("    ").append(dw.getOrderNumber()).append(") ").append(dw.getName()).append("\n");
         }
-        int secondsToWait = 10;
+        int secondsToWait = 5;
         LOGGER.info(sb.append("\nThe workers will be invoked in the above order, starting in [").append(secondsToWait).append("] seconds...\n\n").toString());
         try {
             Thread.sleep(TimeUnit.SECONDS.toMillis(secondsToWait));

@@ -4,7 +4,9 @@ server:
 
 logging:
   file: log/investing-data-loader.log
-  level: INFO
+  level:
+    root: INFO
+    yahoofinance: WARN
 
 spring:
   jackson.serialization.write_dates_as_timestamps: false
@@ -33,7 +35,7 @@ nevex-investing:
   daily-stock-price-loader:
     enabled: false
     wait-time-between-tickers-ms: 1000
-    force-start-on-activation: false
+    force-start-on-app-startup: false
   edgar-ticker-to-cik-loader:
     enabled: false
     only-lookup-missing-ticker-ciks: true # For any ciks that are missing, only get those (not values in the ticker_to_cik table)
@@ -41,9 +43,13 @@ nevex-investing:
     host: api.usfundamentals.com
     api-key:
   ticker-historical-fundamentals-loader:
-    enabled: true
+    enabled: false
+    force-start-on-app-startup: false
 #  ticker-fundamentals-snyc-loader:
 #    enabled: true
+  yahoo-stock-info-data-loader:
+    enabled: true
+    force-start-on-app-startup: true
   tiingo:
     host: https://api.tiingo.com
     api-key:

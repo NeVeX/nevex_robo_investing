@@ -52,7 +52,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         LOGGER.info("{} will start to do it's work", this.getClass());
 
         // Fetch all the ticker symbols we have
-        int totalRecordsProcessed = super.processAllPagesForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, waitTimeBetweenTickersMs);
+        int totalRecordsProcessed = super.processAllPagesIndividuallyForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, waitTimeBetweenTickersMs);
 
         LOGGER.info("{} has completed all it's work", this.getClass());
         return new DataLoaderWorkerResult(totalRecordsProcessed);

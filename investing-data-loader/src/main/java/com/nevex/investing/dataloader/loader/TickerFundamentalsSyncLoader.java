@@ -107,7 +107,7 @@
 //        threadLocalUpdatableCompanies.set(updatableDtos);
 //
 //        try {
-//            int amountProcessed = super.processAllPagesForRepo(tickersRepository, consumerOfTickers, 500);
+//            int amountProcessed = super.processAllPagesIndividuallyForRepo(tickersRepository, consumerOfTickers, 500);
 //            return new DataLoaderWorkerResult(amountProcessed);
 //        } finally {
 //            // clear the thread locals

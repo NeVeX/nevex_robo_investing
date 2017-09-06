@@ -1,5 +1,6 @@
 package com.nevex.investing.config;
 
+import com.nevex.investing.api.yahoo.YahooApiClient;
 import com.nevex.investing.database.*;
 import com.nevex.investing.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,8 @@ public class DataLoaderServicesConfiguration {
     private TickerToCikRepository tickerToCikRepository;
     @Autowired
     private StockExchangesRepository stockExchangesRepository;
-
+    @Autowired
+    private YahooStockInfoRepository yahooStockInfoRepository;
 
     @Bean
     StockPriceAdminService stockPriceAdminService() {
@@ -53,4 +55,13 @@ public class DataLoaderServicesConfiguration {
         return new StockExchangeAdminService(stockExchangesRepository);
     }
 
+    @Bean
+    YahooApiClient yahooApiClient() {
+        return new YahooApiClient();
+    }
+
+    @Bean
+    YahooStockInfoService yahooStockInfoService() {
+        return new YahooStockInfoService(yahooStockInfoRepository);
+    }
 }

@@ -17,24 +17,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Mark Cunningham on 8/9/2017.
  */
-public class CurrentStockPriceLoader extends DataLoaderWorker {
+public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(CurrentStockPriceLoader.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(DailyStockPriceLoader.class);
     private final AtomicBoolean isUnlockedFromDataLoaders = new AtomicBoolean(false);
-    private final AtomicBoolean isWorkerRunning = new AtomicBoolean(false);
     private final TickersRepository tickersRepository;
     private final TiingoApiClient tiingoApiClient;
     private final StockPriceAdminService stockPriceAdminService;
     private final long waitTimeBetweenTickersMs;
-    private final boolean forceStartOnActivation;
 
-    public CurrentStockPriceLoader(TickersRepository tickersRepository,
-                                   TiingoApiClient tiingoApiClient,
-                                   StockPriceAdminService stockPriceAdminService,
-                                   DataLoaderService dataLoaderService,
-                                   long waitTimeBetweenTickersMs,
-                                   boolean forceStartOnActivation) {
-        super(dataLoaderService);
+    public DailyStockPriceLoader(TickersRepository tickersRepository,
+                                 TiingoApiClient tiingoApiClient,
+                                 StockPriceAdminService stockPriceAdminService,
+                                 DataLoaderService dataLoaderService,
+                                 long waitTimeBetweenTickersMs,
+                                 boolean forceStartOnActivation) {
+        super(dataLoaderService, forceStartOnActivation);
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( tiingoApiClient == null) { throw new IllegalArgumentException("Provided tiingoApiClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
@@ -43,7 +41,6 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
         this.tickersRepository = tickersRepository;
         this.tiingoApiClient = tiingoApiClient;
         this.stockPriceAdminService = stockPriceAdminService;
-        this.forceStartOnActivation = forceStartOnActivation;
     }
 
     @Override
@@ -56,49 +53,34 @@ public class CurrentStockPriceLoader extends DataLoaderWorker {
         return "current-stock-price-loader";
     }
 
-    @Override
-    DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
-        // unlock this loader
-        isUnlockedFromDataLoaders.set(true);
-        LOGGER.info("Unlocked the lock so this loader can now fetch current price data on it's schedule");
-        if ( forceStartOnActivation ) {
-            LOGGER.info("Will start the [{}] immediately since it is told to force start", getName());
-            return doScheduleWork();
-        } else {
-            return DataLoaderWorkerResult.nothingDone();
-        }
-    }
-
-    // Run this Monday to Friday, at 8pm
+     // Run this Monday to Friday, at 8pm
     @Scheduled(cron = "0 0 20 * * MON-FRI", zone = "America/Los_Angeles")
 //    @Scheduled(cron = "*/10 * * * * *", zone = "America/Los_Angeles") // Every 10 seconds
-    void onScheduleStart() {
-        doStart(this::doScheduleWork);
+    @Override
+    void onScheduleStartInvoked() {
+        super.scheduleStart();
     }
 
-    private DataLoaderWorkerResult doScheduleWork() throws DataLoaderWorkerException {
+    @Override
+    DataLoaderWorkerResult onWorkerStartedAtAppStartup() throws DataLoaderWorkerException {
+        // unlock this loader
+        isUnlockedFromDataLoaders.set(true);
+        LOGGER.info("[{}] - unlocked the lock so this loader can now fetch current price data on it's schedule", getName());
+        return DataLoaderWorkerResult.nothingDone();
+    }
+
+    @Override
+    DataLoaderWorkerResult doScheduledWork() throws DataLoaderWorkerException {
+        if ( !isUnlockedFromDataLoaders.get()) {
+            LOGGER.warn("[{}] - cannot perform scheduled work since the loader lock is not released yet", getName());
+            return DataLoaderWorkerResult.nothingDone();
+        }
         return new DataLoaderWorkerResult(getAllCurrentPrices());
     }
 
     private int getAllCurrentPrices() {
-        if ( !isUnlockedFromDataLoaders.get()) {
-            LOGGER.warn("Cannot continue job since the loader lock is not released yet");
-            return 0;
-        }
-
-        boolean isWorkerAlreadyRunning = isWorkerRunning.getAndSet(true); // get the current value and set to true for now
-        if ( isWorkerAlreadyRunning ) {
-            LOGGER.warn("There is already a current stock price loader running - will not invoke another loader");
-            return 0;
-        }
-
-        try {
-            // Fetch all the ticker symbols we have
-            return super.processAllPagesForRepo(tickersRepository, this::loadCurrentPrice, waitTimeBetweenTickersMs);
-        } finally {
-            LOGGER.info("Current prices job has finished!");
-            isWorkerRunning.set(false); // reset it
-        }
+        // Fetch all the ticker symbols we have
+        return super.processAllPagesIndividuallyForRepo(tickersRepository, this::loadCurrentPrice, waitTimeBetweenTickersMs);
     }
 
     private void loadCurrentPrice(TickerEntity tickerEntity) {

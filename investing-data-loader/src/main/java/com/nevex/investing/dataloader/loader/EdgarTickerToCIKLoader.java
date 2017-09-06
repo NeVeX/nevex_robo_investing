@@ -51,7 +51,7 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
 
     @Override
     DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
-        int tickersProcessed = super.processAllPagesForRepo(tickersRepository, this::processTicker, 750);
+        int tickersProcessed = super.processAllPagesIndividuallyForRepo(tickersRepository, this::processTicker, 750);
         return new DataLoaderWorkerResult(tickersProcessed);
     }
 

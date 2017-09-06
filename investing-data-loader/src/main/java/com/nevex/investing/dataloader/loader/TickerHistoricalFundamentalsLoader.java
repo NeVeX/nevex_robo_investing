@@ -11,35 +11,32 @@ import com.nevex.investing.service.ServiceException;
 import com.nevex.investing.service.TickerFundamentalsAdminService;
 import com.nevex.investing.service.TickerService;
 import com.nevex.investing.util.CikUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.nevex.investing.dataloader.loader.DataLoaderOrder.TICKER_HISTORICAL_FUNDAMENTALS_LOADER;
 
 /**
  * Created by Mark Cunningham on 9/4/2017.
  */
-public class TickerHistoricalFundamentalsLoader extends DataLoaderWorker {
+public class TickerHistoricalFundamentalsLoader extends DataLoaderSchedulingSingleWorker {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TickerHistoricalFundamentalsLoader.class);
     private final UsFundamentalsApiClient apiClient;
     private final TickerToCikRepository tickerToCikRepository;
     private final TickerService tickerService;
     private final TickerFundamentalsAdminService tickerFundamentalsAdminService;
-    private final AtomicBoolean isWorkerIsRunning = new AtomicBoolean(false);
 
     public TickerHistoricalFundamentalsLoader(DataLoaderService dataLoaderService,
                                               TickerToCikRepository tickerToCikRepository,
                                               TickerFundamentalsAdminService tickerFundamentalsAdminService,
                                               TickerService tickerService,
-                                              UsFundamentalsApiClient apiClient) {
-        super(dataLoaderService);
+                                              UsFundamentalsApiClient apiClient,
+                                              boolean forceStartOnApplicationStart) {
+        super(dataLoaderService, forceStartOnApplicationStart);
         if ( apiClient == null ) { throw new IllegalArgumentException("Provided apiClient is null"); }
         if ( tickerToCikRepository == null ) { throw new IllegalArgumentException("Provided tickerToCikRepository is null"); }
         if ( tickerService == null ) { throw new IllegalArgumentException("Provided tickerService is null"); }
@@ -60,25 +57,20 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderWorker {
         return "ticker-historical-fundamentals-loader";
     }
 
-    @Scheduled(initialDelay = 43200000L, fixedDelay = 43200000L) // 12 hours
-    void onScheduleStart() {
-        doStart(this::doScheduleWork);
-    }
-
-    private DataLoaderWorkerResult doScheduleWork() throws DataLoaderWorkerException {
-        return doWork();
+    @Scheduled(initialDelay = 86400000L, fixedDelay = 86400000L) // 24 hours
+    @Override
+    void onScheduleStartInvoked() {
+        super.scheduleStart();
     }
 
     @Override
-    DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
-        boolean workerIsRunningAlready = this.isWorkerIsRunning.getAndSet(true);
-        if ( workerIsRunningAlready ) {
-            LOGGER.warn("There is already a worker running for job [{}] - will not start this worker", getName());
-            return DataLoaderWorkerResult.nothingDone();
-        }
+    DataLoaderWorkerResult onWorkerStartedAtAppStartup() throws DataLoaderWorkerException {
+        return DataLoaderWorkerResult.nothingDone(); // nothing to do at startup
+    }
 
-        int amountProcessed = super.processAllPagesInIterable(tickerToCikRepository::findAll, this::processCik, 500);
-        isWorkerIsRunning.set(false);
+    @Override
+    DataLoaderWorkerResult doScheduledWork() throws DataLoaderWorkerException {
+        int amountProcessed = super.processAllPagesIndividuallyForIterable(tickerToCikRepository::findAll, this::processCik, 500);
         return new DataLoaderWorkerResult(amountProcessed);
     }
 
