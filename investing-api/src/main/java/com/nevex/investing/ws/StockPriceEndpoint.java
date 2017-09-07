@@ -68,7 +68,7 @@ public class StockPriceEndpoint {
         String symbol = StringUtils.trim(inputSymbol).toUpperCase();
         List<StockPrice> historicalPrices;
         try {
-            historicalPrices = stockPriceService.getHistoricalPrices(symbol);
+            historicalPrices = stockPriceService.getHistoricalPrices(symbol, 365);
         } catch (TickerNotFoundException tickerNotFound) {
             return ResponseEntity.notFound().build();
         }

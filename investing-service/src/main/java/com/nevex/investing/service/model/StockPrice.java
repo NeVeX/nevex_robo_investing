@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * Created by Mark Cunningham on 8/9/2017.
  */
-public final class StockPrice {
+public class StockPrice implements Comparable<StockPrice> {
 
     private final String tickerSymbol;
     private final LocalDate date;
@@ -161,5 +161,10 @@ public final class StockPrice {
                 ", dividendCash=" + dividendCash +
                 ", splitFactor=" + splitFactor +
                 '}';
+    }
+
+    @Override
+    public int compareTo(StockPrice that) {
+        return -(this.date.compareTo(that.date)); // reverse order
     }
 }

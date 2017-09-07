@@ -60,7 +60,7 @@ public class MockStockPriceService extends StockPriceService {
     }
 
     // TODO: Limit the search
-    public List<StockPrice> getHistoricalPrices(String symbol) throws TickerNotFoundException {
+    public List<StockPrice> getHistoricalPricesUpToOneYear(String symbol) throws TickerNotFoundException {
         return mockPrices;
     }
 

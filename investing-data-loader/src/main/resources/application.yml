@@ -25,6 +25,13 @@ spring:
 
 nevex-investing:
   api-admin-key: space
+  events:
+    configuration-enabled: true
+  analyzers:
+    configuration-enabled: true
+    daily-stock-price-analyzer:
+      enabled: true
+
   ticker-data-loader:
     enabled: false # Set this to true and and put values in below for the optional csv to load data into the database
     nasdaq-file: D:\Coding\Git\nevex_investing\data\nasdaq_tickers_08_07_2017.csv
@@ -33,9 +40,9 @@ nevex-investing:
     enabled: false
     wait-time-between-tickers-ms: 1000
   daily-stock-price-loader:
-    enabled: false
+    enabled: true
     wait-time-between-tickers-ms: 1000
-    force-start-on-app-startup: false
+    force-start-on-app-startup: true
   edgar-ticker-to-cik-loader:
     enabled: false
     only-lookup-missing-ticker-ciks: true # For any ciks that are missing, only get those (not values in the ticker_to_cik table)
@@ -48,7 +55,7 @@ nevex-investing:
 #  ticker-fundamentals-snyc-loader:
 #    enabled: true
   yahoo-stock-info-data-loader:
-    enabled: true
+    enabled: false
     force-start-on-app-startup: true
   tiingo:
     host: https://api.tiingo.com

@@ -6,6 +6,7 @@ import com.nevex.investing.database.entity.StockPriceEntity;
 import com.nevex.investing.database.entity.StockPriceHistoricalEntity;
 import com.nevex.investing.service.exception.TickerNotFoundException;
 import com.nevex.investing.service.model.StockPrice;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -45,16 +46,24 @@ public class StockPriceService {
         return Optional.of(stockPrice);
     }
 
-    // TODO: Limit the search
-    public List<StockPrice> getHistoricalPrices(String symbol) throws TickerNotFoundException {
+    public List<StockPrice> getHistoricalPrices(int tickerId, int maxDays) throws TickerNotFoundException {
+        String symbol = tickerService.getSymbolForId(tickerId);
+        return getHistoricalPrices(tickerId, symbol, maxDays);
+    }
+
+    public List<StockPrice> getHistoricalPrices(String symbol, int maxDays) throws TickerNotFoundException {
         int tickerId = tickerService.getIdForSymbol(symbol);
-        List<StockPriceHistoricalEntity> historicalEntities = stockPricesHistoricalRepository.findAllByTickerId(tickerId);
+        return getHistoricalPrices(tickerId, maxDays);
+    }
+
+    private List<StockPrice> getHistoricalPrices(int tickerId, String tickerSymbol, int maxDays) {
+        PageRequest pageRequest = new PageRequest(0, maxDays); // Get a year's worth
+        List<StockPriceHistoricalEntity> historicalEntities = stockPricesHistoricalRepository.findAllByTickerId(tickerId, pageRequest);
         if ( historicalEntities == null || historicalEntities.isEmpty()) {
             return new ArrayList<>();
         }
         List<StockPrice> stockPrices = new ArrayList<>();
-        historicalEntities.stream().forEach( h -> stockPrices.add(new StockPrice(symbol, h)));
+        historicalEntities.stream().forEach( h -> stockPrices.add(new StockPrice(tickerSymbol, h)));
         return stockPrices;
     }
-
 }

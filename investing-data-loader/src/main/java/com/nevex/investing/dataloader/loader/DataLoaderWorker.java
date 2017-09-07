@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Created by Mark Cunningham on 8/9/2017.
@@ -76,14 +77,14 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
     <T, ID extends Serializable> int processAllPagesIndividuallyForRepo(
             PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer, long waitTimeBetweenTickersMs) {
         return processAllPages(sortingRepository::findAll,
-                new ProcessPageIndividually<>(consumer, waitTimeBetweenTickersMs),
+                new IndividualPageProcessor<>(consumer, waitTimeBetweenTickersMs),
                 20);
     }
 
-    <T, ID extends Serializable> int processAllPagesIndividuallyForIterable (
-            PageableIterable<T> iterable, Consumer<T> consumer, long waitTimeBetweenTickersMs) {
-        return processAllPages(iterable,
-                new ProcessPageIndividually<>(consumer, waitTimeBetweenTickersMs),
+    <T> int processAllPagesIndividuallyForIterable (
+            Function<Pageable, Page<T>> pageSupplier, Consumer<T> consumer, long waitTimeBetweenTickersMs) {
+        return processAllPages(pageSupplier,
+                new IndividualPageProcessor<>(consumer, waitTimeBetweenTickersMs),
                 20);
     }
 
@@ -93,7 +94,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
      */
     <T, ID extends Serializable> int processAllPagesInBulkForRepo(
             PagingAndSortingRepository<T, ID> sortingRepository, Consumer<List<T>> consumer, long waitTimeBetweenBulkMs, int bulkAmount) {
-        return processAllPages(sortingRepository::findAll, new ProcessPageInBulk<>(consumer, waitTimeBetweenBulkMs), bulkAmount);
+        return processAllPages(sortingRepository::findAll, new BulkPageProcessor<>(consumer, waitTimeBetweenBulkMs), bulkAmount);
     }
 
     /**
@@ -101,8 +102,8 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
      * @return the total records processed
      */
     <T> int processAllPages(
-            PageableIterable<T> iterable,
-            ProcessPage<T> processPage,
+            Function<Pageable, Page<T>> pageSupplier,
+            Function<Page<T>, Integer> pageProcessor,
             int pageCountMax) {
         int totalRecordsProcessed = 0;
         // Fetch all the ticker symbols we have
@@ -110,9 +111,9 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
         while ( pageable != null ) {
             // At some point the pageable will turn null
 
-            Page<T> page = iterable.iterate(pageable);
+            Page<T> page = pageSupplier.apply(pageable);
             if ( page != null && page.hasContent()) {
-                totalRecordsProcessed += processPage.processPage(page);
+                totalRecordsProcessed += pageProcessor.apply(page);
             }
 
             pageable = page != null && page.hasNext() ? page.nextPageable() : null;
@@ -123,8 +124,14 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
         return totalRecordsProcessed;
     }
 
-    // Tries to pause the thread for a certain amount of time
+    //
     // Returns TRUE if an exception happened
+
+    /**
+     * Tries to pause the thread for a certain amount of time
+     * @param timeToPauseMs - the time in milliseconds to pause
+     * @return - TRUE if an exception happened
+     */
     private static boolean tryPauseThreadForMs(long timeToPauseMs) {
         // we need to pause the thread for a moment
         try {
@@ -140,58 +147,51 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
         dataLoaderService.saveError(getName(), message);
     }
 
-    @FunctionalInterface
-    interface PageableIterable<T> {
-        Page<T> iterate(Pageable pageable);
-    }
+    // Processor for individual elements
+    private static class IndividualPageProcessor<T> implements Function<Page<T>, Integer> {
 
-    @FunctionalInterface
-    interface ProcessPage<T> {
-        int processPage(Page<T> page);
-    }
+        final long waitTimeBetweenElementsMs;
+        final Consumer<T> consumer;
 
-    private static class ProcessPageIndividually<T> implements ProcessPage<T> {
-
-        private final long waitTimeBetweenElements;
-        private final Consumer<T> consumer;
-
-        ProcessPageIndividually(Consumer<T> consumer, long waitTimeBetweenElements) {
+        IndividualPageProcessor(Consumer<T> consumer, long waitTimeBetweenElementsMs) {
             this.consumer = consumer;
-            this.waitTimeBetweenElements = waitTimeBetweenElements;
+            this.waitTimeBetweenElementsMs = waitTimeBetweenElementsMs;
         }
 
         @Override
-        public int processPage(Page<T> page) {
+        public Integer apply(Page<T> page) {
             int totalRecordsProcessed = 0;
             for ( T data : page) {
                 consumer.accept(data);
                 totalRecordsProcessed++;
-                if ( waitTimeBetweenElements > 0 ) {
-                    if ( ! tryPauseThreadForMs(waitTimeBetweenElements) ) {
-                        LOGGER.warn("Could not sleep the thread for [{}] in between bulk page processing. Will continue still...", waitTimeBetweenElements);
+                if ( waitTimeBetweenElementsMs > 0 ) {
+                    if ( tryPauseThreadForMs(waitTimeBetweenElementsMs) ) {
+                        LOGGER.warn("Could not sleep the thread for [{}] ms in between bulk page processing. Will continue still...", waitTimeBetweenElementsMs);
                     }
                 }
             }
             return totalRecordsProcessed;
+
         }
     }
 
-    private static class ProcessPageInBulk<T> implements ProcessPage<T> {
+    // Processor for bulk elements
+    private static class BulkPageProcessor<T> implements Function<Page<T>, Integer> {
 
-        private final long waitTimeBetweenBulkMs;
-        private final Consumer<List<T>> bulkConsumer;
+        final long waitTimeBetweenBulkMs;
+        final Consumer<List<T>> bulkConsumer;
 
-        ProcessPageInBulk(Consumer<List<T>> bulkConsumer, long waitTimeBetweenBulkMs) {
+        BulkPageProcessor(Consumer<List<T>> bulkConsumer, long waitTimeBetweenBulkMs) {
             this.bulkConsumer = bulkConsumer;
             this.waitTimeBetweenBulkMs = waitTimeBetweenBulkMs;
         }
 
         @Override
-        public int processPage(Page<T> page) {
+        public Integer apply(Page<T> page) {
             int totalRecordsProcessed = page.getNumberOfElements();
             bulkConsumer.accept(page.getContent());
-            if ( ! tryPauseThreadForMs(waitTimeBetweenBulkMs)) {
-                LOGGER.warn("Could not sleep the thread for [{}] in between bulk page processing. Will continue still...", waitTimeBetweenBulkMs);
+            if ( tryPauseThreadForMs(waitTimeBetweenBulkMs)) {
+                LOGGER.warn("Could not sleep the thread for [{}] ms in between bulk page processing. Will continue still...", waitTimeBetweenBulkMs);
             }
             return totalRecordsProcessed;
         }
