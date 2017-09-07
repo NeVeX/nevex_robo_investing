@@ -37,7 +37,7 @@ public class StockPriceAdminService extends StockPriceService {
         saveHistoricalPrice(tickerId, price);
 
         StockPriceEntity newCurrentPrice = convertToCurrentEntity(tickerId, price);
-        // Get the current one and update it
+        // Get the current one and onChange it
         Optional<StockPriceEntity> existingCurrentPriceOpt = stockPricesRepository.findByTickerId(tickerId);
         if ( existingCurrentPriceOpt.isPresent()) {
             StockPriceEntity existingCurrentPrice = existingCurrentPriceOpt.get();

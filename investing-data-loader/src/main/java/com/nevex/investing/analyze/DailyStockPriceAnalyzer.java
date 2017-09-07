@@ -1,27 +1,19 @@
 package com.nevex.investing.analyze;
 
-import com.nevex.investing.analyze.model.StockPriceAveragesCalculations;
-import com.nevex.investing.event.type.DailyStockPriceUpdateProcessor;
+import com.nevex.investing.event.type.DailyStockPriceUpdateConsumer;
 import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.service.StockPriceAdminService;
 import com.nevex.investing.service.TickerService;
-import com.nevex.investing.service.exception.TickerNotFoundException;
 import com.nevex.investing.service.model.StockPrice;
-import com.nevex.investing.service.model.Ticker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
 
 /**
  * Created by Mark Cunningham on 9/6/2017.
  */
-public class DailyStockPriceAnalyzer implements DailyStockPriceUpdateProcessor {
+public class DailyStockPriceAnalyzer implements DailyStockPriceUpdateConsumer {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(DailyStockPriceAnalyzer.class);
     private final StockPriceAdminService stockPriceAdminService;
@@ -34,17 +26,16 @@ public class DailyStockPriceAnalyzer implements DailyStockPriceUpdateProcessor {
         this.tickerService = tickerService;
     }
 
-
     @Override
-    public void update(int tickerId) {
-        LOGGER.info("Received new ticker [{}] that has had it's stock price updated - will analyze it now");
+    public void accept(Integer tickerId) {
+        LOGGER.info("Received new ticker [{}] that has had it's stock price updated - will analyze it now", tickerId);
 
-        try {
-            List<StockPrice> stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, 365);
-            analyzeStockPrices(stockPrices);
-        } catch (TickerNotFoundException tickerNotFound) {
-            LOGGER.warn("Ticker Id [{}] is not valid - could not find it", tickerId);
-        }
+//        try {
+//            List<StockPrice> stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, 365);
+//            analyzeStockPrices(stockPrices);
+//        } catch (TickerNotFoundException tickerNotFound) {
+//            LOGGER.warn("Ticker Id [{}] is not valid - could not find it", tickerId);
+//        }
     }
 
     private void analyzeStockPrices(List<StockPrice> stockPrices) {
@@ -78,4 +69,6 @@ public class DailyStockPriceAnalyzer implements DailyStockPriceUpdateProcessor {
 //                .reduce((x,y)->)
         return null;
     }
+
+
 }

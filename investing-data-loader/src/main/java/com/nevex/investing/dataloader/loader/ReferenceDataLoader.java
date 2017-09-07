@@ -43,7 +43,7 @@ public class ReferenceDataLoader extends DataLoaderWorker {
                     stockExchangeAdminService.addExchange(se.getId(), se.name());
                 } catch (ServiceException serviceEx ) {
                     // Don't continue...
-                    throw new DataLoaderWorkerException("Could not add exchange ["+se+"] to database", serviceEx);
+                    throw new DataLoaderWorkerException("Could not addEvent exchange ["+se+"] to database", serviceEx);
                 }
                 stockExchangesAdded++;
             }

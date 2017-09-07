@@ -1,8 +1,8 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.PropertyNames;
-import com.nevex.investing.event.EventManager;
-import com.nevex.investing.event.type.DailyStockPriceUpdateProcessor;
+import com.nevex.investing.event.DailyStockPriceEventProcessor;
+import com.nevex.investing.event.type.DailyStockPriceUpdateConsumer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,18 +23,19 @@ import java.util.stream.Collectors;
 public class EventConfiguration {
 
     @Bean
-    EventManager eventManager(ApplicationContext applicationContext) throws BeansException {
+    DailyStockPriceEventProcessor dailyStockPriceEventProcessor(
+            @Autowired(required = false) Set<DailyStockPriceUpdateConsumer> dailyStockPriceUpdateConsumers) {
 
-        Set<DailyStockPriceUpdateProcessor> dailyStockPriceProcessors = getSetOf(applicationContext, DailyStockPriceUpdateProcessor.class);
+//        Set<DailyStockPriceUpdateConsumer> dailyStockPriceProcessors = setOf(applicationContext, DailyStockPriceUpdateConsumer.class);
 
-        return new EventManager(dailyStockPriceProcessors);
+        return new DailyStockPriceEventProcessor(dailyStockPriceUpdateConsumers);
     }
 
-    private <T> Set<T> getSetOf(ApplicationContext applicationContext, Class<T> clazz) throws BeansException {
-        Map<String, T> mapOfClasses = applicationContext.getBeansOfType(clazz);
-        if ( mapOfClasses != null && !mapOfClasses.isEmpty()) {
-            return mapOfClasses.values().stream().filter(c -> c != null).collect(Collectors.toSet());
-        }
-        return new HashSet<>();
-    }
+//    private <T> Set<T> setOf(ApplicationContext applicationContext, Class<T> clazz) throws BeansException {
+//        Map<String, T> mapOfClasses = applicationContext.getBeansOfType(clazz);
+//        if ( mapOfClasses != null && !mapOfClasses.isEmpty()) {
+//            return mapOfClasses.values().stream().filter(c -> c != null).collect(Collectors.toSet());
+//        }
+//        return new HashSet<>();
+//    }
 }

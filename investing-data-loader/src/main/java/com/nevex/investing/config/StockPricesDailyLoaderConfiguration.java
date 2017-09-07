@@ -4,7 +4,7 @@ import com.nevex.investing.api.tiingo.TiingoApiClient;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.dataloader.loader.DailyStockPriceLoader;
-import com.nevex.investing.event.EventManager;
+import com.nevex.investing.event.DailyStockPriceEventProcessor;
 import com.nevex.investing.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ class StockPricesDailyLoaderConfiguration {
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
     @Autowired
-    private EventManager eventManager;
+    private DailyStockPriceEventProcessor dailyStockPriceEventProcessor;
 
     @Valid
     @NotNull
@@ -66,7 +66,7 @@ class StockPricesDailyLoaderConfiguration {
     DailyStockPriceLoader currentStockPriceLoader() {
         // TODO: This loader is getting too big!
         return new DailyStockPriceLoader(tickersRepository, tiingoApiClient,
-                stockPriceAdminService, dataLoaderService, eventManager, waitTimeBetweenTickersMs, forceStartOnAppStartup);
+                stockPriceAdminService, dataLoaderService, dailyStockPriceEventProcessor, waitTimeBetweenTickersMs, forceStartOnAppStartup);
     }
 
     public void setEnabled(Boolean enabled) {
