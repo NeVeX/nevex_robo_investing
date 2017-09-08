@@ -86,16 +86,11 @@ public class DailyStockPriceChangeProcessor implements DailyStockPriceUpdateCons
 
     private StockPriceAverages.Result calculateAverages(Set<StockPrice> prices) {
         final StockPriceAverages.Calculator calc = new StockPriceAverages.Calculator();
-        Optional<StockPriceAverages> pricesAdded = prices.stream()
+        Optional<StockPriceAverages.Result> averagesResult = prices.stream()
                 .map(StockPriceAverages::new)
-                .reduce(calc::add);
-        if ( pricesAdded.isPresent()) {
-            return calc.calcAverages(pricesAdded.get());
-        }
-        return null;
+                .reduce(calc::add)
+                .map(calc::calcAverages);
+        return averagesResult.isPresent() ? averagesResult.get() : null;
     }
-
-
-
 
 }
