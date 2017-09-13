@@ -4,9 +4,11 @@ import com.nevex.investing.database.StockPricesHistoricalRepository;
 import com.nevex.investing.database.StockPricesRepository;
 import com.nevex.investing.database.entity.StockPriceEntity;
 import com.nevex.investing.database.entity.StockPriceHistoricalEntity;
+import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.service.exception.TickerNotFoundException;
 import com.nevex.investing.service.model.StockPrice;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -57,8 +59,8 @@ public class StockPriceService {
     }
 
     private List<StockPrice> getHistoricalPrices(int tickerId, String tickerSymbol, int maxDays) {
-        PageRequest pageRequest = new PageRequest(0, maxDays); // Get a year's worth
-        List<StockPriceHistoricalEntity> historicalEntities = stockPricesHistoricalRepository.findAllByTickerId(tickerId, pageRequest);
+        Pageable pageable = new PageRequest(0, maxDays);
+        List<StockPriceHistoricalEntity> historicalEntities = stockPricesHistoricalRepository.findAllByTickerId(tickerId, pageable);
         if ( historicalEntities == null || historicalEntities.isEmpty()) {
             return new ArrayList<>();
         }

@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 @Configuration
 @ConditionalOnProperty(value = PropertyNames.NEVEX_INVESTING+".events.configuration-enabled", havingValue = "true")
-public class EventConfiguration {
+class EventConfiguration {
 
     @Bean
     DailyStockPriceEventProcessor dailyStockPriceEventProcessor(

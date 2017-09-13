@@ -25,7 +25,7 @@ import java.util.Map;
  * Created by Mark Cunningham on 8/9/2017.
  */
 @Configuration
-public class DataLoaderConfiguration {
+class DataLoaderConfiguration {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -41,10 +41,6 @@ public class DataLoaderConfiguration {
     private TickerAdminService tickerAdminService;
     @Autowired
     private StockExchangeAdminService stockExchangeAdminService;
-
-    @Valid
-    @Min(value = 0, message = "Invalid wait time in ms specified")
-    private Long waitTimeBetweenTickersMs;
 
     @PostConstruct
     void init() {

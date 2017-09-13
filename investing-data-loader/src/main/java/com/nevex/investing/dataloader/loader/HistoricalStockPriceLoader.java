@@ -6,6 +6,7 @@ import com.nevex.investing.api.tiingo.model.TiingoPriceDto;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
+import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ import java.util.Set;
 public class HistoricalStockPriceLoader extends DataLoaderWorker {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HistoricalStockPriceLoader.class);
-    private final static int DEFAULT_MAX_DAYS_HISTORICAL = 365;
+    private final static int DEFAULT_MAX_DAYS_HISTORICAL = TimePeriod.OneYear.getDays();
     private final TickersRepository tickersRepository;
     private final TiingoApiClient tiingoApiClient;
     private final StockPriceAdminService stockPriceAdminService;

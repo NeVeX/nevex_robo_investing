@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Mark Cunningham on 9/7/2017.
@@ -30,7 +32,36 @@ public enum TimePeriod {
         return title;
     }
 
-    public long getDays() {
+    public int getDays() {
         return days;
     }
+
+    /**
+     * Given an ordered collection, where each element represents a day, this will split the collection
+     * into a map of each defined period.
+     * If there is not enough elements to fill the time period, the time period is not returned
+     */
+    public static <T extends Comparable<T>> Map<TimePeriod, Set<T>> groupDailyElementsIntoExactBuckets(Collection<T> collection) {
+
+        Map<TimePeriod, Set<T>> periodBuckets = new HashMap<>();
+        periodBuckets.put(TimePeriod.SevenDays, new HashSet<>());
+        periodBuckets.put(TimePeriod.OneMonth, new HashSet<>());
+        periodBuckets.put(TimePeriod.ThreeMonths, new HashSet<>());
+        periodBuckets.put(TimePeriod.SixMonths, new HashSet<>());
+        periodBuckets.put(TimePeriod.OneYear, new HashSet<>());
+
+        int counter = 0;
+        for ( T data : collection) {
+            if ( counter < TimePeriod.SevenDays.getDays()) { periodBuckets.get(TimePeriod.SevenDays).add(data); }
+            if ( counter < TimePeriod.OneMonth.getDays()) { periodBuckets.get(TimePeriod.OneMonth).add(data); }
+            if ( counter < TimePeriod.ThreeMonths.getDays() ) { periodBuckets.get(TimePeriod.ThreeMonths).add(data); }
+            if ( counter < TimePeriod.SixMonths.getDays()) { periodBuckets.get(TimePeriod.SixMonths).add(data); }
+            if ( counter < TimePeriod.OneYear.getDays()) { periodBuckets.get(TimePeriod.OneYear).add(data); }
+            counter++;
+        }
+
+        // Remove any periods that do not have the expected number of elements
+        return periodBuckets.entrySet().stream().filter(e -> e.getKey().getDays() == e.getValue().size()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
 }

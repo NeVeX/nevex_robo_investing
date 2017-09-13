@@ -13,6 +13,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -33,7 +34,7 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
     private final ConcurrentHashMap<String, Integer> symbolToTickerIdMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Integer, String> tickerIdToSymbolMap = new ConcurrentHashMap<>();
     private final static int DEFAULT_PAGE_ELEMENT_SIZE = 20;
-    private final static PageRequest DEFAULT_PAGE_REQUEST = new PageRequest(0, DEFAULT_PAGE_ELEMENT_SIZE);
+    private final static Pageable DEFAULT_PAGEABLE = new PageRequest(0, DEFAULT_PAGE_ELEMENT_SIZE);
     private final TickersRepository tickersRepository;
     private final ReadWriteLock tickersLock = new ReentrantReadWriteLock();
     private Set<Ticker> allTickers = new HashSet<>();
@@ -151,7 +152,7 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
      * Returns found tickers using a default pageable result
      */
     public PageableData<Ticker> getTickers() {
-        return getTickers(DEFAULT_PAGE_REQUEST);
+        return getTickers(DEFAULT_PAGEABLE);
     }
 
     /**
@@ -161,8 +162,8 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
         return getTickers(new PageRequest(page, DEFAULT_PAGE_ELEMENT_SIZE));
     }
 
-    private PageableData<Ticker> getTickers(PageRequest pageRequest) {
-        Page<TickerEntity> foundTickers = tickersRepository.findAll(pageRequest);
+    private PageableData<Ticker> getTickers(Pageable pageable) {
+        Page<TickerEntity> foundTickers = tickersRepository.findAll(pageable);
 
         if ( foundTickers == null || !foundTickers.hasContent()) {
             return PageableData.empty();

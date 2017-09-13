@@ -19,7 +19,7 @@ abstract class EventProcessor<C extends Consumer<D>, D> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(EventProcessor.class);
     private final BlockingQueue<D> queue;
-    private Set<C> consumers = new HashSet<>();
+    private final Set<C> consumers = new HashSet<>();
     private final ExecutorService executorService;
 
     abstract String getName();
@@ -49,7 +49,7 @@ abstract class EventProcessor<C extends Consumer<D>, D> {
                     consumers.stream().forEach(c -> c.accept(data));
                 } catch (Exception e) {
                     LOGGER.error("Exception raised while processing data [{}] for [{}] - will ignore and continue. Reason: {}",
-                            data, getName(), e.getMessage());
+                            data, getName(), e);
                 }
             }
             LOGGER.warn("The [{}] will not process any more data since the thread was interrupted", getName());
@@ -68,9 +68,13 @@ abstract class EventProcessor<C extends Consumer<D>, D> {
     }
 
     /**
-     * Inserts the data into the queue to be processed by all registered consumers
+     * Inserts the data into the queue to be processed by all registered consumers.
+     * Returns true of false to denote if the message was placed on the queue
      */
     public boolean addEvent(D dataEntry) {
+
+        if ( consumers.isEmpty()) { return false; }
+
         try {
             queue.put(dataEntry);
             return true;

@@ -13,18 +13,18 @@ import org.springframework.context.annotation.Configuration;
  * Created by Mark Cunningham on 9/6/2017.
  */
 @Configuration
-@ConditionalOnProperty(value = PropertyNames.NEVEX_INVESTING+".analyzers.configuration-enabled", havingValue = "true")
-public class AnalyzerConfiguration {
+@ConditionalOnProperty(value = PropertyNames.NEVEX_INVESTING+".processors.configuration-enabled", havingValue = "true")
+class AnalyzerConfiguration {
 
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
     @Autowired
     private TickerService tickerService;
 
-//    @Bean
-//    @ConditionalOnProperty(value = PropertyNames.NEVEX_INVESTING+".analyzers.daily-stock-price-analyzer.enabled", havingValue = "true")
-//    DailyStockPriceChangeProcessor dailyStockPriceAnalyzer() {
-//        return new DailyStockPriceChangeProcessor(stockPriceAdminService, tickerService);
-//    }
+    @Bean
+    @ConditionalOnProperty(value = PropertyNames.NEVEX_INVESTING+".processors.daily-stock-price-processor.enabled", havingValue = "true")
+    DailyStockPriceChangeProcessor dailyStockPriceProcessor() {
+        return new DailyStockPriceChangeProcessor(stockPriceAdminService, tickerService);
+    }
 
 }

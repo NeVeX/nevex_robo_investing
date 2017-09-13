@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * Created by Mark Cunningham on 9/4/2017.
  */
 @Configuration
-public class DataLoaderServicesConfiguration {
+class DataLoaderServicesConfiguration {
 
     @Autowired
     private TickerFundamentalsRepository tickerFundamentalsRepository;

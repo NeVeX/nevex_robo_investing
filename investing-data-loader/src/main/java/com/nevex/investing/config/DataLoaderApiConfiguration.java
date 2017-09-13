@@ -20,7 +20,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = PropertyNames.NEVEX_INVESTING)
 @Configuration
-public class DataLoaderApiConfiguration {
+class DataLoaderApiConfiguration {
 
     @NotBlank(message = "The api-admin-key is blank")
     private String apiAdminKey;

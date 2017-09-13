@@ -2,7 +2,9 @@ package com.nevex.investing.database;
 
 import com.nevex.investing.database.entity.StockPriceHistoricalEntity;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +18,9 @@ import java.util.Optional;
  * Created by Mark Cunningham on 8/8/2017.
  */
 @Repository
-public interface StockPricesHistoricalRepository extends CrudRepository<StockPriceHistoricalEntity, BigInteger> {
+public interface StockPricesHistoricalRepository extends PagingAndSortingRepository<StockPriceHistoricalEntity, BigInteger> {
 
-    List<StockPriceHistoricalEntity> findAllByTickerId(int tickerId, PageRequest pageRequest);
+    List<StockPriceHistoricalEntity> findAllByTickerId(int tickerId, Pageable pageable);
 
     Optional<StockPriceHistoricalEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
 

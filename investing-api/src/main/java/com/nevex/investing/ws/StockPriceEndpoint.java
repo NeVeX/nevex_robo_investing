@@ -1,5 +1,6 @@
 package com.nevex.investing.ws;
 
+import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.service.StockPriceService;
 import com.nevex.investing.service.exception.TickerNotFoundException;
 import com.nevex.investing.service.model.StockPrice;
@@ -68,7 +69,7 @@ public class StockPriceEndpoint {
         String symbol = StringUtils.trim(inputSymbol).toUpperCase();
         List<StockPrice> historicalPrices;
         try {
-            historicalPrices = stockPriceService.getHistoricalPrices(symbol, 365);
+            historicalPrices = stockPriceService.getHistoricalPrices(symbol, TimePeriod.OneYear.getDays());
         } catch (TickerNotFoundException tickerNotFound) {
             return ResponseEntity.notFound().build();
         }

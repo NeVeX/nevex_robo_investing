@@ -23,7 +23,7 @@ import static com.nevex.investing.PropertyNames.NEVEX_INVESTING;
 @Configuration
 @ConfigurationProperties(prefix = TickerHistoricalFundamentalsLoaderConfiguration.CONFIGURATION_PREFIX_KEY)
 @ConditionalOnProperty(name = TickerHistoricalFundamentalsLoaderConfiguration.CONFIGURATION_ENABLED_KEY, havingValue = "true")
-public class TickerHistoricalFundamentalsLoaderConfiguration {
+class TickerHistoricalFundamentalsLoaderConfiguration {
 
     static final String CONFIGURATION_PREFIX_KEY = NEVEX_INVESTING + ".ticker-historical-fundamentals-loader";
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";

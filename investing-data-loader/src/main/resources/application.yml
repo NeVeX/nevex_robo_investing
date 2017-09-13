@@ -27,9 +27,9 @@ nevex-investing:
   api-admin-key: space
   events:
     configuration-enabled: true
-  analyzers:
+  processors:
     configuration-enabled: true
-    daily-stock-price-analyzer:
+    daily-stock-price-processor:
       enabled: true
 
   ticker-data-loader:
