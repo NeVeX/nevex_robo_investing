@@ -1,6 +1,7 @@
 package com.nevex.investing.dataloader.loader;
 
 import com.nevex.investing.TestingControlUtil;
+import com.nevex.investing.api.ApiStockPrice;
 import com.nevex.investing.api.tiingo.TiingoApiClient;
 import com.nevex.investing.api.tiingo.model.TiingoPriceDto;
 import com.nevex.investing.database.TickersRepository;
@@ -66,7 +67,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
             return;
         }
 
-        Set<TiingoPriceDto> historicalPrices;
+        Set<ApiStockPrice> historicalPrices;
         try {
             historicalPrices = tiingoApiClient.getHistoricalPricesForSymbol(tickerEntity.getSymbol(), DEFAULT_MAX_DAYS_HISTORICAL);
 

@@ -1,6 +1,8 @@
 package com.nevex.investing.dataloader.loader;
 
 import com.nevex.investing.TestingControlUtil;
+import com.nevex.investing.api.ApiStockPrice;
+import com.nevex.investing.api.ApiStockPriceClient;
 import com.nevex.investing.api.tiingo.TiingoApiClient;
 import com.nevex.investing.api.tiingo.model.TiingoPriceDto;
 import com.nevex.investing.database.TickersRepository;
@@ -23,13 +25,13 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
     private final static Logger LOGGER = LoggerFactory.getLogger(DailyStockPriceLoader.class);
     private final AtomicBoolean isUnlockedFromDataLoaders = new AtomicBoolean(false);
     private final TickersRepository tickersRepository;
-    private final TiingoApiClient tiingoApiClient;
+    private final ApiStockPriceClient apiStockPriceClient;
     private final DailyStockPriceEventProcessor dailyStockPriceEventProcessor;
     private final StockPriceAdminService stockPriceAdminService;
     private final long waitTimeBetweenTickersMs;
 
     public DailyStockPriceLoader(TickersRepository tickersRepository,
-                                 TiingoApiClient tiingoApiClient,
+                                 ApiStockPriceClient apiStockPriceClient,
                                  StockPriceAdminService stockPriceAdminService,
                                  DataLoaderService dataLoaderService,
                                  DailyStockPriceEventProcessor dailyStockPriceEventProcessor,
@@ -37,13 +39,13 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
                                  boolean forceStartOnActivation) {
         super(dataLoaderService, forceStartOnActivation);
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
-        if ( tiingoApiClient == null) { throw new IllegalArgumentException("Provided tiingoApiClient is null"); }
+        if ( apiStockPriceClient == null) { throw new IllegalArgumentException("Provided apiStockPriceClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
         if ( dailyStockPriceEventProcessor == null) { throw new IllegalArgumentException("Provided dailyStockPriceEventProcessor is null"); }
         if ( waitTimeBetweenTickersMs < 0) { throw new IllegalArgumentException("Provided waitTimeBetweenTickersMs ["+waitTimeBetweenTickersMs+"] is invalid"); }
         this.waitTimeBetweenTickersMs = waitTimeBetweenTickersMs;
         this.tickersRepository = tickersRepository;
-        this.tiingoApiClient = tiingoApiClient;
+        this.apiStockPriceClient = apiStockPriceClient;
         this.stockPriceAdminService = stockPriceAdminService;
         this.dailyStockPriceEventProcessor = dailyStockPriceEventProcessor;
     }
@@ -96,7 +98,7 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
         }
 
         try {
-            Optional<TiingoPriceDto> tiingoPriceOpt = tiingoApiClient.getCurrentPriceForSymbol(tickerEntity.getSymbol());
+            Optional<ApiStockPrice> tiingoPriceOpt = apiStockPriceClient.getPriceForSymbol(tickerEntity.getSymbol());
             if ( tiingoPriceOpt.isPresent()) {
                 stockPriceAdminService.saveNewCurrentPrice(tickerEntity.getSymbol(), tiingoPriceOpt.get());
                 dailyStockPriceEventProcessor.addEvent(tickerEntity.getId());

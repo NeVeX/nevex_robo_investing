@@ -67,8 +67,8 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
 
     @Override
     DataLoaderWorkerResult doScheduledWork() throws DataLoaderWorkerException {
-        super.processAllPagesInBulkForRepo(tickersRepository, this::processEntities, TimeUnit.SECONDS.toMillis(10), 100);
-        return DataLoaderWorkerResult.nothingDone();
+        int tickersProcessed = super.processAllPagesInBulkForRepo(tickersRepository, this::processEntities, TimeUnit.SECONDS.toMillis(10), 100);
+        return new DataLoaderWorkerResult(tickersProcessed);
     }
 
     private void processEntities(List<TickerEntity> tickerEntities) {

@@ -11,7 +11,7 @@ import java.time.OffsetDateTime;
  * Created by Mark Cunningham on 8/9/2017.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TiingoPriceDto extends ApiStockPrice {
+public class TiingoPriceDto {
 
     @JsonProperty("date")
     private OffsetDateTime date;
@@ -144,5 +144,22 @@ public class TiingoPriceDto extends ApiStockPrice {
         this.splitFactor = splitFactor;
     }
 
-
+    @Override
+    public String toString() {
+        return "TiingoPriceDto{" +
+                "date=" + date +
+                ", open=" + open +
+                ", high=" + high +
+                ", low=" + low +
+                ", close=" + close +
+                ", volume=" + volume +
+                ", adjOpen=" + adjOpen +
+                ", adjHigh=" + adjHigh +
+                ", adjLow=" + adjLow +
+                ", adjClose=" + adjClose +
+                ", adjVolume=" + adjVolume +
+                ", divCash=" + divCash +
+                ", splitFactor=" + splitFactor +
+                '}';
+    }
 }

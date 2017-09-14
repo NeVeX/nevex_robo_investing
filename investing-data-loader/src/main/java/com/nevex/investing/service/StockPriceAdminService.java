@@ -96,7 +96,7 @@ public class StockPriceAdminService extends StockPriceService {
 
         // check if we already have this saved
         Optional<StockPriceHistoricalEntity> existingHistPriceOpt =
-                stockPricesHistoricalRepository.findByTickerIdAndDate(tickerId, price.getDate().toLocalDate());
+                stockPricesHistoricalRepository.findByTickerIdAndDate(tickerId, price.getDate());
 
         if ( existingHistPriceOpt.isPresent()) {
             StockPriceHistoricalEntity existingHistPrice = existingHistPriceOpt.get();
@@ -115,7 +115,7 @@ public class StockPriceAdminService extends StockPriceService {
 
         StockPriceHistoricalEntity entity = new StockPriceHistoricalEntity();
         entity.setTickerId(tickerId);
-        entity.setDate(tPrice.getDate().toLocalDate());
+        entity.setDate(tPrice.getDate());
 
         entity.setClose(tPrice.getClose());
         entity.setOpen(tPrice.getOpen());
@@ -123,23 +123,22 @@ public class StockPriceAdminService extends StockPriceService {
         entity.setLow(tPrice.getLow());
         entity.setVolume(tPrice.getVolume());
 
-        entity.setAdjClose(tPrice.getAdjClose());
-        entity.setAdjHigh(tPrice.getAdjHigh());
-        entity.setAdjLow(tPrice.getAdjLow());
-        entity.setAdjOpen(tPrice.getAdjOpen());
-        entity.setAdjVolume(tPrice.getAdjVolume());
-
-        entity.setDividendCash(tPrice.getDivCash());
-        entity.setSplitFactor(tPrice.getSplitFactor());
+        entity.setAdjClose(tPrice.getAdjustedClose());
+//        entity.setAdjHigh(tPrice.getAdjHigh());
+//        entity.setAdjLow(tPrice.getAdjLow());
+//        entity.setAdjOpen(tPrice.getAdjOpen());
+//        entity.setAdjVolume(tPrice.getAdjVolume());
+//
+//        entity.setDividendCash(tPrice.getDivCash());
+//        entity.setSplitFactor(tPrice.getSplitFactor());
         return entity;
-
     }
 
     private StockPriceEntity convertToCurrentEntity(int tickerId, ApiStockPrice tPrice) {
 
         StockPriceEntity entity = new StockPriceEntity();
         entity.setTickerId(tickerId);
-        entity.setDate(tPrice.getDate().toLocalDate());
+        entity.setDate(tPrice.getDate());
 
         entity.setClose(tPrice.getClose());
         entity.setOpen(tPrice.getOpen());
@@ -147,14 +146,14 @@ public class StockPriceAdminService extends StockPriceService {
         entity.setLow(tPrice.getLow());
         entity.setVolume(tPrice.getVolume());
 
-        entity.setAdjClose(tPrice.getAdjClose());
-        entity.setAdjHigh(tPrice.getAdjHigh());
-        entity.setAdjLow(tPrice.getAdjLow());
-        entity.setAdjOpen(tPrice.getAdjOpen());
-        entity.setAdjVolume(tPrice.getAdjVolume());
-
-        entity.setDividendCash(tPrice.getDivCash());
-        entity.setSplitFactor(tPrice.getSplitFactor());
+        entity.setAdjClose(tPrice.getAdjustedClose());
+//        entity.setAdjHigh(tPrice.getAdjHigh());
+//        entity.setAdjLow(tPrice.getAdjLow());
+//        entity.setAdjOpen(tPrice.getAdjOpen());
+//        entity.setAdjVolume(tPrice.getAdjVolume());
+//
+//        entity.setDividendCash(tPrice.getDivCash());
+//        entity.setSplitFactor(tPrice.getSplitFactor());
         return entity;
 
     }

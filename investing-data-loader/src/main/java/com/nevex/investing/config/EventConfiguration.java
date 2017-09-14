@@ -25,17 +25,7 @@ class EventConfiguration {
     @Bean
     DailyStockPriceEventProcessor dailyStockPriceEventProcessor(
             @Autowired(required = false) Set<DailyStockPriceUpdateConsumer> dailyStockPriceUpdateConsumers) {
-
-//        Set<DailyStockPriceUpdateConsumer> dailyStockPriceProcessors = setOf(applicationContext, DailyStockPriceUpdateConsumer.class);
-
         return new DailyStockPriceEventProcessor(dailyStockPriceUpdateConsumers);
     }
 
-//    private <T> Set<T> setOf(ApplicationContext applicationContext, Class<T> clazz) throws BeansException {
-//        Map<String, T> mapOfClasses = applicationContext.getBeansOfType(clazz);
-//        if ( mapOfClasses != null && !mapOfClasses.isEmpty()) {
-//            return mapOfClasses.values().stream().filter(c -> c != null).collect(Collectors.toSet());
-//        }
-//        return new HashSet<>();
-//    }
 }

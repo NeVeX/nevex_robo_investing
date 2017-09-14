@@ -33,18 +33,24 @@ public class StockPriceHistoricalEntity implements StockPriceBaseEntity {
     private long volume;
 
     @Column(name = "adj_open")
+    @Deprecated
     private BigDecimal adjOpen;
     @Column(name = "adj_high")
+    @Deprecated
     private BigDecimal adjHigh;
     @Column(name = "adj_low")
+    @Deprecated
     private BigDecimal adjLow;
     @Column(name = "adj_close")
     private BigDecimal adjClose;
     @Column(name = "adj_volume")
+    @Deprecated
     private Long adjVolume;
     @Column(name = "dividend_cash")
+    @Deprecated
     private BigDecimal dividendCash;
     @Column(name = "split_factor")
+    @Deprecated
     private BigDecimal splitFactor;
 
     public long getId() {
@@ -119,28 +125,34 @@ public class StockPriceHistoricalEntity implements StockPriceBaseEntity {
     }
 
     @Override
+    @Deprecated
     public BigDecimal getAdjOpen() {
         return adjOpen;
     }
 
+    @Deprecated
     public void setAdjOpen(BigDecimal adjOpen) {
         this.adjOpen = adjOpen;
     }
 
     @Override
+    @Deprecated
     public BigDecimal getAdjHigh() {
         return adjHigh;
     }
 
+    @Deprecated
     public void setAdjHigh(BigDecimal adjHigh) {
         this.adjHigh = adjHigh;
     }
 
     @Override
+    @Deprecated
     public BigDecimal getAdjLow() {
         return adjLow;
     }
 
+    @Deprecated
     public void setAdjLow(BigDecimal adjLow) {
         this.adjLow = adjLow;
     }
@@ -155,28 +167,34 @@ public class StockPriceHistoricalEntity implements StockPriceBaseEntity {
     }
 
     @Override
+    @Deprecated
     public Long getAdjVolume() {
         return adjVolume;
     }
 
+    @Deprecated
     public void setAdjVolume(Long adjVolume) {
         this.adjVolume = adjVolume;
     }
 
     @Override
+    @Deprecated
     public BigDecimal getDividendCash() {
         return dividendCash;
     }
 
+    @Deprecated
     public void setDividendCash(BigDecimal dividendCash) {
         this.dividendCash = dividendCash;
     }
 
     @Override
+    @Deprecated
     public BigDecimal getSplitFactor() {
         return splitFactor;
     }
 
+    @Deprecated
     public void setSplitFactor(BigDecimal splitFactor) {
         this.splitFactor = splitFactor;
     }

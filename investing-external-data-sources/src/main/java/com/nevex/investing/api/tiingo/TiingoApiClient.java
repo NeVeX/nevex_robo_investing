@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nevex.investing.api.ApiException;
+import com.nevex.investing.api.ApiStockPrice;
+import com.nevex.investing.api.ApiStockPriceClient;
 import com.nevex.investing.api.tiingo.model.TiingoPriceDto;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -16,13 +18,14 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 /**
  * Created by Mark Cunningham on 8/8/2017.
  */
-public class TiingoApiClient {
+public class TiingoApiClient implements ApiStockPriceClient {
 
     private final OkHttpClient httpClient = new OkHttpClient();
     private final DateTimeFormatter HISTORICAL_DATE_FORMATTER = DateTimeFormatter.ISO_DATE;
@@ -41,15 +44,15 @@ public class TiingoApiClient {
         objectMapper.registerModule(new JavaTimeModule()); // For better support of LocalDate...etc
     }
 
-    public Optional<TiingoPriceDto> getCurrentPriceForSymbol(String symbol) throws ApiException {
+    public Optional<ApiStockPrice> getPriceForSymbol(String symbol) throws ApiException {
 
         String url = StringUtils.replace(currentStockPriceUrl, "{SYMBOL}", symbol);
         Request request = buildDefaultRequest().url(url).build();
 
-        TiingoPriceDto priceDto = null;
-        Set<TiingoPriceDto> prices = getStockPrices(request);
+        ApiStockPrice priceDto = null;
+        Set<ApiStockPrice> prices = convertToApiStockPrices(getStockPrices(request));
         if ( prices != null ) {
-            Optional<TiingoPriceDto> firstPrice = prices.stream().findFirst();
+            Optional<ApiStockPrice> firstPrice = prices.stream().findFirst();
             if ( firstPrice.isPresent()) {
                 priceDto = firstPrice.get();
             }
@@ -57,7 +60,7 @@ public class TiingoApiClient {
         return Optional.ofNullable(priceDto);
     }
 
-    public Set<TiingoPriceDto> getHistoricalPricesForSymbol(String symbol, int maxDaysToFetch) throws ApiException {
+    public Set<ApiStockPrice> getHistoricalPricesForSymbol(String symbol, int maxDaysToFetch) throws ApiException {
         // Build the date to use
         LocalDate todaysDate = LocalDate.now();
         LocalDate earliestDate = todaysDate.minus(maxDaysToFetch, ChronoUnit.DAYS);
@@ -69,7 +72,7 @@ public class TiingoApiClient {
         url = StringUtils.replace(url, "{START_DATE}", earliestDateAsString);
         url = StringUtils.replace(url, "{END_DATE}", todaysDateAsString);
         Request request = buildDefaultRequest().url(url).build();
-        return getStockPrices(request);
+        return convertToApiStockPrices(getStockPrices(request));
     }
 
     private Set<TiingoPriceDto> getStockPrices(Request request) throws ApiException {
@@ -91,6 +94,30 @@ public class TiingoApiClient {
         return new Request.Builder()
                 .addHeader("Authorization", "Token "+apiKey)
                 .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+    }
+
+    private Set<ApiStockPrice> convertToApiStockPrices(Set<TiingoPriceDto> tiingoPriceDtos) throws ApiException {
+        Set<ApiStockPrice> convertedPrices = new HashSet<>();
+        for ( TiingoPriceDto tiingoPriceDto : tiingoPriceDtos ) {
+            convertedPrices.add(convertToApiStockPrice(tiingoPriceDto));
+        }
+        return convertedPrices;
+    }
+
+    private ApiStockPrice convertToApiStockPrice(TiingoPriceDto priceDto) throws ApiException {
+        try {
+            return ApiStockPrice.builder()
+                    .withDate(priceDto.getDate().toLocalDate())
+                    .withAdjustedClose(priceDto.getAdjClose())
+                    .withClose(priceDto.getClose())
+                    .withHigh(priceDto.getHigh())
+                    .withLow(priceDto.getLow())
+                    .withOpen(priceDto.getOpen())
+                    .withVolume(priceDto.getVolume())
+                    .build();
+        } catch (ApiStockPrice.BuilderException be) {
+            throw new ApiException("Could not convert Tiingo stock price data into "+ApiStockPrice.class.getSimpleName(), be);
+        }
     }
 
 }
