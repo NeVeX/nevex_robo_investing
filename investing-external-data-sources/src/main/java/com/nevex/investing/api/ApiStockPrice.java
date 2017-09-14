@@ -3,6 +3,8 @@ package com.nevex.investing.api;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Created by Mark Cunningham on 8/9/2017.
@@ -36,6 +38,13 @@ public final class ApiStockPrice implements Comparable<ApiStockPrice> {
 
     public final int compareTo(ApiStockPrice other) {
         return date.compareTo(other.date) * -1; // reverse the natural order (gets latest date first)
+    }
+
+    public static Optional<ApiStockPrice> getLatestPrice(Set<ApiStockPrice> prices) {
+        if ( prices != null ) {
+            return prices.stream().findFirst();
+        }
+        return Optional.empty();
     }
 
     public LocalDate getDate() {

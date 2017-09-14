@@ -1,6 +1,7 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.api.tiingo.TiingoApiClient;
+import com.nevex.investing.api.yahoo.YahooApiClient;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.dataloader.loader.HistoricalStockPriceLoader;

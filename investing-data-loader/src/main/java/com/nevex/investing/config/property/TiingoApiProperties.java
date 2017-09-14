@@ -1,34 +1,25 @@
-package com.nevex.investing.config;
+package com.nevex.investing.config.property;
 
 import com.nevex.investing.PropertyNames;
-import com.nevex.investing.api.tiingo.TiingoApiClient;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-import static com.nevex.investing.config.TiingoApiConfiguration.TIINGO_PREFIX;
-
 /**
- * Created by Mark Cunningham on 8/8/2017.
+ * Created by Mark Cunningham on 9/14/2017.
  */
 @Validated
 @Configuration
-@ConfigurationProperties(prefix = PropertyNames.NEVEX_INVESTING + TIINGO_PREFIX)
-public class TiingoApiConfiguration {
+@ConfigurationProperties(prefix = TiingoApiProperties.TIINGO_PREFIX)
+public class TiingoApiProperties {
 
-    static final String TIINGO_PREFIX = ".tiingo";
+    static final String TIINGO_PREFIX = PropertyNames.NEVEX_INVESTING+".api-clients.tiingo";
 
     @NotBlank
     private String apiKey;
     @NotBlank
     private String host;
-
-    @Bean
-    TiingoApiClient tiingoApiClient() {
-        return new TiingoApiClient(apiKey, host);
-    }
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
@@ -38,11 +29,20 @@ public class TiingoApiConfiguration {
         this.host = host;
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
     @Override
     public String toString() {
-        return "TiingoApiConfiguration{" +
+        return "TiingoApiProperties{" +
                 "apiKey='" + apiKey + '\'' +
                 ", host='" + host + '\'' +
                 '}';
     }
+
 }

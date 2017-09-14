@@ -3,7 +3,6 @@ package com.nevex.investing.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nevex.investing.PropertyNames;
 import com.nevex.investing.api.usfundamentals.UsFundamentalsApiClient;
-import com.nevex.investing.config.property.TickerFundamentalsLoaderProperties;
 import com.nevex.investing.database.DataLoaderErrorsRepository;
 import com.nevex.investing.database.DataLoaderRunsRepository;
 import com.nevex.investing.ws.DataLoaderAdminEndpoint;
@@ -20,7 +19,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = PropertyNames.NEVEX_INVESTING)
 @Configuration
-class DataLoaderApiConfiguration {
+class ControllerConfiguration {
 
     @NotBlank(message = "The api-admin-key is blank")
     private String apiAdminKey;
@@ -28,10 +27,6 @@ class DataLoaderApiConfiguration {
     private DataLoaderRunsRepository dataLoaderRunsRepository;
     @Autowired
     private DataLoaderErrorsRepository dataLoaderErrorsRepository;
-    @Autowired
-    private TickerFundamentalsLoaderProperties tickerFundamentalsLoaderProperties;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Bean
     DataLoaderAdminEndpoint dataLoaderAdminEndpoint() {
@@ -42,13 +37,6 @@ class DataLoaderApiConfiguration {
         this.apiAdminKey = apiAdminKey;
     }
 
-    @Bean
-    UsFundamentalsApiClient usFundamentalsApiClient() {
-        return new UsFundamentalsApiClient(
-                tickerFundamentalsLoaderProperties.getHost(),
-                tickerFundamentalsLoaderProperties.getApiKey(),
-                objectMapper
-        );
-    }
+
 
 }

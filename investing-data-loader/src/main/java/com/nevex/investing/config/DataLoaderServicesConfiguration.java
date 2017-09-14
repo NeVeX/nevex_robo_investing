@@ -56,11 +56,6 @@ class DataLoaderServicesConfiguration {
     }
 
     @Bean
-    YahooApiClient yahooApiClient() {
-        return new YahooApiClient();
-    }
-
-    @Bean
     YahooStockInfoService yahooStockInfoService() {
         return new YahooStockInfoService(yahooStockInfoRepository);
     }

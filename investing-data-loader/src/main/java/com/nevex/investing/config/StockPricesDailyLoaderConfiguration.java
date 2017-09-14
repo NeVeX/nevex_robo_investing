@@ -1,14 +1,18 @@
 package com.nevex.investing.config;
 
+import com.nevex.investing.api.ApiStockPriceClient;
 import com.nevex.investing.api.tiingo.TiingoApiClient;
+import com.nevex.investing.api.yahoo.YahooApiClient;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.dataloader.loader.DailyStockPriceLoader;
 import com.nevex.investing.event.DailyStockPriceEventProcessor;
 import com.nevex.investing.service.StockPriceAdminService;
+import com.nevex.investing.service.TickerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -41,11 +45,13 @@ class StockPricesDailyLoaderConfiguration {
     @Autowired
     private TickersRepository tickersRepository;
     @Autowired
-    private TiingoApiClient tiingoApiClient;
+    private YahooApiClient yahooApiClient;
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
     @Autowired
     private DailyStockPriceEventProcessor dailyStockPriceEventProcessor;
+    @Autowired
+    private TickerService tickerService;
 
     @Valid
     @NotNull
@@ -65,8 +71,8 @@ class StockPricesDailyLoaderConfiguration {
     @Bean
     DailyStockPriceLoader currentStockPriceLoader() {
         // TODO: This loader is getting too big!
-        return new DailyStockPriceLoader(tickersRepository, tiingoApiClient,
-                stockPriceAdminService, dataLoaderService, dailyStockPriceEventProcessor, waitTimeBetweenTickersMs, forceStartOnAppStartup);
+        return new DailyStockPriceLoader(tickersRepository, yahooApiClient,
+                stockPriceAdminService, dataLoaderService, dailyStockPriceEventProcessor, tickerService, waitTimeBetweenTickersMs, forceStartOnAppStartup);
     }
 
     public void setEnabled(Boolean enabled) {

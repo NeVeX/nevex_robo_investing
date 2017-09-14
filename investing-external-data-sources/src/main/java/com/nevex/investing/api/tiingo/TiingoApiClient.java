@@ -18,9 +18,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Mark Cunningham on 8/8/2017.
@@ -49,15 +47,17 @@ public class TiingoApiClient implements ApiStockPriceClient {
         String url = StringUtils.replace(currentStockPriceUrl, "{SYMBOL}", symbol);
         Request request = buildDefaultRequest().url(url).build();
 
-        ApiStockPrice priceDto = null;
         Set<ApiStockPrice> prices = convertToApiStockPrices(getStockPrices(request));
-        if ( prices != null ) {
-            Optional<ApiStockPrice> firstPrice = prices.stream().findFirst();
-            if ( firstPrice.isPresent()) {
-                priceDto = firstPrice.get();
-            }
+        return ApiStockPrice.getLatestPrice(prices);
+    }
+
+    @Override
+    public Map<String, Optional<ApiStockPrice>> getPriceForSymbols(List<String> symbols) throws ApiException {
+        Map<String, Optional<ApiStockPrice>> results = new HashMap<>();
+        for (String symbol : symbols) {
+            results.put(symbol, getPriceForSymbol(symbol));
         }
-        return Optional.ofNullable(priceDto);
+        return results;
     }
 
     public Set<ApiStockPrice> getHistoricalPricesForSymbol(String symbol, int maxDaysToFetch) throws ApiException {
@@ -73,6 +73,15 @@ public class TiingoApiClient implements ApiStockPriceClient {
         url = StringUtils.replace(url, "{END_DATE}", todaysDateAsString);
         Request request = buildDefaultRequest().url(url).build();
         return convertToApiStockPrices(getStockPrices(request));
+    }
+
+    @Override
+    public Map<String, Set<ApiStockPrice>> getHistoricalPricesForSymbols(List<String> symbols, int maxDaysToFetch) throws ApiException {
+        Map<String, Set<ApiStockPrice>> results = new HashMap<>();
+        for (String symbol : symbols) {
+            results.put(symbol, getHistoricalPricesForSymbol(symbol, maxDaysToFetch));
+        }
+        return results;
     }
 
     private Set<TiingoPriceDto> getStockPrices(Request request) throws ApiException {
