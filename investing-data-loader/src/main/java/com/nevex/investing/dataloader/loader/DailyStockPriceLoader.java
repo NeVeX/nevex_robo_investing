@@ -36,6 +36,8 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
     private final TickerService tickerService;
     private final long waitTimeBetweenTickersMs;
     private final boolean useBulkMode;
+    private final long waitTimeBetweenBulkMs;
+    private final int bulkAmountPerPage;
 
     public DailyStockPriceLoader(TickersRepository tickersRepository,
                                  ApiStockPriceClient apiStockPriceClient,
@@ -57,6 +59,8 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
         this.dailyStockPriceEventProcessor = dailyStockPriceEventProcessor;
         this.tickerService = tickerService;
         this.useBulkMode = properties.getUseBulkMode();
+        this.waitTimeBetweenBulkMs = properties.getWaitTimeBetweenBulkMs();
+        this.bulkAmountPerPage = properties.getBulkAmountPerPage();
     }
 
     @Override
@@ -97,7 +101,7 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
     private int getAllCurrentPrices() {
         // Fetch all the ticker symbols we have
         if ( useBulkMode ) {
-            return super.processAllPagesInBulkForRepo(tickersRepository, this::loadCurrentPrices, 2000, 50);
+            return super.processAllPagesInBulkForRepo(tickersRepository, this::loadCurrentPrices, waitTimeBetweenBulkMs, bulkAmountPerPage);
         } else {
             return super.processAllPagesIndividuallyForRepo(tickersRepository, this::loadCurrentPrice, waitTimeBetweenTickersMs);
         }

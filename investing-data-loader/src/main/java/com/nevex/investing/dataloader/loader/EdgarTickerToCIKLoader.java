@@ -27,6 +27,7 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
     private final EdgarCikLookupClient edgarCikLookupClient;
     private final EdgarAdminService edgarAdminService;
     private final boolean onlyLookupMissingCiks;
+    private final long waitTimeBetweenTickersMs;
 
     public EdgarTickerToCIKLoader(DataLoaderService dataLoaderService, TickersRepository tickersRepository,
                                   EdgarCikLookupClient edgarCikLookupClient, EdgarAdminService edgarAdminService,
@@ -40,6 +41,7 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
         this.edgarCikLookupClient = edgarCikLookupClient;
         this.edgarAdminService = edgarAdminService;
         this.onlyLookupMissingCiks = properties.getOnlyLookupMissingTickerCiks();
+        this.waitTimeBetweenTickersMs = properties.getWaitTimeBetweenTickersMs();
     }
 
     @Override
@@ -54,7 +56,7 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
 
     @Override
     DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
-        int tickersProcessed = super.processAllPagesIndividuallyForRepo(tickersRepository, this::processTicker, 750);
+        int tickersProcessed = super.processAllPagesIndividuallyForRepo(tickersRepository, this::processTicker, waitTimeBetweenTickersMs);
         return new DataLoaderWorkerResult(tickersProcessed);
     }
 

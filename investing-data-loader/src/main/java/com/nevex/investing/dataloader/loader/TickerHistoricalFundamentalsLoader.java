@@ -30,6 +30,7 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderSchedulingSing
     private final TickerToCikRepository tickerToCikRepository;
     private final TickerService tickerService;
     private final TickerFundamentalsAdminService tickerFundamentalsAdminService;
+    private final long waitTimeBetweenTickersMs;
 
     public TickerHistoricalFundamentalsLoader(DataLoaderService dataLoaderService,
                                               TickerToCikRepository tickerToCikRepository,
@@ -46,6 +47,7 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderSchedulingSing
         this.tickerToCikRepository = tickerToCikRepository;
         this.tickerService = tickerService;
         this.tickerFundamentalsAdminService = tickerFundamentalsAdminService;
+        this.waitTimeBetweenTickersMs = properties.getWaitTimeBetweenTickersMs();
     }
 
     @Override
@@ -71,7 +73,7 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderSchedulingSing
 
     @Override
     DataLoaderWorkerResult doScheduledWork() throws DataLoaderWorkerException {
-        int amountProcessed = super.processAllPagesIndividuallyForIterable(tickerToCikRepository::findAll, this::processCik, 500);
+        int amountProcessed = super.processAllPagesIndividuallyForIterable(tickerToCikRepository::findAll, this::processCik, waitTimeBetweenTickersMs);
         return new DataLoaderWorkerResult(amountProcessed);
     }
 

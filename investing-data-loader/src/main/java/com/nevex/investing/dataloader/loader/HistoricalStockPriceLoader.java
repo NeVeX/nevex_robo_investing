@@ -25,12 +25,14 @@ import java.util.stream.Collectors;
 public class HistoricalStockPriceLoader extends DataLoaderWorker {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HistoricalStockPriceLoader.class);
-    private final static int DEFAULT_MAX_DAYS_HISTORICAL = TimePeriod.OneYear.getDays();
     private final TickersRepository tickersRepository;
     private final ApiStockPriceClient apiStockPriceClient;
     private final StockPriceAdminService stockPriceAdminService;
     private final long waitTimeBetweenTickersMs;
     private final boolean useBulkMode;
+    private final int maxDaysToFetch;
+    private final long waitTimeBetweenBulkMs;
+    private final int bulkAmountPerPage;
 
     public HistoricalStockPriceLoader(TickersRepository tickersRepository,
                                       ApiStockPriceClient apiStockPriceClient,
@@ -46,6 +48,9 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         this.apiStockPriceClient = apiStockPriceClient;
         this.stockPriceAdminService = stockPriceAdminService;
         this.useBulkMode = properties.getUseBulkMode();
+        this.maxDaysToFetch = properties.getMaxDaysToFetch();
+        this.waitTimeBetweenBulkMs = properties.getWaitTimeBetweenBulkMs();
+        this.bulkAmountPerPage = properties.getBulkAmountPerPage();
     }
 
     @Override
@@ -61,7 +66,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         // Fetch all the ticker symbols we have
         int totalRecordsProcessed = 0;
         if ( useBulkMode) {
-            super.processAllPagesInBulkForRepo(tickersRepository, this::loadHistoricalPricesForSymbols, 3000, 20);
+            super.processAllPagesInBulkForRepo(tickersRepository, this::loadHistoricalPricesForSymbols, waitTimeBetweenBulkMs, bulkAmountPerPage);
         } else {
             super.processAllPagesIndividuallyForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, waitTimeBetweenTickersMs);
         }
@@ -75,7 +80,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         tickers = TestingControlUtil.getAllowedTickers(tickers); // remove tickers that are not allowed under test
         Map<String, Set<ApiStockPrice>> prices = null;
         try {
-            prices = apiStockPriceClient.getHistoricalPricesForSymbols(tickers, DEFAULT_MAX_DAYS_HISTORICAL);
+            prices = apiStockPriceClient.getHistoricalPricesForSymbols(tickers, maxDaysToFetch);
         } catch (ApiException apiEx) {
             saveExceptionToDatabase("Could not get historical price for bulk ["+tickers.size()+"] symbols. Reason: ["+apiEx.getMessage()+"]");
             LOGGER.error("Could not bulk get historical prices for symbols [{}]", tickers, apiEx);
@@ -100,7 +105,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
 
         Set<ApiStockPrice> historicalPrices = null;
         try {
-            historicalPrices = apiStockPriceClient.getHistoricalPricesForSymbol(tickerEntity.getSymbol(), DEFAULT_MAX_DAYS_HISTORICAL);
+            historicalPrices = apiStockPriceClient.getHistoricalPricesForSymbol(tickerEntity.getSymbol(), maxDaysToFetch);
         } catch (ApiException apiEx ) {
             saveExceptionToDatabase("Could not get historical price for symbol symbol ["+tickerEntity.getSymbol()+"]. Reason: ["+apiEx.getMessage()+"]");
             LOGGER.error("Could not get historical prices for symbol [{}]", tickerEntity.getSymbol(), apiEx);

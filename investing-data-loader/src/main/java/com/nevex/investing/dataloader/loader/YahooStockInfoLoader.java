@@ -26,6 +26,8 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
     private final YahooApiClient yahooApiClient;
     private final YahooStockInfoService yahooStockInfoService;
     private final TickerService tickerService;
+    private final long waitTimeBetweenBulkMs;
+    private final int bulkAmountPerPage;
 
     public YahooStockInfoLoader(DataLoaderService dataLoaderService,
                                 TickersRepository tickersRepository,
@@ -42,6 +44,8 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
         this.yahooApiClient = yahooApiClient;
         this.yahooStockInfoService = yahooStockInfoService;
         this.tickerService = tickerService;
+        this.waitTimeBetweenBulkMs = properties.getWaitTimeBetweenBulkMs();
+        this.bulkAmountPerPage = properties.getBulkAmountPerPage();
     }
 
     @Override
@@ -67,7 +71,7 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
 
     @Override
     DataLoaderWorkerResult doScheduledWork() throws DataLoaderWorkerException {
-        int tickersProcessed = super.processAllPagesInBulkForRepo(tickersRepository, this::processEntities, TimeUnit.SECONDS.toMillis(10), 100);
+        int tickersProcessed = super.processAllPagesInBulkForRepo(tickersRepository, this::processEntities, waitTimeBetweenBulkMs, bulkAmountPerPage);
         return new DataLoaderWorkerResult(tickersProcessed);
     }
 

@@ -21,23 +21,28 @@ abstract class EventProcessor<C extends Consumer<D>, D> {
     private final BlockingQueue<D> queue;
     private final Set<C> consumers = new HashSet<>();
     private final ExecutorService executorService;
+    private final Class<C> supportedType;
 
     abstract String getName();
 
-    EventProcessor(Set<C> consumers) {
-        this(consumers, 1000);
+    EventProcessor(Set<C> consumers, Class<C> supportedType) {
+        this(consumers, supportedType, 1000);
     }
 
-    EventProcessor(Set<C> newConsumers, int queueSize) {
-        queue = new ArrayBlockingQueue<>(queueSize);
-        executorService = Executors.newSingleThreadExecutor(); // for now...
-
+    EventProcessor(Set<C> newConsumers, Class<C> supportedType, int queueSize) {
+        this.queue = new ArrayBlockingQueue<>(queueSize);
+        this.executorService = Executors.newSingleThreadExecutor(); // for now...
+        this.supportedType = supportedType;
         if ( newConsumers != null && !newConsumers.isEmpty()) {
             consumers.addAll(newConsumers);
             executorService.submit(this::processQueue);
             executorService.shutdown();
             LOGGER.info("A total of [{}] consumers are registered for event processor [{}] ", consumers.size(), getName());
         }
+    }
+
+    public Class<C> getSupportedType() {
+        return supportedType;
     }
 
     private void processQueue() {

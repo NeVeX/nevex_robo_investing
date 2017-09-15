@@ -44,6 +44,8 @@ class DefaultConfiguration {
     private StockExchangesRepository stockExchangesRepository;
     @Autowired
     private YahooStockInfoRepository yahooStockInfoRepository;
+    @Autowired
+    private StockPriceChangeTrackerRepository stockPriceChangeTrackerRepository;
 
     @PostConstruct
     void init() throws Exception {
@@ -72,7 +74,7 @@ class DefaultConfiguration {
 
     @Bean
     StockPriceAdminService stockPriceAdminService() {
-        return new StockPriceAdminService(tickerService, stockPricesRepository, stockPricesHistoricalRepository);
+        return new StockPriceAdminService(tickerService, stockPricesRepository, stockPricesHistoricalRepository, stockPriceChangeTrackerRepository);
     }
 
     @Bean

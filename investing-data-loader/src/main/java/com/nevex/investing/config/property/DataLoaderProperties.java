@@ -53,6 +53,12 @@ public class DataLoaderProperties {
         private Boolean enabled;
         @NotNull
         private Boolean forceStartOnAppStartup;
+        @NotNull
+        @Min(value = 1)
+        private Long waitTimeBetweenBulkMs;
+        @NotNull
+        @Min(value = 1)
+        private Integer bulkAmountPerPage;
 
         public Boolean getEnabled() {
             return enabled;
@@ -70,11 +76,29 @@ public class DataLoaderProperties {
             this.forceStartOnAppStartup = forceStartOnAppStartup;
         }
 
+        public Long getWaitTimeBetweenBulkMs() {
+            return waitTimeBetweenBulkMs;
+        }
+
+        public void setWaitTimeBetweenBulkMs(Long waitTimeBetweenBulkMs) {
+            this.waitTimeBetweenBulkMs = waitTimeBetweenBulkMs;
+        }
+
+        public Integer getBulkAmountPerPage() {
+            return bulkAmountPerPage;
+        }
+
+        public void setBulkAmountPerPage(Integer bulkAmountPerPage) {
+            this.bulkAmountPerPage = bulkAmountPerPage;
+        }
+
         @Override
         public String toString() {
             return "YahooStockInfoDataLoaderProperties{" +
                     "enabled=" + enabled +
                     ", forceStartOnAppStartup=" + forceStartOnAppStartup +
+                    ", bulkAmountPerPage=" + bulkAmountPerPage +
+                    ", waitTimeBetweenBulkMs=" + waitTimeBetweenBulkMs +
                     '}';
         }
     }
@@ -84,6 +108,9 @@ public class DataLoaderProperties {
         private Boolean enabled;
         @NotNull
         private Boolean forceStartOnAppStartup;
+        @NotNull
+        @Min(value = 0)
+        private Integer waitTimeBetweenTickersMs;
 
         public Boolean getEnabled() {
             return enabled;
@@ -101,11 +128,20 @@ public class DataLoaderProperties {
             this.forceStartOnAppStartup = forceStartOnAppStartup;
         }
 
+        public Integer getWaitTimeBetweenTickersMs() {
+            return waitTimeBetweenTickersMs;
+        }
+
+        public void setWaitTimeBetweenTickersMs(Integer waitTimeBetweenTickersMs) {
+            this.waitTimeBetweenTickersMs = waitTimeBetweenTickersMs;
+        }
+
         @Override
         public String toString() {
             return "HistoricalTickerFundamentalsLoaderProperties{" +
                     "enabled=" + enabled +
                     ", forceStartOnAppStartup=" + forceStartOnAppStartup +
+                    ", waitTimeBetweenTickersMs=" + waitTimeBetweenTickersMs +
                     '}';
         }
     }
@@ -115,6 +151,9 @@ public class DataLoaderProperties {
         private Boolean enabled;
         @NotNull
         private Boolean onlyLookupMissingTickerCiks;
+        @NotNull
+        @Min(value = 0)
+        private Integer waitTimeBetweenTickersMs;
 
         public Boolean getEnabled() {
             return enabled;
@@ -132,11 +171,20 @@ public class DataLoaderProperties {
             this.onlyLookupMissingTickerCiks = onlyLookupMissingTickerCiks;
         }
 
+        public Integer getWaitTimeBetweenTickersMs() {
+            return waitTimeBetweenTickersMs;
+        }
+
+        public void setWaitTimeBetweenTickersMs(Integer waitTimeBetweenTickersMs) {
+            this.waitTimeBetweenTickersMs = waitTimeBetweenTickersMs;
+        }
+
         @Override
         public String toString() {
             return "EdgarTickerToCikLoaderProperties{" +
                     "enabled=" + enabled +
                     ", onlyLookupMissingTickerCiks=" + onlyLookupMissingTickerCiks +
+                    ", waitTimeBetweenTickersMs=" + waitTimeBetweenTickersMs +
                     '}';
         }
     }
@@ -151,6 +199,12 @@ public class DataLoaderProperties {
         private Boolean forceStartOnAppStartup;
         @NotNull
         private Boolean useBulkMode;
+        @NotNull
+        @Min(value = 1)
+        private Long waitTimeBetweenBulkMs;
+        @NotNull
+        @Min(value = 1)
+        private Integer bulkAmountPerPage;
 
         public Boolean getEnabled() {
             return enabled;
@@ -184,12 +238,30 @@ public class DataLoaderProperties {
             this.useBulkMode = useBulkMode;
         }
 
+        public Long getWaitTimeBetweenBulkMs() {
+            return waitTimeBetweenBulkMs;
+        }
+
+        public void setWaitTimeBetweenBulkMs(Long waitTimeBetweenBulkMs) {
+            this.waitTimeBetweenBulkMs = waitTimeBetweenBulkMs;
+        }
+
+        public Integer getBulkAmountPerPage() {
+            return bulkAmountPerPage;
+        }
+
+        public void setBulkAmountPerPage(Integer bulkAmountPerPage) {
+            this.bulkAmountPerPage = bulkAmountPerPage;
+        }
+
         @Override
         public String toString() {
             return "DailyStockPriceLoaderProperties{" +
                     "enabled=" + enabled +
                     ", waitTimeBetweenTickersMs=" + waitTimeBetweenTickersMs +
                     ", useBulkMode=" + useBulkMode +
+                    ", waitTimeBetweenBulkMs=" + waitTimeBetweenBulkMs +
+                    ", bulkAmountPerPage=" + bulkAmountPerPage +
                     ", forceStartOnAppStartup=" + forceStartOnAppStartup +
                     '}';
         }
@@ -203,6 +275,15 @@ public class DataLoaderProperties {
         private Integer waitTimeBetweenTickersMs;
         @NotNull
         private Boolean useBulkMode;
+        @NotNull
+        @Min(value = 1)
+        private Integer maxDaysToFetch;
+        @NotNull
+        @Min(value = 1)
+        private Long waitTimeBetweenBulkMs;
+        @NotNull
+        @Min(value = 1)
+        private Integer bulkAmountPerPage;
 
         public Boolean getEnabled() {
             return enabled;
@@ -228,11 +309,38 @@ public class DataLoaderProperties {
             this.useBulkMode = useBulkMode;
         }
 
+        public Integer getMaxDaysToFetch() {
+            return maxDaysToFetch;
+        }
+
+        public void setMaxDaysToFetch(Integer maxDaysToFetch) {
+            this.maxDaysToFetch = maxDaysToFetch;
+        }
+
+        public Long getWaitTimeBetweenBulkMs() {
+            return waitTimeBetweenBulkMs;
+        }
+
+        public void setWaitTimeBetweenBulkMs(Long waitTimeBetweenBulkMs) {
+            this.waitTimeBetweenBulkMs = waitTimeBetweenBulkMs;
+        }
+
+        public Integer getBulkAmountPerPage() {
+            return bulkAmountPerPage;
+        }
+
+        public void setBulkAmountPerPage(Integer bulkAmountPerPage) {
+            this.bulkAmountPerPage = bulkAmountPerPage;
+        }
+
         @Override
         public String toString() {
             return "HistoricalStockLoaderProperties{" +
                     "enabled=" + enabled +
+                    ", maxDaysToFetch=" + maxDaysToFetch +
                     ", waitTimeBetweenTickersMs=" + waitTimeBetweenTickersMs +
+                    ", waitTimeBetweenBulkMs=" + waitTimeBetweenBulkMs +
+                    ", bulkAmountPerPage=" + bulkAmountPerPage +
                     ", useBulkMode=" + useBulkMode +
                     '}';
         }

@@ -24,8 +24,6 @@ class AnalyzerConfiguration {
 
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
-    @Autowired
-    private TickerService tickerService;
 
     @PostConstruct
     void init() throws Exception {
@@ -35,7 +33,7 @@ class AnalyzerConfiguration {
     @Bean
     @ConditionalOnProperty(value = PropertyNames.NEVEX_INVESTING+".processors.daily-stock-price-processor.enabled", havingValue = "true")
     DailyStockPriceChangeProcessor dailyStockPriceProcessor() {
-        return new DailyStockPriceChangeProcessor(stockPriceAdminService, tickerService);
+        return new DailyStockPriceChangeProcessor(stockPriceAdminService);
     }
 
 }

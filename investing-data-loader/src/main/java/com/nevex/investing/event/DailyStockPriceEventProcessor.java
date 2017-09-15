@@ -10,7 +10,7 @@ import java.util.Set;
 public class DailyStockPriceEventProcessor extends EventProcessor<DailyStockPriceUpdateConsumer, Integer> {
 
     public DailyStockPriceEventProcessor(Set<DailyStockPriceUpdateConsumer> dailyStockPriceConsumers) {
-        super(dailyStockPriceConsumers);
+        super(dailyStockPriceConsumers, DailyStockPriceUpdateConsumer.class);
     }
 
     @Override
