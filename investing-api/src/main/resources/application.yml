@@ -4,7 +4,8 @@ server:
 
 logging:
   file: log/api-investing.log
-  level: INFO
+  level:
+    root: INFO
 
 spring:
   jackson.serialization.write_dates_as_timestamps: false
@@ -25,5 +26,5 @@ spring:
 nevex-investing:
   testing:
     enabled: false
-    allowed-symbols: LC, FB, APPL, NAKD, GOOGL, MSFT,
+    allowed-symbols: LC, FB, APPL, NAKD, GOOGL, MSFT
 

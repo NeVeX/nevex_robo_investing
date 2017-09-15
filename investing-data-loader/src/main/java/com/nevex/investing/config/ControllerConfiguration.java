@@ -1,8 +1,6 @@
 package com.nevex.investing.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nevex.investing.PropertyNames;
-import com.nevex.investing.api.usfundamentals.UsFundamentalsApiClient;
 import com.nevex.investing.database.DataLoaderErrorsRepository;
 import com.nevex.investing.database.DataLoaderRunsRepository;
 import com.nevex.investing.ws.DataLoaderAdminEndpoint;

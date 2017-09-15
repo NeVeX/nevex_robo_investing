@@ -3,13 +3,13 @@ package com.nevex.investing.dataloader.loader;
 import com.nevex.investing.api.ApiException;
 import com.nevex.investing.api.yahoo.YahooApiClient;
 import com.nevex.investing.api.yahoo.model.YahooStockInfo;
+import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.service.ServiceException;
 import com.nevex.investing.service.TickerService;
 import com.nevex.investing.service.YahooStockInfoService;
-import com.nevex.investing.service.model.Ticker;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
@@ -32,8 +32,8 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
                                 YahooApiClient yahooApiClient,
                                 YahooStockInfoService yahooStockInfoService,
                                 TickerService tickerService,
-                                boolean forceStartOnAppStartup) {
-        super(dataLoaderService, forceStartOnAppStartup);
+                                DataLoaderProperties.YahooStockInfoDataLoaderProperties properties) {
+        super(dataLoaderService, properties.getForceStartOnAppStartup());
         if ( tickersRepository == null ) { throw new IllegalArgumentException("Provided tickersRepository is null"); }
         if ( yahooApiClient == null ) { throw new IllegalArgumentException("Provided yahooApiClient is null"); }
         if ( yahooStockInfoService == null ) { throw new IllegalArgumentException("Provided yahooStockInfoService is null"); }

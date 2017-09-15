@@ -1,10 +1,7 @@
 package com.nevex.investing.event;
 
 import com.nevex.investing.event.type.DailyStockPriceUpdateConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.annotation.PreDestroy;
 import java.util.Set;
 
 /**

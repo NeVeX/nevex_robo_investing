@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 
 import javax.annotation.PreDestroy;
+import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +29,10 @@ public class DataLoaderStarter implements ApplicationListener<ApplicationReadyEv
 
     public void addDataWorker(DataLoaderWorker dw) {
         this.workers.add(dw);
+    }
+
+    public void addDataWorkers(Collection<DataLoaderWorker> dws) {
+        this.workers.addAll(dws);
     }
 
     public void onApplicationEvent(ApplicationReadyEvent event) {

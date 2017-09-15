@@ -4,7 +4,6 @@ import com.nevex.investing.database.StockPricesHistoricalRepository;
 import com.nevex.investing.database.StockPricesRepository;
 import com.nevex.investing.database.entity.StockPriceEntity;
 import com.nevex.investing.database.entity.StockPriceHistoricalEntity;
-import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.service.exception.TickerNotFoundException;
 import com.nevex.investing.service.model.StockPrice;
 import org.springframework.data.domain.PageRequest;

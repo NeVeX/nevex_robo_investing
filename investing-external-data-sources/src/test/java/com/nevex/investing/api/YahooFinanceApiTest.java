@@ -3,12 +3,8 @@ package com.nevex.investing.api;
 import org.junit.Test;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
-import yahoofinance.histquotes.HistoricalQuote;
-import yahoofinance.histquotes.Interval;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.List;
 
 /**
  * Created by Mark Cunningham on 9/5/2017.

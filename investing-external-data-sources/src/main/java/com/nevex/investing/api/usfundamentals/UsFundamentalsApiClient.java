@@ -3,7 +3,6 @@ package com.nevex.investing.api.usfundamentals;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nevex.investing.api.ApiException;
-import com.nevex.investing.api.tiingo.model.TiingoPriceDto;
 import com.nevex.investing.api.usfundamentals.model.UsFundamentalIndicatorDto;
 import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponseDto;
 import com.nevex.investing.api.usfundamentals.model.UsFundamentalsUpdatableDto;

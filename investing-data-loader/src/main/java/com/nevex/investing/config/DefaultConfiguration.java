@@ -1,18 +1,33 @@
 package com.nevex.investing.config;
 
-import com.nevex.investing.api.yahoo.YahooApiClient;
 import com.nevex.investing.database.*;
+import com.nevex.investing.dataloader.DataLoaderService;
+import com.nevex.investing.dataloader.DataLoaderStarter;
+import com.nevex.investing.dataloader.loader.DataLoaderWorker;
+import com.nevex.investing.dataloader.loader.ReferenceDataLoader;
+import com.nevex.investing.dataloader.loader.TickerCacheLoader;
 import com.nevex.investing.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
+import java.util.Set;
+
 /**
- * Created by Mark Cunningham on 9/4/2017.
+ * Created by Mark Cunningham on 8/9/2017.
  */
 @Configuration
-class DataLoaderServicesConfiguration {
+class DefaultConfiguration {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultConfiguration.class);
+
+    @Autowired
+    private DataLoaderRunsRepository dataLoaderRunsRepository;
+    @Autowired
+    private DataLoaderErrorsRepository dataLoaderErrorsRepository;
     @Autowired
     private TickerFundamentalsRepository tickerFundamentalsRepository;
     @Autowired
@@ -29,6 +44,31 @@ class DataLoaderServicesConfiguration {
     private StockExchangesRepository stockExchangesRepository;
     @Autowired
     private YahooStockInfoRepository yahooStockInfoRepository;
+
+    @PostConstruct
+    void init() throws Exception {
+        LOGGER.info("The [{}] has been activated", this.getClass().getSimpleName());
+    }
+
+    @Bean
+    DataLoaderService dataLoaderService() {
+        return new DataLoaderService(dataLoaderRunsRepository, dataLoaderErrorsRepository);
+    }
+
+    @Bean
+    DataLoaderStarter dataLoaderStarter(@Autowired Set<DataLoaderWorker> workers) {
+        DataLoaderStarter starter = new DataLoaderStarter();
+        starter.addDataWorkers(workers);
+        return starter;
+    }
+
+    @Bean
+    ReferenceDataLoader referenceDataLoader() {
+        return new ReferenceDataLoader(stockExchangeAdminService(), dataLoaderService());
+    }
+
+    @Bean
+    TickerCacheLoader tickerCacheLoader() { return new TickerCacheLoader(tickerAdminService(), dataLoaderService()); }
 
     @Bean
     StockPriceAdminService stockPriceAdminService() {

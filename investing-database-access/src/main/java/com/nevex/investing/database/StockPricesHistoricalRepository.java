@@ -1,9 +1,7 @@
 package com.nevex.investing.database;
 
 import com.nevex.investing.database.entity.StockPriceHistoricalEntity;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;

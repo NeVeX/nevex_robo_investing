@@ -1,9 +1,9 @@
 package com.nevex.investing.database.entity;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Objects;
 
 /**
  * Created by Mark Cunningham on 8/9/2017.

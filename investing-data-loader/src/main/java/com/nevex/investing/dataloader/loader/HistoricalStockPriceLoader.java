@@ -4,8 +4,7 @@ import com.nevex.investing.TestingControlUtil;
 import com.nevex.investing.api.ApiException;
 import com.nevex.investing.api.ApiStockPrice;
 import com.nevex.investing.api.ApiStockPriceClient;
-import com.nevex.investing.api.tiingo.TiingoApiClient;
-import com.nevex.investing.api.tiingo.model.TiingoPriceDto;
+import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
@@ -31,22 +30,22 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     private final ApiStockPriceClient apiStockPriceClient;
     private final StockPriceAdminService stockPriceAdminService;
     private final long waitTimeBetweenTickersMs;
-    private final boolean useBulkMode = true;
+    private final boolean useBulkMode;
 
     public HistoricalStockPriceLoader(TickersRepository tickersRepository,
                                       ApiStockPriceClient apiStockPriceClient,
                                       StockPriceAdminService stockPriceAdminService,
                                       DataLoaderService dataLoaderService,
-                                      long waitTimeBetweenTickersMs) {
+                                      DataLoaderProperties.HistoricalStockLoaderProperties properties) {
         super(dataLoaderService);
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( apiStockPriceClient == null) { throw new IllegalArgumentException("Provided apiStockPriceClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
-        if ( waitTimeBetweenTickersMs < 0) { throw new IllegalArgumentException("Provided waitTimeBetweenTickersMs ["+waitTimeBetweenTickersMs+"] is invalid"); }
-        this.waitTimeBetweenTickersMs = waitTimeBetweenTickersMs;
+        this.waitTimeBetweenTickersMs = properties.getWaitTimeBetweenTickersMs();
         this.tickersRepository = tickersRepository;
         this.apiStockPriceClient = apiStockPriceClient;
         this.stockPriceAdminService = stockPriceAdminService;
+        this.useBulkMode = properties.getUseBulkMode();
     }
 
     @Override

@@ -1,12 +1,9 @@
 package com.nevex.investing.config.property;
 
-import com.nevex.investing.PropertyNames;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
-
-import javax.validation.constraints.NotNull;
 
 import static com.nevex.investing.PropertyNames.NEVEX_INVESTING;
 

@@ -2,6 +2,7 @@ package com.nevex.investing.dataloader.loader;
 
 import com.nevex.investing.api.ApiException;
 import com.nevex.investing.api.edgar.EdgarCikLookupClient;
+import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
@@ -28,15 +29,17 @@ public class EdgarTickerToCIKLoader extends DataLoaderWorker {
     private final boolean onlyLookupMissingCiks;
 
     public EdgarTickerToCIKLoader(DataLoaderService dataLoaderService, TickersRepository tickersRepository,
-                                  EdgarCikLookupClient edgarCikLookupClient, EdgarAdminService edgarAdminService, boolean onlyLookupMissingCiks) {
+                                  EdgarCikLookupClient edgarCikLookupClient, EdgarAdminService edgarAdminService,
+                                  DataLoaderProperties.EdgarTickerToCikLoaderProperties properties) {
         super(dataLoaderService);
         if ( tickersRepository == null ) { throw new IllegalArgumentException("Provided tickersRepository is null"); }
         if ( edgarCikLookupClient == null ) { throw new IllegalArgumentException("Provided edgarCikLookupClient is null"); }
         if ( edgarAdminService == null ) { throw new IllegalArgumentException("Provided edgarAdminService is null"); }
+        if ( properties == null ) { throw new IllegalArgumentException("Provided properties is null"); }
         this.tickersRepository = tickersRepository;
         this.edgarCikLookupClient = edgarCikLookupClient;
         this.edgarAdminService = edgarAdminService;
-        this.onlyLookupMissingCiks = onlyLookupMissingCiks;
+        this.onlyLookupMissingCiks = properties.getOnlyLookupMissingTickerCiks();
     }
 
     @Override

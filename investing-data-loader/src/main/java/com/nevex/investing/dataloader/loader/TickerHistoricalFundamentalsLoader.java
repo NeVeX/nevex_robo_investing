@@ -4,6 +4,7 @@ import com.nevex.investing.TestingControlUtil;
 import com.nevex.investing.api.ApiException;
 import com.nevex.investing.api.usfundamentals.UsFundamentalsApiClient;
 import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponseDto;
+import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickerToCikRepository;
 import com.nevex.investing.database.entity.TickerToCikEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
@@ -35,8 +36,8 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderSchedulingSing
                                               TickerFundamentalsAdminService tickerFundamentalsAdminService,
                                               TickerService tickerService,
                                               UsFundamentalsApiClient apiClient,
-                                              boolean forceStartOnApplicationStart) {
-        super(dataLoaderService, forceStartOnApplicationStart);
+                                              DataLoaderProperties.HistoricalTickerFundamentalsLoaderProperties properties) {
+        super(dataLoaderService, properties.getForceStartOnAppStartup());
         if ( apiClient == null ) { throw new IllegalArgumentException("Provided apiClient is null"); }
         if ( tickerToCikRepository == null ) { throw new IllegalArgumentException("Provided tickerToCikRepository is null"); }
         if ( tickerService == null ) { throw new IllegalArgumentException("Provided tickerService is null"); }

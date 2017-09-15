@@ -1,8 +1,7 @@
 package com.nevex.investing.config;
 
-import com.nevex.investing.api.ApiStockPriceClient;
-import com.nevex.investing.api.tiingo.TiingoApiClient;
 import com.nevex.investing.api.yahoo.YahooApiClient;
+import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.dataloader.loader.DailyStockPriceLoader;
@@ -12,32 +11,24 @@ import com.nevex.investing.service.TickerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.PostConstruct;
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-
-import static com.nevex.investing.PropertyNames.NEVEX_INVESTING;
 
 /**
  * Created by Mark Cunningham on 8/7/2017.
  */
 @Validated
 @Configuration
-@ConfigurationProperties(prefix = StockPricesDailyLoaderConfiguration.CONFIGURATION_PREFIX_KEY)
 @ConditionalOnProperty(name = StockPricesDailyLoaderConfiguration.CONFIGURATION_ENABLED_KEY, havingValue = "true")
 class StockPricesDailyLoaderConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StockPricesDailyLoaderConfiguration.class);
 
-    static final String CONFIGURATION_PREFIX_KEY = NEVEX_INVESTING + ".daily-stock-price-loader";
+    private static final String CONFIGURATION_PREFIX_KEY = DataLoaderProperties.PREFIX + ".daily-stock-price-loader";
     static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
 
     @Autowired
@@ -52,47 +43,19 @@ class StockPricesDailyLoaderConfiguration {
     private DailyStockPriceEventProcessor dailyStockPriceEventProcessor;
     @Autowired
     private TickerService tickerService;
-
-    @Valid
-    @NotNull
-    private Boolean enabled;
-    @Valid
-    @Min(value = 0)
-    private Long waitTimeBetweenTickersMs;
-    @Valid
-    @NotNull
-    private Boolean forceStartOnAppStartup;
+    @Autowired
+    private DataLoaderProperties dataLoaderProperties;
 
     @PostConstruct
     void init() throws Exception {
-        LOGGER.info("The daily price stock loader configuration has been activated. Configurations [{}]", this);
+        LOGGER.info("The [{}] has been activated", this.getClass().getSimpleName());
     }
 
     @Bean
     DailyStockPriceLoader currentStockPriceLoader() {
         // TODO: This loader is getting too big!
         return new DailyStockPriceLoader(tickersRepository, yahooApiClient,
-                stockPriceAdminService, dataLoaderService, dailyStockPriceEventProcessor, tickerService, waitTimeBetweenTickersMs, forceStartOnAppStartup);
+                stockPriceAdminService, dataLoaderService, dailyStockPriceEventProcessor, tickerService, dataLoaderProperties.getDailyStockPriceLoader());
     }
 
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public void setWaitTimeBetweenTickersMs(Long waitTimeBetweenTickersMs) {
-        this.waitTimeBetweenTickersMs = waitTimeBetweenTickersMs;
-    }
-
-    public void setForceStartOnAppStartup(Boolean forceStartOnAppStartup) {
-        this.forceStartOnAppStartup = forceStartOnAppStartup;
-    }
-
-    @Override
-    public String toString() {
-        return "StockPricesDailyLoaderConfiguration{" +
-                "enabled=" + enabled +
-                ", waitTimeBetweenTickersMs=" + waitTimeBetweenTickersMs +
-                ", forceStartOnAppStartup=" + forceStartOnAppStartup +
-                '}';
-    }
 }
