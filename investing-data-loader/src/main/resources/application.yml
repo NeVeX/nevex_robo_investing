@@ -1,0 +1,80 @@
+server:
+  port: 56700
+  context-path: /investing/dataloader
+
+logging:
+  file: log/investing-data-loader.log
+  level:
+    root: INFO
+    yahoofinance: WARN
+
+spring:
+  jackson.serialization.write_dates_as_timestamps: false
+  jackson.serialization.indent_output: true # Should disable this in the future
+  profiles:
+    active: sensitive
+  properties.hibernate.format_sql: true
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    hibernate:
+      ddl-auto: validate #auto-drop
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+nevex-investing:
+  api-admin-key: space
+  events:
+    configuration-enabled: true
+  processors:
+    configuration-enabled: true
+    daily-stock-price-processor:
+      enabled: true
+  data-loaders:
+    ticker-data-loader:
+      enabled: false # Set this to true and and put values in below for the optional csv to load data into the database
+      nasdaq-file: D:\Coding\Git\nevex_investing\data\nasdaq_tickers_08_07_2017.csv
+      nyse-file: D:\Coding\Git\nevex_investing\data\nyse_tickers_08_07_2017.csv
+    stock-historical-loader:
+      enabled: false
+      wait-time-between-tickers-ms: 400
+      use-bulk-mode: false
+      wait-time-between-bulk-ms: 4000
+      bulk-amount-per-page: 50
+      max-days-to-fetch: 1850 # About 5 years
+    daily-stock-price-loader:
+      enabled: true
+      wait-time-between-tickers-ms: 1000
+      force-start-on-app-startup: true
+      use-bulk-mode: false
+      wait-time-between-bulk-ms: 4000
+      bulk-amount-per-page: 50
+    edgar-ticker-to-cik-loader:
+      enabled: false
+      only-lookup-missing-ticker-ciks: true # For any ciks that are missing, only get those (not values in the ticker_to_cik table)
+      wait-time-between-tickers-ms: 750
+    ticker-fundamentals-loader:
+      host: api.usfundamentals.com
+      api-key:
+    ticker-historical-fundamentals-loader:
+      enabled: false
+      force-start-on-app-startup: false
+      wait-time-between-tickers-ms: 1000
+    yahoo-stock-info-data-loader:
+      enabled: false
+      force-start-on-app-startup: false
+      wait-time-between-bulk-ms: 10000
+      bulk-amount-per-page: 100
+  api-clients:
+    tiingo:
+      host: https://api.tiingo.com
+      api-key:
+    us-fundamentals:
+      host: api.usfundamentals.com
+      api-key:
+  testing:
+    enabled: false
+    allowed-symbols: LC, NVDA, FB, APPL, NAKD, GOOGL, MSFT, AMD
+
+# Tiingo API: https://api.tiingo.com/

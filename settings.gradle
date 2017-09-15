@@ -1,0 +1,9 @@
+rootProject.name = 'nevex-investing'
+include 'investing-database-access'
+include 'investing-api'
+include 'investing-data-loader'
+include 'investing-service'
+include 'investing-service-mock'
+include 'investing-external-data-sources'
+include 'investing-common'
+

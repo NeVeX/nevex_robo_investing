@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <meta name="description" content="Investing with NeVeX">
+        <meta name="author" content="Mark Cunningham">
+        <title>NeVeX Investing</title>
+        <script src="js/jquery-3.1.0.min.js"></script>
+        <script src="js/moment-2.18.1.js"></script>
+        <script src="js/jchart-2.6.0.js"></script>
+        <script src="js/nevex-investing.js"></script>
+        <!--<script src="js/nevex-investing-test.js"></script>-->
+        <link href="css/nevex-investing.css" rel="stylesheet"/>
+    </head>
+
+    <body >
+        <div class="wrapper">
+            <div class="box box-title">
+                <div class="title">NeVeX Investing</div>
+            </div>
+            <div class="box box-ticker-input">
+                <input class="ticker-search" type="text" id="ticker-input"
+                       list="tickers-datalist" placeholder="Enter some ticker info (at least 3 chars)">
+                <datalist id="tickers-datalist"></datalist>
+            </div>
+
+            <div id="ticker-info-div" class="box ticker-information-box">
+                <div id="ticker-info-title" class="ticker-info-title">The ticker title</div>
+
+                <div class="ticker-info-subtitle-static">Symbol:</div>
+                <div id="ticker-info-symbol" class="ticker-info-subtitle-dynamic">MSFT</div>
+
+                <div class="ticker-info-subtitle ticker-info-subtitle-static">Name:</div>
+                <div id="ticker-info-name" class="ticker-info-subtitle ticker-info-subtitle-dynamic">Microsoft</div>
+
+                <div class="ticker-info-subtitle ticker-info-subtitle-static">Exchange:</div>
+                <div id="ticker-info-exchange" class="ticker-info-subtitle ticker-info-subtitle-dynamic">NASDAQ</div>
+
+                <div class="ticker-info-subtitle ticker-info-subtitle-static">Sector:</div>
+                <div id="ticker-info-sector" class="ticker-info-subtitle ticker-info-subtitle-dynamic">Information Tech</div>
+
+                <div class="ticker-info-subtitle ticker-info-subtitle-static">Industry:</div>
+                <div id="ticker-info-industry" class="ticker-info-subtitle ticker-info-subtitle-dynamic">Computing</div>
+
+                <div class="ticker-info-subtitle ticker-info-subtitle-static">Is-Tradable:</div>
+                <div id="ticker-info-isTradable" class="ticker-info-subtitle ticker-info-subtitle-dynamic">Yes</div>
+
+            </div>
+
+            <div id="stock-price-overview-div" class="box ticker-pricing-overview-box">
+
+                <div id="stock-price" class="stock-price">$5.80</div>
+                <div class="ticker-pricing-overview-low-high-box">
+                    <div class="ticker-pricing-overview-low-high-box-static-text">Low</div>
+                    <div id="stock-price-low" >$5.90</div>
+                    <div class="ticker-pricing-overview-low-high-box-static-text">High</div>
+                    <div id="stock-price-high">$19.90</div>
+                </div>
+                <div id="stock-volume" class="stock-volume">456M</div>
+            </div>
+
+            <div id="stock-chart-div" class="box stock-chart-box">
+                <div class="stock-price-chart-options">
+                    <div><input type="checkbox" id="stock_price_option_seven_days" data-name="seven_days" title="7 Days"></div>
+                    <div>7 Days</div>
+
+                    <div><input type="checkbox" id="stock_price_option_one_month" data-name="one_month" title="1 Month"></div>
+                    <div>1 Month</div>
+
+                    <div><input type="checkbox" id="stock_price_option_three_months" data-name="three_months" title="3 Months"></div>
+                    <div>3 Months</div>
+
+                    <div><input type="checkbox" id="stock_price_option_all" data-name="all" title="All"></div>
+                    <div>All</div>
+
+                </div>
+                <canvas id="stock-chart" class="stock-price-chart-canvas"></canvas>
+            </div>
+
+
+        </div>
+    </body>
+
+</html>

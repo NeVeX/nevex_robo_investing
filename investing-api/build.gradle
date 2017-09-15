@@ -1,0 +1,9 @@
+
+bootRepackage {
+    enabled = true
+}
+
+dependencies {
+    compile project (':investing-service')
+    compile project (':investing-service-mock')
+}

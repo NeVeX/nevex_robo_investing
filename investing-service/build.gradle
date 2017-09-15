@@ -1,0 +1,5 @@
+
+dependencies {
+    compile project(':investing-database-access')
+    compile project(':investing-common')
+}
