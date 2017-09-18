@@ -7,7 +7,7 @@ import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.service.EdgarAdminService;
-import com.nevex.investing.service.ServiceException;
+import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

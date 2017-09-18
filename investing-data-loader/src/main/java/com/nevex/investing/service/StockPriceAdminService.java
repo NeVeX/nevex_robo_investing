@@ -1,16 +1,17 @@
 package com.nevex.investing.service;
 
 import com.nevex.investing.api.ApiStockPrice;
-import com.nevex.investing.database.StockPriceChangeTrackerRepository;
+import com.nevex.investing.database.StockPricePeriodSummaryRepository;
 import com.nevex.investing.database.StockPricesHistoricalRepository;
 import com.nevex.investing.database.StockPricesRepository;
 import com.nevex.investing.database.entity.StockPriceBaseEntity;
-import com.nevex.investing.database.entity.StockPriceChangeTrackerEntity;
+import com.nevex.investing.database.entity.StockPricePeriodSummaryEntity;
 import com.nevex.investing.database.entity.StockPriceEntity;
 import com.nevex.investing.database.entity.StockPriceHistoricalEntity;
 import com.nevex.investing.model.TimePeriod;
-import com.nevex.investing.processor.model.StockPriceSummary;
+import com.nevex.investing.model.StockPriceSummary;
 import com.nevex.investing.service.exception.TickerNotFoundException;
+import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,15 +30,15 @@ import java.util.stream.Collectors;
 public class StockPriceAdminService extends StockPriceService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(StockPriceAdminService.class);
-    private final StockPriceChangeTrackerRepository stockPriceChangeTrackerRepository;
+    private final StockPricePeriodSummaryRepository stockPricePeriodSummaryRepository;
 
     public StockPriceAdminService(TickerService tickerService,
                                   StockPricesRepository stockPricesRepository,
                                   StockPricesHistoricalRepository stockPricesHistoricalRepository,
-                                  StockPriceChangeTrackerRepository stockPriceChangeTrackerRepository) {
+                                  StockPricePeriodSummaryRepository stockPricePeriodSummaryRepository) {
         super(tickerService, stockPricesRepository, stockPricesHistoricalRepository);
-        if ( stockPriceChangeTrackerRepository == null ) { throw new IllegalArgumentException("Provided stockPriceChangeTrackerRepository is null"); }
-        this.stockPriceChangeTrackerRepository = stockPriceChangeTrackerRepository;
+        if ( stockPricePeriodSummaryRepository == null ) { throw new IllegalArgumentException("Provided stockPriceChangeTrackerRepository is null"); }
+        this.stockPricePeriodSummaryRepository = stockPricePeriodSummaryRepository;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -105,20 +106,18 @@ public class StockPriceAdminService extends StockPriceService {
     public void savePriceChanges(int tickerId, TimePeriod timePeriod, StockPriceSummary summary) throws ServiceException {
 
         String periodName = timePeriod.getTitle();
-        StockPriceChangeTrackerEntity newEntity = new StockPriceChangeTrackerEntity(tickerId, periodName, summary.getOpenAvg(),
-                summary.getHighAvg(), summary.getLowAvg(),
-                summary.getCloseAvg(), summary.getVolumeAvg());
+        StockPricePeriodSummaryEntity newEntity = new StockPricePeriodSummaryEntity(tickerId, timePeriod, summary, LocalDate.now());
 
-        Optional<StockPriceChangeTrackerEntity> existingEntityOpt = stockPriceChangeTrackerRepository.findByTickerIdAndPeriodName(tickerId, periodName);
+        Optional<StockPricePeriodSummaryEntity> existingEntityOpt = stockPricePeriodSummaryRepository.findByTickerIdAndPeriodName(tickerId, periodName);
         if ( existingEntityOpt.isPresent()) {
             // found existing, so merge the two
-            StockPriceChangeTrackerEntity existingEntity = existingEntityOpt.get();
+            StockPricePeriodSummaryEntity existingEntity = existingEntityOpt.get();
             existingEntity.merge(newEntity);
             newEntity = existingEntity;
         }
 
         try {
-            stockPriceChangeTrackerRepository.save(newEntity);
+            stockPricePeriodSummaryRepository.save(newEntity);
         } catch (Exception e) {
             throw new ServiceException("Could not save stock price change entity for ticker ["+tickerId+"]", e);
         }
@@ -156,6 +155,7 @@ public class StockPriceAdminService extends StockPriceService {
         return entity;
     }
 
+    // TODO: Move this into the entity
     private void populateEntity(StockPriceBaseEntity baseEntity, int tickerId, ApiStockPrice tPrice) {
         baseEntity.setTickerId(tickerId);
         baseEntity.setDate(tPrice.getDate());

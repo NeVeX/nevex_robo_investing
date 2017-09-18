@@ -3,6 +3,7 @@ package com.nevex.investing.service;
 import com.nevex.investing.api.yahoo.model.YahooStockInfo;
 import com.nevex.investing.database.YahooStockInfoRepository;
 import com.nevex.investing.database.entity.YahooStockInfoEntity;
+import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,7 +27,6 @@ public class YahooStockInfoService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveYahooStockInfo(int tickerId, YahooStockInfo yahooStockInfo) throws ServiceException {
-
         YahooStockInfoEntity newEntity = createEntity(tickerId, yahooStockInfo);
 
         Optional<YahooStockInfoEntity> existingEntityOpt = yahooStockInfoRepository.findByTickerIdAndDate(tickerId, newEntity.getDate());

@@ -5,6 +5,7 @@ import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * Created by Mark Cunningham on 9/5/2017.
@@ -14,15 +15,14 @@ public class YahooFinanceApiTest {
     @Test
     public void test() throws Exception {
 
-        Stock stock = YahooFinance.get("MSFT");
+        Map<String, Stock> stocks = YahooFinance.get(new String[]{"MSFT", "123412313"});
 
-        BigDecimal price = stock.getQuote().getPrice();
-        BigDecimal change = stock.getQuote().getChangeInPercent();
-        BigDecimal peg = stock.getStats().getPeg();
-        BigDecimal dividend = stock.getDividend().getAnnualYieldPercent();
+//        BigDecimal price = stock.getQuote().getPrice();
+//        BigDecimal change = stock.getQuote().getChangeInPercent();
+//        BigDecimal peg = stock.getStats().getPeg();
+//        BigDecimal dividend = stock.getDividend().getAnnualYieldPercent();
 
-        stock.print();
-
+        stocks.toString();
 
 
 //        Calendar from = Calendar.getInstance();

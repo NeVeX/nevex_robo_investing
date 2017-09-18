@@ -1,7 +1,7 @@
 package com.nevex.investing.dataloader.loader;
 
 import com.nevex.investing.dataloader.DataLoaderService;
-import com.nevex.investing.service.ServiceException;
+import com.nevex.investing.service.model.ServiceException;
 import com.nevex.investing.service.StockExchangeAdminService;
 import com.nevex.investing.service.model.StockExchange;
 import org.slf4j.Logger;

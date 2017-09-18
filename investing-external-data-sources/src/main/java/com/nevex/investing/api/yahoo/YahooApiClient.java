@@ -4,11 +4,15 @@ import com.nevex.investing.api.ApiException;
 import com.nevex.investing.api.ApiStockPrice;
 import com.nevex.investing.api.ApiStockPriceClient;
 import com.nevex.investing.api.yahoo.model.YahooStockInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
+import yahoofinance.quotes.stock.StockQuote;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,6 +21,8 @@ import java.util.stream.Collectors;
  * Created by Mark Cunningham on 9/5/2017.
  */
 public class YahooApiClient implements ApiStockPriceClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(YahooApiClient.class);
 
     public List<YahooStockInfo> getYahooStockInfo(List<String> symbols) throws ApiException {
         try {
@@ -41,12 +47,25 @@ public class YahooApiClient implements ApiStockPriceClient {
 
     @Override
     public Map<String, Optional<ApiStockPrice>> getPriceForSymbols(List<String> symbols) throws ApiException {
-        Map<String, Set<ApiStockPrice>> yahooStockPrices = getHistoricalPricesForSymbols(symbols, 1, false);
-        Map<String, Optional<ApiStockPrice>> prices = new HashMap<>();
-        for ( Map.Entry<String, Set<ApiStockPrice>> entry : yahooStockPrices.entrySet()) {
-            prices.put(entry.getKey(), ApiStockPrice.getLatestPrice(entry.getValue()));
+
+        try {
+            Map<String, Stock> results = YahooFinance.get(symbols.toArray(new String[symbols.size()]));
+            Map<String, Optional<ApiStockPrice>> parsedResults = new HashMap<>();
+
+            for ( Map.Entry<String, Stock> entry : results.entrySet()) {
+
+                if ( entry.getValue() == null || !entry.getValue().isValid()) {
+                    LOGGER.warn("Skipping over daily stock price for ticker [{}] since the data returned is not valid", entry.getKey());
+                    continue;
+                }
+
+                ApiStockPrice stockPrice = convertToApiStockPrice(entry.getValue().getQuote());
+                parsedResults.put(entry.getKey(), Optional.ofNullable(stockPrice));
+            }
+            return parsedResults;
+        } catch (Exception e ) {
+            throw new ApiException("Could not get current stock prices from Yahoo for symbols ["+symbols+"]", e);
         }
-        return prices;
     }
 
     @Override
@@ -64,6 +83,9 @@ public class YahooApiClient implements ApiStockPriceClient {
     }
 
     private Map<String, Set<ApiStockPrice>> getHistoricalPricesForSymbols(List<String> symbols, int maxDaysToFetch, boolean includeHistoryInitially) throws ApiException {
+
+        LOGGER.warn("Use of the Yahoo historical price function is flaky - so it may fail...");
+
         Calendar to = Calendar.getInstance();
         Calendar from = Calendar.getInstance();
         from.add(Calendar.DAY_OF_MONTH, -maxDaysToFetch); // go back the required days
@@ -76,16 +98,36 @@ public class YahooApiClient implements ApiStockPriceClient {
             }
             return symbolToPrices;
         } catch (Exception e) {
-            throw new ApiException("Could not get stock prices for symbols ["+symbols+"] using Yahoo", e);
+            throw new ApiException("Could not get historical stock prices from Yahoo for symbols ["+symbols+"]", e);
         }
     }
 
     private Set<ApiStockPrice> convertToApiStockPrices(List<HistoricalQuote> historicalQuotes) throws ApiException {
         Set<ApiStockPrice> prices = new HashSet<>();
         for ( HistoricalQuote quote : historicalQuotes) {
-            prices.add(convertToApiStockPrice(quote));
+            ApiStockPrice price = convertToApiStockPrice(quote);
+            if ( price != null) {
+                prices.add(price);
+            }
         }
         return prices;
+    }
+
+    private ApiStockPrice convertToApiStockPrice(StockQuote quote) throws ApiException {
+        try {
+            return ApiStockPrice.builder()
+                    .withClose(quote.getPrice()) // close is the current price. TODO: Need to make sure this is ok
+//                    .withAdjustedClose(stock.getQuote().getA)
+                    .withDate(quote.getLastTradeTime() != null ? quote.getLastTradeTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : LocalDate.now())
+                    .withHigh(quote.getDayHigh())
+                    .withOpen(quote.getOpen())
+                    .withVolume(quote.getVolume())
+                    .withLow(quote.getDayLow())
+                    .build();
+        } catch (Exception e ) {
+            LOGGER.error("Could not convert historical yahoo quote into "+ApiStockPrice.class.getSimpleName(), e);
+            return null;
+        }
     }
 
     private ApiStockPrice convertToApiStockPrice(HistoricalQuote historicalQuote) throws ApiException {
@@ -100,7 +142,8 @@ public class YahooApiClient implements ApiStockPriceClient {
                     .withLow(historicalQuote.getLow())
                     .build();
         } catch (Exception e ) {
-            throw new ApiException("Could not convert historical yahoo quote into "+ApiStockPrice.class.getSimpleName(), e);
+            LOGGER.error("Could not convert historical yahoo quote into "+ApiStockPrice.class.getSimpleName(), e);
+            return null;
         }
     }
 }

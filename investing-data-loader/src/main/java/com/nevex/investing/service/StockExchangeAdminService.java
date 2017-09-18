@@ -2,6 +2,7 @@ package com.nevex.investing.service;
 
 import com.nevex.investing.database.StockExchangesRepository;
 import com.nevex.investing.database.entity.StockExchangeEntity;
+import com.nevex.investing.service.model.ServiceException;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

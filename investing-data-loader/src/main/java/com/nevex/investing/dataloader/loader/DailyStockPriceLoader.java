@@ -8,7 +8,7 @@ import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
-import com.nevex.investing.event.DailyStockPriceEventProcessor;
+import com.nevex.investing.event.StockPriceChangeEventProcessor;
 import com.nevex.investing.service.StockPriceAdminService;
 import com.nevex.investing.service.TickerService;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
     private final AtomicBoolean isUnlockedFromDataLoaders = new AtomicBoolean(false);
     private final TickersRepository tickersRepository;
     private final ApiStockPriceClient apiStockPriceClient;
-    private final DailyStockPriceEventProcessor dailyStockPriceEventProcessor;
+    private final StockPriceChangeEventProcessor stockPriceChangeEventProcessor;
     private final StockPriceAdminService stockPriceAdminService;
     private final TickerService tickerService;
     private final long waitTimeBetweenTickersMs;
@@ -43,20 +43,20 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
                                  ApiStockPriceClient apiStockPriceClient,
                                  StockPriceAdminService stockPriceAdminService,
                                  DataLoaderService dataLoaderService,
-                                 DailyStockPriceEventProcessor dailyStockPriceEventProcessor,
+                                 StockPriceChangeEventProcessor stockPriceChangeEventProcessor,
                                  TickerService tickerService,
                                  DataLoaderProperties.DailyStockPriceLoaderProperties properties) {
         super(dataLoaderService, properties.getForceStartOnAppStartup());
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( apiStockPriceClient == null) { throw new IllegalArgumentException("Provided apiStockPriceClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
-        if ( dailyStockPriceEventProcessor == null) { throw new IllegalArgumentException("Provided dailyStockPriceEventProcessor is null"); }
+        if ( stockPriceChangeEventProcessor == null) { throw new IllegalArgumentException("Provided stockPriceChangeEventProcessor is null"); }
         if ( tickerService == null) { throw new IllegalArgumentException("Provided tickerService is null"); }
         this.waitTimeBetweenTickersMs = properties.getWaitTimeBetweenTickersMs();
         this.tickersRepository = tickersRepository;
         this.apiStockPriceClient = apiStockPriceClient;
         this.stockPriceAdminService = stockPriceAdminService;
-        this.dailyStockPriceEventProcessor = dailyStockPriceEventProcessor;
+        this.stockPriceChangeEventProcessor = stockPriceChangeEventProcessor;
         this.tickerService = tickerService;
         this.useBulkMode = properties.getUseBulkMode();
         this.waitTimeBetweenBulkMs = properties.getWaitTimeBetweenBulkMs();
@@ -154,7 +154,7 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
     private void savePrice(String symbol, ApiStockPrice stockPrice) {
         try {
             stockPriceAdminService.saveNewCurrentPrice(symbol, stockPrice);
-            dailyStockPriceEventProcessor.addEvent(tickerService.getIdForSymbol(symbol));
+            stockPriceChangeEventProcessor.addEvent(tickerService.getIdForSymbol(symbol));
         } catch (Exception ex) {
             LOGGER.error("Could not save the stock price for ticker [{}]", symbol, ex);
         }

@@ -4,6 +4,7 @@ import com.nevex.investing.api.usfundamentals.model.UsFundamentalIndicatorDto;
 import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponseDto;
 import com.nevex.investing.database.TickerFundamentalsRepository;
 import com.nevex.investing.database.entity.TickerFundamentalsEntity;
+import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;

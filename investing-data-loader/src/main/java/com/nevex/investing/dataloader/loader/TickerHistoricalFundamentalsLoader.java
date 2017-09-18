@@ -8,7 +8,7 @@ import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickerToCikRepository;
 import com.nevex.investing.database.entity.TickerToCikEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
-import com.nevex.investing.service.ServiceException;
+import com.nevex.investing.service.model.ServiceException;
 import com.nevex.investing.service.TickerFundamentalsAdminService;
 import com.nevex.investing.service.TickerService;
 import com.nevex.investing.util.CikUtils;

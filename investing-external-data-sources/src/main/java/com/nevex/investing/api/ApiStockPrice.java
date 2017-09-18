@@ -22,7 +22,7 @@ public final class ApiStockPrice implements Comparable<ApiStockPrice> {
         if ( builder.date == null ) { throw new IllegalArgumentException("Date cannot be null"); }
         if ( builder.open == null ) { throw new IllegalArgumentException("Open cannot be null"); }
         if ( builder.close == null ) { throw new IllegalArgumentException("Close cannot be null"); }
-        if ( builder.adjustedClose == null ) { throw new IllegalArgumentException("AdjustedClose cannot be null"); }
+//        if ( builder.adjustedClose == null ) { throw new IllegalArgumentException("AdjustedClose cannot be null"); }
         if ( builder.high == null ) { throw new IllegalArgumentException("High cannot be null"); }
         if ( builder.low == null ) { throw new IllegalArgumentException("Low cannot be null"); }
         if ( builder.volume == null ) { throw new IllegalArgumentException("Volume cannot be null"); }

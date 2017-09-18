@@ -1,8 +1,8 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.PropertyNames;
-import com.nevex.investing.event.DailyStockPriceEventProcessor;
-import com.nevex.investing.event.type.DailyStockPriceUpdateConsumer;
+import com.nevex.investing.event.StockPriceChangeEventProcessor;
+import com.nevex.investing.event.type.StockPriceUpdateConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +28,9 @@ class EventConfiguration {
     }
 
     @Bean
-    DailyStockPriceEventProcessor dailyStockPriceEventProcessor(
-            @Autowired(required = false) Set<DailyStockPriceUpdateConsumer> dailyStockPriceUpdateConsumers) {
-        return new DailyStockPriceEventProcessor(dailyStockPriceUpdateConsumers);
+    StockPriceChangeEventProcessor dailyStockPriceEventProcessor(
+            @Autowired(required = false) Set<StockPriceUpdateConsumer> stockPriceUpdateConsumers) {
+        return new StockPriceChangeEventProcessor(stockPriceUpdateConsumers);
     }
 
 }

@@ -47,16 +47,16 @@ nevex-investing:
       enabled: true
       wait-time-between-tickers-ms: 1000
       force-start-on-app-startup: true
-      use-bulk-mode: false
+      use-bulk-mode: true
       wait-time-between-bulk-ms: 4000
-      bulk-amount-per-page: 50
+      bulk-amount-per-page: 75
     edgar-ticker-to-cik-loader:
       enabled: false
       only-lookup-missing-ticker-ciks: true # For any ciks that are missing, only get those (not values in the ticker_to_cik table)
       wait-time-between-tickers-ms: 750
-    ticker-fundamentals-loader:
-      host: api.usfundamentals.com
-      api-key:
+#    ticker-fundamentals-loader:
+#      host: api.usfundamentals.com
+#      api-key:
     ticker-historical-fundamentals-loader:
       enabled: false
       force-start-on-app-startup: false

@@ -59,19 +59,14 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     }
 
     @Override
-    @Transactional
     DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
-        LOGGER.info("{} will start to do it's work", this.getClass());
-
         // Fetch all the ticker symbols we have
         int totalRecordsProcessed = 0;
         if ( useBulkMode) {
-            super.processAllPagesInBulkForRepo(tickersRepository, this::loadHistoricalPricesForSymbols, waitTimeBetweenBulkMs, bulkAmountPerPage);
+            totalRecordsProcessed = super.processAllPagesInBulkForRepo(tickersRepository, this::loadHistoricalPricesForSymbols, waitTimeBetweenBulkMs, bulkAmountPerPage);
         } else {
-            super.processAllPagesIndividuallyForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, waitTimeBetweenTickersMs);
+            totalRecordsProcessed = super.processAllPagesIndividuallyForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, waitTimeBetweenTickersMs);
         }
-
-        LOGGER.info("{} has completed all it's work", this.getClass());
         return new DataLoaderWorkerResult(totalRecordsProcessed);
     }
 
@@ -115,6 +110,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
             LOGGER.warn("Received no historical prices for stock [{}]", tickerEntity.getSymbol());
             return;
         }
+        savePrices(tickerEntity.getSymbol(), historicalPrices);
         LOGGER.info("Successfully loaded [{}] historical prices for [{}]", historicalPrices.size(), tickerEntity.getSymbol());
     }
 

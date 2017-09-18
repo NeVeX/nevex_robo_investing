@@ -1,9 +1,8 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.PropertyNames;
-import com.nevex.investing.processor.DailyStockPriceChangeProcessor;
+import com.nevex.investing.processor.StockPriceChangeSummaryProcessor;
 import com.nevex.investing.service.StockPriceAdminService;
-import com.nevex.investing.service.TickerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +31,8 @@ class AnalyzerConfiguration {
 
     @Bean
     @ConditionalOnProperty(value = PropertyNames.NEVEX_INVESTING+".processors.daily-stock-price-processor.enabled", havingValue = "true")
-    DailyStockPriceChangeProcessor dailyStockPriceProcessor() {
-        return new DailyStockPriceChangeProcessor(stockPriceAdminService);
+    StockPriceChangeSummaryProcessor dailyStockPriceProcessor() {
+        return new StockPriceChangeSummaryProcessor(stockPriceAdminService);
     }
 
 }

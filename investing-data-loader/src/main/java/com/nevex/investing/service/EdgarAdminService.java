@@ -2,6 +2,7 @@ package com.nevex.investing.service;
 
 import com.nevex.investing.database.TickerToCikRepository;
 import com.nevex.investing.database.entity.TickerToCikEntity;
+import com.nevex.investing.service.model.ServiceException;
 import com.nevex.investing.util.CikUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -7,14 +7,13 @@ import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
-import com.nevex.investing.service.ServiceException;
+import com.nevex.investing.service.model.ServiceException;
 import com.nevex.investing.service.TickerService;
 import com.nevex.investing.service.YahooStockInfoService;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**

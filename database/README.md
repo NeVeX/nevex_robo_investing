@@ -49,6 +49,11 @@ Then restoring would become something like (note the `-d viper` switch):
 pg_restore -h localhost -p 5432 -U postgres -d postgres -C -v /opt/srv/investing-svc/database/viper-db.backup
 ```
 
+#### Resetting the sequences
 
-
+Sometimes you'll need to reset the `id`'s of various tables. Just get the sequence name and do the following to change:
+```
+SELECT setval('investing.stock_price_id_seq', 1); // next seq value will be 1
+SELECT setval('investing.stock_prices_historical_id_seq', 1);
+```
 
