@@ -5,6 +5,7 @@ import com.nevex.investing.config.property.EventProperties;
 import com.nevex.investing.event.EventConsumer;
 import com.nevex.investing.event.EventManager;
 import com.nevex.investing.event.type.Event;
+import com.nevex.investing.processor.StockFinancialsAnalyzer;
 import com.nevex.investing.processor.StockPriceChangeSummaryProcessor;
 import com.nevex.investing.service.StockPriceAdminService;
 import org.slf4j.Logger;
@@ -45,6 +46,11 @@ class EventConfiguration {
     @Bean
     StockPriceChangeSummaryProcessor stockPriceChangeSummaryProcessor() {
         return new StockPriceChangeSummaryProcessor(stockPriceAdminService);
+    }
+
+    @Bean
+    StockFinancialsAnalyzer stockFinancialsAnalyzer() {
+        return new StockFinancialsAnalyzer();
     }
 
 }

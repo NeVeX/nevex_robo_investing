@@ -1,6 +1,7 @@
 package com.nevex.investing.database;
 
 import com.nevex.investing.database.entity.YahooStockInfoEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,5 @@ public interface YahooStockInfoRepository extends PagingAndSortingRepository<Yah
 
     Optional<YahooStockInfoEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
 
+    Optional<YahooStockInfoEntity> findByTickerId(int tickerId, Pageable pageable);
 }

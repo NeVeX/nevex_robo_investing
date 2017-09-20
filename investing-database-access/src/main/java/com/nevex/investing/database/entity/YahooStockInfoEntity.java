@@ -13,13 +13,15 @@ import java.util.Objects;
         uniqueConstraints = @UniqueConstraint(columnNames = {"ticker_id", "date"}))
 public class YahooStockInfoEntity {
 
+    public static final String DATE_COL = "date";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
     @Column(name = "ticker_id")
     private int tickerId;
-    @Column(name = "date", columnDefinition = "DATE")
+    @Column(name = DATE_COL, columnDefinition = "DATE")
     private LocalDate date;
     @Column(name = "currency")
     private String currency;

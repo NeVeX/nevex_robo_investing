@@ -58,7 +58,7 @@ public class DataLoaderAdminEndpoint {
         ResponseEntity<?> forbiddenResponse = checkHeaderKey(adminHeaderKey);
         if ( forbiddenResponse != null ) { return forbiddenResponse; }
 
-        Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "id")); // get the latest first
+        Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, DataLoaderRunEntity.ID_COL)); // get the latest first
         Pageable pageable = new PageRequest(pageNumber, DEFAULT_PAGE_SIZE, sort);
         Page<DataLoaderRunEntity> pageData = dataLoaderRunsRepository.findAll(pageable);
         if ( pageData == null || !pageData.hasContent() ) {
@@ -75,7 +75,7 @@ public class DataLoaderAdminEndpoint {
         ResponseEntity<?> forbiddenResponse = checkHeaderKey(adminHeaderKey);
         if ( forbiddenResponse != null ) { return forbiddenResponse; }
 
-        Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, "id")); // get the latest first
+        Sort sort = new Sort(new Sort.Order(Sort.Direction.DESC, DataLoaderErrorEntity.ID_COL)); // get the latest first
         Pageable pageable = new PageRequest(pageNumber, DEFAULT_PAGE_SIZE, sort);
         Page<DataLoaderErrorEntity> pageData = dataLoaderErrorsRepository.findAll(pageable);
         if ( pageData == null || !pageData.hasContent() ) {

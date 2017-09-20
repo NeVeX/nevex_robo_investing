@@ -6,6 +6,10 @@ import com.nevex.investing.database.entity.YahooStockInfoEntity;
 import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +45,12 @@ public class YahooStockInfoService {
         } catch (Exception e ) {
             throw new ServiceException("Could not save entity yahoo stock entity for ["+tickerId+"]", e);
         }
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public Optional<YahooStockInfoEntity> getLatestStockInfo(int tickerId) {
+        Pageable pageable = new PageRequest(1, 1, new Sort(Sort.Direction.DESC, YahooStockInfoEntity.DATE_COL));
+        return yahooStockInfoRepository.findByTickerId(tickerId, pageable);
     }
 
     private YahooStockInfoEntity createEntity(int tickerId, YahooStockInfo yahooStockInfo) {

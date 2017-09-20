@@ -9,7 +9,7 @@ import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.event.EventManager;
-import com.nevex.investing.event.type.StockPriceUpdateEvent;
+import com.nevex.investing.event.type.StockPriceUpdatedEvent;
 import com.nevex.investing.service.StockPriceAdminService;
 import com.nevex.investing.service.TickerService;
 import org.slf4j.Logger;
@@ -155,7 +155,7 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
     private void savePrice(String symbol, ApiStockPrice stockPrice) {
         try {
             stockPriceAdminService.saveNewCurrentPrice(symbol, stockPrice);
-            eventManager.sendEvent(new StockPriceUpdateEvent(tickerService.getIdForSymbol(symbol)));
+            eventManager.sendEvent(new StockPriceUpdatedEvent(tickerService.getIdForSymbol(symbol)));
         } catch (Exception ex) {
             LOGGER.error("Could not save the stock price for ticker [{}]", symbol, ex);
         }

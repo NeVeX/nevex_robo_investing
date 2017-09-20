@@ -12,9 +12,11 @@ import java.time.LocalDate;
 @MappedSuperclass
 public abstract class StockPriceBaseEntity {
 
+    public final static String DATE_COLUMN = "date";
+
     @Column(name = "ticker_id")
     private int tickerId;
-    @Column(name = "date", columnDefinition = "DATE")
+    @Column(name = DATE_COLUMN, columnDefinition = "DATE")
     private LocalDate date;
     @Column(name = "open")
     private BigDecimal open;

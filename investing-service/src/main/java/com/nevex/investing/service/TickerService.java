@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Mark Cunningham on 8/8/2017.
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class TickerService implements ApplicationListener<ApplicationReadyEvent> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TickerService.class);
@@ -42,12 +43,7 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
     public TickerService(TickersRepository tickersRepository) {
         if ( tickersRepository == null ) { throw new IllegalArgumentException("Provided ticker repository is null"); }
         this.tickersRepository = tickersRepository;
-
-//        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-//        Runnable refreshTickersTask = this::refreshAllTickers;
-//        executor.scheduleAtFixedRate(refreshTickersTask, 10, TimeUnit.MINUTES.toSeconds(10), TimeUnit.SECONDS);
     }
-
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {

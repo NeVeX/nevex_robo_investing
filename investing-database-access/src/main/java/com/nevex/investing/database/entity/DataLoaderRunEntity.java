@@ -11,9 +11,11 @@ import java.util.Objects;
 @Table(schema = "investing", name = "data_loader_runs")
 public class DataLoaderRunEntity {
 
+    public static final String ID_COL = "id";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = ID_COL)
     private int id;
     @Column(name = "name")
     private String name;

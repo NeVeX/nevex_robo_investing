@@ -8,6 +8,8 @@ import com.nevex.investing.service.exception.TickerNotFoundException;
 import com.nevex.investing.service.model.StockPrice;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ import java.util.Optional;
 /**
  * Created by Mark Cunningham on 8/9/2017.
  */
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
 public class StockPriceService {
 
     final StockPricesHistoricalRepository stockPricesHistoricalRepository;
@@ -58,7 +60,7 @@ public class StockPriceService {
     }
 
     private List<StockPrice> getHistoricalPrices(int tickerId, String tickerSymbol, int maxDays) {
-        Pageable pageable = new PageRequest(0, maxDays);
+        Pageable pageable = new PageRequest(0, maxDays, new Sort(Sort.Direction.DESC, StockPriceHistoricalEntity.DATE_COLUMN));
         List<StockPriceHistoricalEntity> historicalEntities = stockPricesHistoricalRepository.findAllByTickerId(tickerId, pageable);
         if ( historicalEntities == null || historicalEntities.isEmpty()) {
             return new ArrayList<>();
