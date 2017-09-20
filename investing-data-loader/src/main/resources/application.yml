@@ -27,6 +27,7 @@ nevex-investing:
   api-admin-key: space
   events:
     configuration-enabled: true
+    event-queue-size: 1500
   processors:
     configuration-enabled: true
     daily-stock-price-processor:

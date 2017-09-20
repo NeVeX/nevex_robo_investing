@@ -5,7 +5,7 @@ import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.dataloader.loader.DailyStockPriceLoader;
-import com.nevex.investing.event.StockPriceChangeEventProcessor;
+import com.nevex.investing.event.EventManager;
 import com.nevex.investing.service.StockPriceAdminService;
 import com.nevex.investing.service.TickerService;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ class StockPricesDailyLoaderConfiguration {
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
     @Autowired
-    private StockPriceChangeEventProcessor stockPriceChangeEventProcessor;
+    private EventManager eventManager;
     @Autowired
     private TickerService tickerService;
     @Autowired
@@ -55,7 +55,7 @@ class StockPricesDailyLoaderConfiguration {
     DailyStockPriceLoader currentStockPriceLoader() {
         // TODO: This loader is getting too big!
         return new DailyStockPriceLoader(tickersRepository, yahooApiClient,
-                stockPriceAdminService, dataLoaderService, stockPriceChangeEventProcessor, tickerService, dataLoaderProperties.getDailyStockPriceLoader());
+                stockPriceAdminService, dataLoaderService, eventManager, tickerService, dataLoaderProperties.getDailyStockPriceLoader());
     }
 
 }

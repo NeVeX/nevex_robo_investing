@@ -28,7 +28,7 @@ public class YahooApiClient implements ApiStockPriceClient {
         try {
             Map<String, Stock> stockMap = YahooFinance.get(symbols.toArray(new String[symbols.size()]));
             if ( stockMap != null ) {
-                return stockMap.values().stream().map(YahooStockInfo::new).collect(Collectors.toList());
+                return stockMap.values().stream().filter(Stock::isValid).map(YahooStockInfo::new).collect(Collectors.toList());
             }
             return new ArrayList<>();
         } catch (Exception e ) {
@@ -118,6 +118,7 @@ public class YahooApiClient implements ApiStockPriceClient {
             return ApiStockPrice.builder()
                     .withClose(quote.getPrice()) // close is the current price. TODO: Need to make sure this is ok
 //                    .withAdjustedClose(stock.getQuote().getA)
+                    // TODO: need to make sure this is ok
                     .withDate(quote.getLastTradeTime() != null ? quote.getLastTradeTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : LocalDate.now())
                     .withHigh(quote.getDayHigh())
                     .withOpen(quote.getOpen())

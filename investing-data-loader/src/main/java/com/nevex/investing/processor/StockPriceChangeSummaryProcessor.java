@@ -1,6 +1,7 @@
 package com.nevex.investing.processor;
 
-import com.nevex.investing.event.type.StockPriceUpdateConsumer;
+import com.nevex.investing.event.EventConsumer;
+import com.nevex.investing.event.type.StockPriceUpdateEvent;
 import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.model.StockPriceSummary;
 import com.nevex.investing.processor.model.StockPriceSummaryCollector;
@@ -22,18 +23,25 @@ import static java.util.stream.Collectors.groupingBy;
 /**
  * Created by Mark Cunningham on 9/6/2017.
  */
-public class StockPriceChangeSummaryProcessor implements StockPriceUpdateConsumer {
+public class StockPriceChangeSummaryProcessor extends EventConsumer<StockPriceUpdateEvent> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(StockPriceChangeSummaryProcessor.class);
     private final StockPriceAdminService stockPriceAdminService;
 
     public StockPriceChangeSummaryProcessor(StockPriceAdminService stockPriceAdminService) {
+        super(StockPriceUpdateEvent.class);
         if ( stockPriceAdminService == null ) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
         this.stockPriceAdminService = stockPriceAdminService;
     }
 
     @Override
-    public void accept(Integer tickerId) {
+    public String getConsumerName() {
+        return "stock-price-change-summary-processor";
+    }
+
+    @Override
+    public void onEvent(StockPriceUpdateEvent event) {
+        int tickerId = event.getTickerId();
         LOGGER.info("Received new ticker [{}] that has had it's stock price updated - will process it now", tickerId);
         try {
             List<StockPrice> stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, TimePeriod.OneYear.getDays());
