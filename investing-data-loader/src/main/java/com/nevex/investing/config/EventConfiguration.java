@@ -1,6 +1,7 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.PropertyNames;
+import com.nevex.investing.config.property.ApplicationProperties;
 import com.nevex.investing.config.property.EventProperties;
 import com.nevex.investing.event.EventConsumer;
 import com.nevex.investing.event.EventManager;
@@ -8,6 +9,8 @@ import com.nevex.investing.event.type.Event;
 import com.nevex.investing.processor.StockFinancialsAnalyzer;
 import com.nevex.investing.processor.StockPriceChangeSummaryProcessor;
 import com.nevex.investing.service.StockPriceAdminService;
+import com.nevex.investing.service.TickerAnalyzersService;
+import com.nevex.investing.service.YahooStockInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +34,16 @@ class EventConfiguration {
     private EventProperties eventProperties;
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
+    @Autowired
+    private YahooStockInfoService yahooStockInfoService;
+    @Autowired
+    private TickerAnalyzersService tickerAnalyzersService;
 
     @PostConstruct
     void init() throws Exception {
         LOGGER.info("The [{}] has been activated", this.getClass().getSimpleName());
     }
+
 
     @Bean
     EventManager eventManager(
@@ -50,7 +58,9 @@ class EventConfiguration {
 
     @Bean
     StockFinancialsAnalyzer stockFinancialsAnalyzer() {
-        return new StockFinancialsAnalyzer();
+        return new StockFinancialsAnalyzer(yahooStockInfoService, tickerAnalyzersService);
     }
+
+
 
 }

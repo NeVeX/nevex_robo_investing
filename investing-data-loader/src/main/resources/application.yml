@@ -28,6 +28,10 @@ nevex-investing:
   events:
     configuration-enabled: true
     event-queue-size: 1500
+  analyzers:
+    configuration-enabled: true
+    stock-financials-analyzer:
+      enabled: true
   processors:
     configuration-enabled: true
     daily-stock-price-processor:
@@ -45,7 +49,7 @@ nevex-investing:
       bulk-amount-per-page: 50
       max-days-to-fetch: 1850 # About 5 years
     daily-stock-price-loader:
-      enabled: true
+      enabled: false
       wait-time-between-tickers-ms: 1000
       force-start-on-app-startup: true
       use-bulk-mode: true
@@ -75,7 +79,7 @@ nevex-investing:
       host: api.usfundamentals.com
       api-key:
   testing:
-    enabled: false
+    enabled: true
     allowed-symbols: LC, NVDA, FB, APPL, NAKD, GOOGL, MSFT, AMD
 
 # Tiingo API: https://api.tiingo.com/
