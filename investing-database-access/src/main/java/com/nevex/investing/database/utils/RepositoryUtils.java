@@ -18,14 +18,17 @@ public class RepositoryUtils {
      * <br>Note, you must be in the correct transactions before calling this method - no transactions are opened here
      */
     public static <T extends MergeableEntity<T>, ID extends Serializable> T createOrUpdate(
-            CrudRepository<T, ID> repo, T entityToSave, Supplier<Optional<T>> existenceCheck) throws DataSaveException {
+            CrudRepository<T, ID> repo, T inputEntity, Supplier<Optional<T>> existenceCheck) throws DataSaveException {
+
+        T entityToSave = inputEntity;
 
         // check if the entity exists
         Optional<T> existingEntityOpt = existenceCheck.get();
         if ( existingEntityOpt.isPresent()) {
-            // we have an existing entity, so merge in the existing entity into the new entity we wish to save
+            // we have an existing entity, so merge in entity we want to save (keeping the id etc)
             T existingEntity = existingEntityOpt.get();
-            entityToSave.merge(existingEntity);
+            existingEntity.merge(entityToSave);
+            entityToSave = existingEntity; // and now (re) save this
         }
 
         try {

@@ -5,6 +5,7 @@ import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.dataloader.loader.HistoricalStockPriceLoader;
+import com.nevex.investing.event.EventManager;
 import com.nevex.investing.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,8 @@ class StockPricesHistoricalLoaderConfiguration {
     private StockPriceAdminService stockPriceAdminService;
     @Autowired
     private DataLoaderProperties dataLoaderProperties;
+    @Autowired
+    private EventManager eventManager;
 
     @PostConstruct
     void init() throws Exception {
@@ -47,7 +50,7 @@ class StockPricesHistoricalLoaderConfiguration {
 
     @Bean
     HistoricalStockPriceLoader historicalStockPriceLoader() {
-        return new HistoricalStockPriceLoader(tickersRepository, tiingoApiClient, stockPriceAdminService, dataLoaderService, dataLoaderProperties.getStockHistoricalLoader());
+        return new HistoricalStockPriceLoader(tickersRepository, tiingoApiClient, stockPriceAdminService, dataLoaderService, eventManager, dataLoaderProperties.getStockHistoricalLoader());
     }
 
 }

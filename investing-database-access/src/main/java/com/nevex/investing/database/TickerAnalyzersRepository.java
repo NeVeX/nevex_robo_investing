@@ -7,6 +7,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -14,6 +15,8 @@ import java.util.Optional;
  */
 @Repository
 public interface TickerAnalyzersRepository extends PagingAndSortingRepository<TickerAnalyzerEntity, Integer> {
+
+    List<TickerAnalyzerEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
 
     Optional<TickerAnalyzerEntity> findByTickerIdAndDateAndName(int tickerId, LocalDate date, String name);
 

@@ -32,6 +32,8 @@ nevex-investing:
     configuration-enabled: true
     stock-financials-analyzer:
       enabled: true
+    stock-financials-summary-analyzer:
+      enabled: true
     stock-price-change-analyzer:
       enabled: true
   data-loaders:
@@ -65,8 +67,8 @@ nevex-investing:
       force-start-on-app-startup: false
       wait-time-between-tickers-ms: 1000
     yahoo-stock-info-data-loader:
-      enabled: false
-      force-start-on-app-startup: false
+      enabled: true
+      force-start-on-app-startup: true
       wait-time-between-bulk-ms: 10000
       bulk-amount-per-page: 100
   api-clients:
@@ -77,7 +79,7 @@ nevex-investing:
       host: api.usfundamentals.com
       api-key:
   testing:
-    enabled: true
+    enabled: false
     allowed-symbols: LC, NVDA, FB, APPL, NAKD, GOOGL, MSFT, AMD
 
 # Tiingo API: https://api.tiingo.com/

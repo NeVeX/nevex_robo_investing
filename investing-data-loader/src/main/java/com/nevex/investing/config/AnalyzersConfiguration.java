@@ -1,9 +1,11 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.PropertyNames;
+import com.nevex.investing.analyzer.StockFinancialsSummaryAnalyzer;
 import com.nevex.investing.analyzer.StockPriceChangeAnalyzer;
 import com.nevex.investing.config.property.AnalyzerProperties;
 import com.nevex.investing.database.TickerAnalyzersRepository;
+import com.nevex.investing.database.TickerAnalyzersSummaryRepository;
 import com.nevex.investing.event.EventManager;
 import com.nevex.investing.analyzer.StockFinancialsAnalyzer;
 import com.nevex.investing.service.StockPriceAdminService;
@@ -37,6 +39,8 @@ class AnalyzersConfiguration {
     @Autowired
     private TickerAnalyzersRepository tickerAnalyzersRepository;
     @Autowired
+    private TickerAnalyzersSummaryRepository tickerAnalyzersSummaryRepository;
+    @Autowired
     private YahooStockInfoService yahooStockInfoService;
     @Autowired
     private EventManager eventManager;
@@ -53,7 +57,7 @@ class AnalyzersConfiguration {
 
     @Bean
     TickerAnalyzersService tickerAnalyzersService() {
-        return new TickerAnalyzersService(tickerAnalyzersRepository);
+        return new TickerAnalyzersService(tickerAnalyzersRepository, tickerAnalyzersSummaryRepository);
     }
 
     @Bean
@@ -68,4 +72,9 @@ class AnalyzersConfiguration {
         return new StockPriceChangeAnalyzer(stockPriceAdminService);
     }
 
+    @Bean
+    @ConditionalOnProperty(value = AnalyzerProperties.StockFinancialsSummaryAnalyzerProperties.ENABLED, havingValue = "true")
+    StockFinancialsSummaryAnalyzer stockFinancialsSummaryAnalyzer() {
+        return new StockFinancialsSummaryAnalyzer(tickerAnalyzersService());
+    }
 }

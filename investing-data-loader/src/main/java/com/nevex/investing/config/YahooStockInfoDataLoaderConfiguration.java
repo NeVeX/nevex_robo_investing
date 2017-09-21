@@ -5,6 +5,7 @@ import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.dataloader.loader.YahooStockInfoLoader;
+import com.nevex.investing.event.EventManager;
 import com.nevex.investing.service.TickerService;
 import com.nevex.investing.service.YahooStockInfoService;
 import org.slf4j.Logger;
@@ -41,6 +42,8 @@ class YahooStockInfoDataLoaderConfiguration {
     private TickerService tickerService;
     @Autowired
     private DataLoaderProperties dataLoaderProperties;
+    @Autowired
+    private EventManager eventManager;
 
     @PostConstruct
     void init() throws Exception {
@@ -49,7 +52,8 @@ class YahooStockInfoDataLoaderConfiguration {
 
     @Bean
     YahooStockInfoLoader yahooStockInfoLoader() {
-        return new YahooStockInfoLoader(dataLoaderService, tickersRepository, yahooApiClient, yahooStockInfoService, tickerService, dataLoaderProperties.getYahooStockInfoDataLoader());
+        return new YahooStockInfoLoader(dataLoaderService, tickersRepository, yahooApiClient,
+                yahooStockInfoService, tickerService, eventManager, dataLoaderProperties.getYahooStockInfoDataLoader());
     }
 
 }

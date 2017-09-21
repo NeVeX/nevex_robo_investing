@@ -65,6 +65,8 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
         }
 
         sendTickerAnalyzerUpdatedEvent(tickerId, event.getAsOfDate());
+
+        LOGGER.info("{} has finished processing ticker {}", getConsumerName(), tickerId);
     }
 
     private void sendTickerAnalyzerUpdatedEvent(int tickerId, LocalDate asOfDate) {
@@ -78,13 +80,27 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
     }
 
     private double getResultForPE(BigDecimal priceToEarningsRatio) {
-
-        if ( priceToEarningsRatio.compareTo(BigDecimal.valueOf(5)) <= 1) { return 0.8; }
-        else if ( priceToEarningsRatio.compareTo(BigDecimal.valueOf(10)) <= 1) { return 0.7; }
-        else if ( priceToEarningsRatio.compareTo(BigDecimal.valueOf(20)) <= 1) { return 0.6; }
-        else if ( priceToEarningsRatio.compareTo(BigDecimal.valueOf(30)) <= 1) { return 0.4; }
-        else if ( priceToEarningsRatio.compareTo(BigDecimal.valueOf(50)) <= 1) { return 0.1; }
-        return 0; // terrible...
+        if ( priceToEarningsRatio.compareTo(BigDecimal.ZERO) <= 0 ) {
+            if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(-10)) >= 0) {
+                return -0.3;
+            } else if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(-30)) >= 0) {
+                return -0.6;
+            }
+            return -1.0;
+        } else {
+            if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(5)) <= 0) {
+                return 0.8;
+            } else if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(10)) <= 0) {
+                return 0.7;
+            } else if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(20)) <= 0) {
+                return 0.6;
+            } else if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(30)) <= 0) {
+                return 0.4;
+            } else if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(50)) <= 0) {
+                return 0.1;
+            }
+            return 0;
+        }
     }
 
 

@@ -38,7 +38,6 @@ public class YahooStockInfoService {
         try {
             RepositoryUtils.createOrUpdate(yahooStockInfoRepository, newEntity,
                     () -> yahooStockInfoRepository.findByTickerIdAndDate(tickerId, newEntity.getDate()));
-            yahooStockInfoRepository.save(newEntity);
         } catch (DataSaveException dataEx) {
             throw new ServiceException("Could not save entity yahoo stock entity for ["+dataEx.getDataFailedToSave()+"]", dataEx);
         }

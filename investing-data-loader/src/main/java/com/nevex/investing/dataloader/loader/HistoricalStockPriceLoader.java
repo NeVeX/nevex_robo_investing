@@ -8,12 +8,15 @@ import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
+import com.nevex.investing.event.EventManager;
+import com.nevex.investing.event.type.StockPriceUpdatedEvent;
 import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +31,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     private final TickersRepository tickersRepository;
     private final ApiStockPriceClient apiStockPriceClient;
     private final StockPriceAdminService stockPriceAdminService;
+    private final EventManager eventManager;
     private final long waitTimeBetweenTickersMs;
     private final boolean useBulkMode;
     private final int maxDaysToFetch;
@@ -38,15 +42,18 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
                                       ApiStockPriceClient apiStockPriceClient,
                                       StockPriceAdminService stockPriceAdminService,
                                       DataLoaderService dataLoaderService,
+                                      EventManager eventManager,
                                       DataLoaderProperties.HistoricalStockLoaderProperties properties) {
         super(dataLoaderService);
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( apiStockPriceClient == null) { throw new IllegalArgumentException("Provided apiStockPriceClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
+        if ( eventManager == null) { throw new IllegalArgumentException("Provided eventManager is null"); }
         this.waitTimeBetweenTickersMs = properties.getWaitTimeBetweenTickersMs();
         this.tickersRepository = tickersRepository;
         this.apiStockPriceClient = apiStockPriceClient;
         this.stockPriceAdminService = stockPriceAdminService;
+        this.eventManager = eventManager;
         this.useBulkMode = properties.getUseBulkMode();
         this.maxDaysToFetch = properties.getMaxDaysToFetch();
         this.waitTimeBetweenBulkMs = properties.getWaitTimeBetweenBulkMs();
@@ -110,16 +117,21 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
             LOGGER.warn("Received no historical prices for stock [{}]", tickerEntity.getSymbol());
             return;
         }
-        savePrices(tickerEntity.getSymbol(), historicalPrices);
-        LOGGER.info("Successfully loaded [{}] historical prices for [{}]", historicalPrices.size(), tickerEntity.getSymbol());
+        if ( savePrices(tickerEntity.getSymbol(), historicalPrices) ) {
+            eventManager.sendEvent(new StockPriceUpdatedEvent(tickerEntity.getId(), LocalDate.now()));
+            LOGGER.info("Successfully loaded [{}] historical prices for [{}]", historicalPrices.size(), tickerEntity.getSymbol());
+        }
+
     }
 
-    private void savePrices(String symbol, Set<ApiStockPrice> prices) {
+    private boolean savePrices(String symbol, Set<ApiStockPrice> prices) {
         try {
             stockPriceAdminService.saveHistoricalPrices(symbol, prices);
+            return true;
         } catch (Exception e) {
             saveExceptionToDatabase("Could not save historical price for symbol ["+symbol+"]. Reason: ["+e.getMessage()+"]");
             LOGGER.error("Could not save historical prices for symbol [{}]", symbol, e);
+            return false;
         }
     }
 

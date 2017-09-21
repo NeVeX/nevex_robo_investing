@@ -60,6 +60,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         } catch (TickerNotFoundException tickerNotFound) {
             LOGGER.warn("Ticker Id [{}] is not valid - could not find it", tickerId);
         }
+        LOGGER.info("{} has finished processing ticker {}", getConsumerName(), tickerId);
     }
 
     Map<TimePeriod, StockPriceSummary> calculateStockPriceAverages(List<StockPrice> stockPrices) {

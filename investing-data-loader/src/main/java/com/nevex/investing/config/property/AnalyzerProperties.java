@@ -26,6 +26,31 @@ public class AnalyzerProperties {
     @NotNull
     @Valid
     private StockPriceChangeAnalyzerProperties stockPriceChangeAnalyzer;
+    @NotNull
+    @Valid
+    private StockFinancialsSummaryAnalyzerProperties stockFinancialsSummaryAnalyzer;
+
+    public static class StockFinancialsSummaryAnalyzerProperties {
+        public final static String ENABLED = AnalyzerProperties.PREFIX + ".stock-financials-summary-analyzer.enabled";
+
+        @NotNull
+        private Boolean enabled;
+
+        public Boolean getEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(Boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        @Override
+        public String toString() {
+            return "StockFinancialsSummaryAnalyzerProperties{" +
+                    "enabled=" + enabled +
+                    '}';
+        }
+    }
 
     public static class StockFinancialsAnalyzerProperties {
         public final static String ENABLED = AnalyzerProperties.PREFIX + ".stock-financials-analyzer.enabled";
@@ -96,12 +121,21 @@ public class AnalyzerProperties {
         this.stockPriceChangeAnalyzer = stockPriceChangeAnalyzer;
     }
 
+    public StockFinancialsSummaryAnalyzerProperties getStockFinancialsSummaryAnalyzer() {
+        return stockFinancialsSummaryAnalyzer;
+    }
+
+    public void setStockFinancialsSummaryAnalyzer(StockFinancialsSummaryAnalyzerProperties stockFinancialsSummaryAnalyzer) {
+        this.stockFinancialsSummaryAnalyzer = stockFinancialsSummaryAnalyzer;
+    }
+
     @Override
     public String toString() {
         return "AnalyzerProperties{" +
                 "configurationEnabled=" + configurationEnabled +
                 ", stockFinancialsAnalyzer=" + stockFinancialsAnalyzer +
                 ", stockPriceChangeAnalyzer=" + stockPriceChangeAnalyzer +
+                ", stockFinancialsSummaryAnalyzer=" + stockFinancialsSummaryAnalyzer +
                 '}';
     }
 }
