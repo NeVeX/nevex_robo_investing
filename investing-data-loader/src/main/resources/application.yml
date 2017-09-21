@@ -32,9 +32,7 @@ nevex-investing:
     configuration-enabled: true
     stock-financials-analyzer:
       enabled: true
-  processors:
-    configuration-enabled: true
-    daily-stock-price-processor:
+    stock-price-change-analyzer:
       enabled: true
   data-loaders:
     ticker-data-loader:

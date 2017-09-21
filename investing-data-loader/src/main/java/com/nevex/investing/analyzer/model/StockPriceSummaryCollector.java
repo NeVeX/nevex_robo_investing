@@ -1,4 +1,4 @@
-package com.nevex.investing.processor.model;
+package com.nevex.investing.analyzer.model;
 
 import com.nevex.investing.model.StockPriceSummary;
 import com.nevex.investing.service.model.StockPrice;

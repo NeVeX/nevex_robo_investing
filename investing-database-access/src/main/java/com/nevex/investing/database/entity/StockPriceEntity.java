@@ -8,7 +8,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(schema = "investing", name = "stock_prices", uniqueConstraints = @UniqueConstraint(columnNames = "ticker_id"))
-public class StockPriceEntity extends StockPriceBaseEntity {
+public class StockPriceEntity extends StockPriceBaseEntity implements MergeableEntity<StockPriceEntity> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,5 +42,10 @@ public class StockPriceEntity extends StockPriceBaseEntity {
                 "id=" + id +
                 super.toString() +
                 '}';
+    }
+
+    @Override
+    public void merge(StockPriceEntity other) {
+        super.merge(other);
     }
 }

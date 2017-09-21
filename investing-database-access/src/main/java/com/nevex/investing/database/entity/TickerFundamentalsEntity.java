@@ -11,7 +11,7 @@ import java.util.Objects;
 @Entity
 @Table(schema = "investing", name = "ticker_fundamentals",
         uniqueConstraints = @UniqueConstraint(columnNames = {"ticker_id", "period_end", "period_type"}))
-public class TickerFundamentalsEntity implements Comparable<TickerFundamentalsEntity> {
+public class TickerFundamentalsEntity implements Comparable<TickerFundamentalsEntity>, MergeableEntity<TickerFundamentalsEntity> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,6 +50,7 @@ public class TickerFundamentalsEntity implements Comparable<TickerFundamentalsEn
         this.cashAndCashEquivalentsAtCarryingValue = cashAndCashEquivalentsAtCarryingValue;
     }
 
+    @Override
     public void merge(TickerFundamentalsEntity newData) {
         this.earningsPerShare = newData.earningsPerShare;
         this.commonSharesOutstanding = newData.commonSharesOutstanding;

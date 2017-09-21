@@ -1,11 +1,11 @@
-package com.nevex.investing.processor;
+package com.nevex.investing.analyzer;
 
 import com.nevex.investing.database.entity.YahooStockInfoEntity;
 import com.nevex.investing.event.EventConsumer;
 import com.nevex.investing.event.EventManager;
 import com.nevex.investing.event.type.StockFinancialsUpdatedEvent;
 import com.nevex.investing.event.type.TickerAnalyzerUpdatedEvent;
-import com.nevex.investing.processor.model.AnalyzerResult;
+import com.nevex.investing.analyzer.model.AnalyzerResult;
 import com.nevex.investing.service.TickerAnalyzersService;
 import com.nevex.investing.service.YahooStockInfoService;
 import com.nevex.investing.service.model.ServiceException;
@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -24,18 +25,15 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
     private final static Logger LOGGER = LoggerFactory.getLogger(StockFinancialsAnalyzer.class);
     private final YahooStockInfoService yahooStockInfoService;
     private final TickerAnalyzersService tickerAnalyzersService;
-    private final EventManager eventManager;
+    private EventManager eventManager;
 
     public StockFinancialsAnalyzer(YahooStockInfoService yahooStockInfoService,
-                                   TickerAnalyzersService tickerAnalyzersService,
-                                   EventManager eventManager) {
+                                   TickerAnalyzersService tickerAnalyzersService) {
         super(StockFinancialsUpdatedEvent.class);
         if ( yahooStockInfoService == null ) { throw new IllegalArgumentException("Provided yahooStockInfoService is null"); }
         if ( tickerAnalyzersService == null ) { throw new IllegalArgumentException("Provided tickerAnalyzersService is null"); }
-        if ( eventManager == null ) { throw new IllegalArgumentException("Provided eventManager is null"); }
         this.yahooStockInfoService = yahooStockInfoService;
         this.tickerAnalyzersService = tickerAnalyzersService;
-        this.eventManager = eventManager;
     }
 
     @Override
@@ -66,8 +64,17 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
             return;
         }
 
-        // send an event about this
-        eventManager.sendEvent(new TickerAnalyzerUpdatedEvent(tickerId));
+        sendTickerAnalyzerUpdatedEvent(tickerId, event.getAsOfDate());
+    }
+
+    private void sendTickerAnalyzerUpdatedEvent(int tickerId, LocalDate asOfDate) {
+        if ( eventManager != null ) {
+            eventManager.sendEvent(new TickerAnalyzerUpdatedEvent(tickerId, asOfDate));
+        }
+    }
+
+    public void setEventManager(EventManager eventManager) {
+        this.eventManager = eventManager;
     }
 
     private double getResultForPE(BigDecimal priceToEarningsRatio) {

@@ -8,6 +8,8 @@ import com.nevex.investing.database.entity.StockPriceBaseEntity;
 import com.nevex.investing.database.entity.StockPricePeriodSummaryEntity;
 import com.nevex.investing.database.entity.StockPriceEntity;
 import com.nevex.investing.database.entity.StockPriceHistoricalEntity;
+import com.nevex.investing.database.model.DataSaveException;
+import com.nevex.investing.database.utils.RepositoryUtils;
 import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.model.StockPriceSummary;
 import com.nevex.investing.service.exception.TickerNotFoundException;
@@ -22,6 +24,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -42,7 +45,7 @@ public class StockPriceAdminService extends StockPriceService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveNewCurrentPrice(String symbol, ApiStockPrice price) throws TickerNotFoundException {
+    public void saveNewCurrentPrice(String symbol, ApiStockPrice price) throws TickerNotFoundException, ServiceException {
 
         int tickerId = tickerService.getIdForSymbol(symbol);
 
@@ -50,7 +53,7 @@ public class StockPriceAdminService extends StockPriceService {
         saveHistoricalPrice(tickerId, price);
 
         StockPriceEntity newCurrentPrice = convertToCurrentEntity(tickerId, price);
-        // Get the current one and onChange it
+        // Get the current one, if there is one
         Optional<StockPriceEntity> existingCurrentPriceOpt = stockPricesRepository.findByTickerId(tickerId);
         if ( existingCurrentPriceOpt.isPresent()) {
             StockPriceEntity existingCurrentPrice = existingCurrentPriceOpt.get();
@@ -66,13 +69,15 @@ public class StockPriceAdminService extends StockPriceService {
             newCurrentPrice = existingCurrentPrice; // swap!
         }
 
-        if ( stockPricesRepository.save(newCurrentPrice) == null) {
-            LOGGER.warn("Could not save the current stock price entity [{}]", newCurrentPrice);
+        try {
+            stockPricesRepository.save(newCurrentPrice);
+        } catch (Exception e) {
+            throw new ServiceException("Could not save the current stock price entity ["+ newCurrentPrice +"]", e);
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public <E extends ApiStockPrice> void saveHistoricalPrices(String symbol, Set<E> historicalPrices) throws TickerNotFoundException {
+    public <E extends ApiStockPrice> void saveHistoricalPrices(String symbol, Set<E> historicalPrices) throws TickerNotFoundException, ServiceException {
 
         int tickerId = tickerService.getIdForSymbol(symbol);
 
@@ -108,38 +113,22 @@ public class StockPriceAdminService extends StockPriceService {
         String periodName = timePeriod.getTitle();
         StockPricePeriodSummaryEntity newEntity = new StockPricePeriodSummaryEntity(tickerId, timePeriod, summary, LocalDate.now());
 
-        Optional<StockPricePeriodSummaryEntity> existingEntityOpt = stockPricePeriodSummaryRepository.findByTickerIdAndPeriodName(tickerId, periodName);
-        if ( existingEntityOpt.isPresent()) {
-            // found existing, so merge the two
-            StockPricePeriodSummaryEntity existingEntity = existingEntityOpt.get();
-            existingEntity.merge(newEntity);
-            newEntity = existingEntity;
-        }
-
         try {
-            stockPricePeriodSummaryRepository.save(newEntity);
-        } catch (Exception e) {
-            throw new ServiceException("Could not save stock price change entity for ticker ["+tickerId+"]", e);
+            RepositoryUtils.createOrUpdate(stockPricePeriodSummaryRepository, newEntity,
+                    () -> stockPricePeriodSummaryRepository.findByTickerIdAndPeriodName(tickerId, periodName));
+        } catch (DataSaveException dataEx) {
+            throw new ServiceException("Could not save stock price change entity ["+dataEx.getDataFailedToSave()+"]", dataEx);
         }
     }
 
     private void saveHistoricalPrice(int tickerId, ApiStockPrice price) {
         // now insert all our records
-        StockPriceHistoricalEntity newHistoryEntity = convertToHistoricalEntity(tickerId, price);
-
-        // check if we already have this saved
-        Optional<StockPriceHistoricalEntity> existingHistPriceOpt =
-                stockPricesHistoricalRepository.findByTickerIdAndDate(tickerId, price.getDate());
-
-        if ( existingHistPriceOpt.isPresent()) {
-            StockPriceHistoricalEntity existingHistPrice = existingHistPriceOpt.get();
-            LOGGER.info("Merging found existing entity for historical price [{}]", existingHistPrice);
-            existingHistPrice.merge(newHistoryEntity);
-            newHistoryEntity = existingHistPrice; // swap what we should save
-        }
-
-        if ( stockPricesHistoricalRepository.save(newHistoryEntity) == null) {
-            LOGGER.warn("Could not save the historical stock price entity [{}]", newHistoryEntity);
+        StockPriceHistoricalEntity newHistoryEntityToSave = convertToHistoricalEntity(tickerId, price);
+        try {
+            RepositoryUtils.createOrUpdate(stockPricesHistoricalRepository, newHistoryEntityToSave,
+                    () -> stockPricesHistoricalRepository.findByTickerIdAndDate(tickerId, price.getDate()));
+        } catch (DataSaveException dataEx) {
+            LOGGER.warn("Could not save the historical stock price entity [{}]", dataEx.getDataFailedToSave());
         }
     }
 

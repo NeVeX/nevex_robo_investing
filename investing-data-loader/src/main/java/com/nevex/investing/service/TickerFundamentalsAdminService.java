@@ -4,6 +4,8 @@ import com.nevex.investing.api.usfundamentals.model.UsFundamentalIndicatorDto;
 import com.nevex.investing.api.usfundamentals.model.UsFundamentalsResponseDto;
 import com.nevex.investing.database.TickerFundamentalsRepository;
 import com.nevex.investing.database.entity.TickerFundamentalsEntity;
+import com.nevex.investing.database.model.DataSaveException;
+import com.nevex.investing.database.utils.RepositoryUtils;
 import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,30 +47,12 @@ public class TickerFundamentalsAdminService {
     }
 
     private void saveEntity(TickerFundamentalsEntity tickerFundamentalsEntity) throws ServiceException {
-        // check if it already exists
-        Optional<TickerFundamentalsEntity> existingEntityOpt = tickerFundamentalsRepository.findByTickerIdAndPeriodEndAndPeriodType(
-                tickerFundamentalsEntity.getTickerId(), tickerFundamentalsEntity.getPeriodEnd(), tickerFundamentalsEntity.getPeriodType());
-
-        final TickerFundamentalsEntity entityToSave;
-        if ( existingEntityOpt.isPresent()) {
-            TickerFundamentalsEntity existingEntity = existingEntityOpt.get();
-            // merge the two data sets
-            existingEntity.merge(tickerFundamentalsEntity);
-            entityToSave = existingEntity;
-            LOGGER.info("Found existing fundamentals data for ticker [{}] - will merge the two data sets", existingEntity.getTickerId());
-        } else {
-            entityToSave = tickerFundamentalsEntity;
-        }
-
-        TickerFundamentalsEntity savedEntity;
         try {
-            savedEntity = tickerFundamentalsRepository.save(entityToSave);
-        } catch (Exception e) {
-            throw new ServiceException("Could not save fundamentals entity ["+entityToSave+"]", e);
-        }
-
-        if ( savedEntity == null ) {
-            throw new ServiceException("Entity was not actually saved to the database ["+entityToSave+"]");
+            RepositoryUtils.createOrUpdate(tickerFundamentalsRepository, tickerFundamentalsEntity,
+                    () -> tickerFundamentalsRepository.findByTickerIdAndPeriodEndAndPeriodType(
+                            tickerFundamentalsEntity.getTickerId(), tickerFundamentalsEntity.getPeriodEnd(), tickerFundamentalsEntity.getPeriodType()));
+        } catch (DataSaveException dataEx) {
+            throw new ServiceException("Could not save fundamentals entity ["+dataEx.getDataFailedToSave()+"]", dataEx);
         }
     }
 

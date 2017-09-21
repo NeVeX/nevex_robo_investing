@@ -14,7 +14,7 @@ import java.util.Objects;
 @Entity
 @Table(schema = "investing", name = "stock_price_period_summary",
         uniqueConstraints = @UniqueConstraint(columnNames = {"ticker_id", "period_name", "date"}))
-public class StockPricePeriodSummaryEntity {
+public class StockPricePeriodSummaryEntity implements MergeableEntity<StockPricePeriodSummaryEntity> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -82,6 +82,7 @@ public class StockPricePeriodSummaryEntity {
         this.volumeLowest = summary.getVolumeLowest();
     }
 
+    @Override
     public void merge(StockPricePeriodSummaryEntity other) {
         this.openAvg = other.openAvg;
         this.openLowest = other.openLowest;

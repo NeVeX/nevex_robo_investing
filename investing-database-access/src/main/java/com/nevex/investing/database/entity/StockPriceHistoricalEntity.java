@@ -9,7 +9,7 @@ import java.util.Objects;
 @Entity
 @Table(schema = "investing", name = "stock_prices_historical",
         uniqueConstraints = @UniqueConstraint(columnNames = {"ticker_id", "date"}))
-public class StockPriceHistoricalEntity extends StockPriceBaseEntity {
+public class StockPriceHistoricalEntity extends StockPriceBaseEntity implements MergeableEntity<StockPriceHistoricalEntity> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,5 +44,10 @@ public class StockPriceHistoricalEntity extends StockPriceBaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(getTickerId(), getDate());
+    }
+
+    @Override
+    public void merge(StockPriceHistoricalEntity other) {
+        super.merge(other);
     }
 }

@@ -32,12 +32,12 @@ public final class EventManager {
 
     private void startTheQueueProcessor() {
         if ( eventConsumers.isEmpty() ) {
-            LOGGER.warn("Not starting the Event Manager queue processor since there are no event consumers setup");
+            LOGGER.warn("Not starting the Event Manager queue analyzer since there are no event consumers setup");
             return;
         }
         executorService.submit(this::continuallyProcessEventQueue);
         executorService.shutdown();
-        LOGGER.info("The Event Manager queue processor has been started - will accept events");
+        LOGGER.info("The Event Manager queue analyzer has been started - will accept events");
     }
 
     private void continuallyProcessEventQueue() {

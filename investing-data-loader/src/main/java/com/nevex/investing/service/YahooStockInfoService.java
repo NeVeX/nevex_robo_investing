@@ -3,6 +3,8 @@ package com.nevex.investing.service;
 import com.nevex.investing.api.yahoo.model.YahooStockInfo;
 import com.nevex.investing.database.YahooStockInfoRepository;
 import com.nevex.investing.database.entity.YahooStockInfoEntity;
+import com.nevex.investing.database.model.DataSaveException;
+import com.nevex.investing.database.utils.RepositoryUtils;
 import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,19 +34,13 @@ public class YahooStockInfoService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveYahooStockInfo(int tickerId, YahooStockInfo yahooStockInfo) throws ServiceException {
-        YahooStockInfoEntity newEntity = createEntity(tickerId, yahooStockInfo);
-
-        Optional<YahooStockInfoEntity> existingEntityOpt = yahooStockInfoRepository.findByTickerIdAndDate(tickerId, newEntity.getDate());
-        if ( existingEntityOpt.isPresent()) {
-            LOGGER.info("Found an existing entity for yahoo stock info with ticker [{}] for date [{}] - will merge the two data sets and save", tickerId, newEntity.getDate());
-            YahooStockInfoEntity existingEntity = existingEntityOpt.get();
-            existingEntity.merge(newEntity);
-            newEntity = existingEntity; // re-save this entity instead
-        }
+        final YahooStockInfoEntity newEntity = createEntity(tickerId, yahooStockInfo);
         try {
+            RepositoryUtils.createOrUpdate(yahooStockInfoRepository, newEntity,
+                    () -> yahooStockInfoRepository.findByTickerIdAndDate(tickerId, newEntity.getDate()));
             yahooStockInfoRepository.save(newEntity);
-        } catch (Exception e ) {
-            throw new ServiceException("Could not save entity yahoo stock entity for ["+tickerId+"]", e);
+        } catch (DataSaveException dataEx) {
+            throw new ServiceException("Could not save entity yahoo stock entity for ["+dataEx.getDataFailedToSave()+"]", dataEx);
         }
     }
 

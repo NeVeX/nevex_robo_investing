@@ -11,7 +11,7 @@ import java.util.Objects;
 @Entity
 @Table(schema = "investing", name = "yahoo_stock_info",
         uniqueConstraints = @UniqueConstraint(columnNames = {"ticker_id", "date"}))
-public class YahooStockInfoEntity {
+public class YahooStockInfoEntity implements MergeableEntity<YahooStockInfoEntity> {
 
     public static final String DATE_COL = "date";
 
@@ -109,6 +109,7 @@ public class YahooStockInfoEntity {
         this.annualDividendYieldPercent = annualDividendYieldPercent;
     }
 
+    @Override
     public void merge(YahooStockInfoEntity other) {
         this.currency = other.currency;
         this.stockExchange = other.stockExchange;

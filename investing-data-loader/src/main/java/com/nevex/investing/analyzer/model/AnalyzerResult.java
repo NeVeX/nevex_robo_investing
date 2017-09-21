@@ -1,4 +1,4 @@
-package com.nevex.investing.processor.model;
+package com.nevex.investing.analyzer.model;
 
 import org.apache.commons.lang3.StringUtils;
 

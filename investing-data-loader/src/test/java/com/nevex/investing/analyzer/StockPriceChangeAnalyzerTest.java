@@ -1,4 +1,4 @@
-package com.nevex.investing.processor;
+package com.nevex.investing.analyzer;
 
 import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.model.StockPriceSummary;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Created by Mark Cunningham on 9/7/2017.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class StockPriceChangeSummaryProcessorTest {
+public class StockPriceChangeAnalyzerTest {
 
 
     @Mock
@@ -38,7 +38,7 @@ public class StockPriceChangeSummaryProcessorTest {
                 BigDecimal.valueOf(100), BigDecimal.valueOf(100), BigDecimal.valueOf(100),
                 Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE);
         List<StockPrice> oneYearStockPrices = generateStockPrices(TimePeriod.OneYear.getDays(), summary);
-        StockPriceChangeSummaryProcessor priceChangeProcessor = new StockPriceChangeSummaryProcessor(stockPriceAdminService);
+        StockPriceChangeAnalyzer priceChangeProcessor = new StockPriceChangeAnalyzer(stockPriceAdminService);
         Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(oneYearStockPrices);
         assertThat(results.keySet().size()).isEqualTo(5); // we have 5 periods so far
         // Each period we get should be equal to the summary we created above (2+2+2+...) = 2 on average
@@ -53,7 +53,7 @@ public class StockPriceChangeSummaryProcessorTest {
                 BigDecimal.valueOf(100), BigDecimal.valueOf(100), BigDecimal.valueOf(100),
                 Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE);
         List<StockPrice> oneYearStockPrices = generateStockPrices(10, summary); // only 10 days
-        StockPriceChangeSummaryProcessor priceChangeProcessor = new StockPriceChangeSummaryProcessor(stockPriceAdminService);
+        StockPriceChangeAnalyzer priceChangeProcessor = new StockPriceChangeAnalyzer(stockPriceAdminService);
         Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(oneYearStockPrices);
         assertThat(results.keySet().size()).isEqualTo(1); // we should only have one
         assertThat(results.get(TimePeriod.SevenDays)).isNotNull(); // should be a value
@@ -73,7 +73,7 @@ public class StockPriceChangeSummaryProcessorTest {
         stockPrices.add(new StockPrice("TEST", LocalDate.now().minusDays(1), BigDecimal.valueOf(6), BigDecimal.valueOf(10), BigDecimal.valueOf(7), BigDecimal.valueOf(8), 600, null, null, null, null, null, null, null));
         stockPrices.add(new StockPrice("TEST", LocalDate.now(),              BigDecimal.valueOf(7), BigDecimal.valueOf(11), BigDecimal.valueOf(8), BigDecimal.valueOf(9), 700, null, null, null, null, null, null, null));
 
-        StockPriceChangeSummaryProcessor priceChangeProcessor = new StockPriceChangeSummaryProcessor(stockPriceAdminService);
+        StockPriceChangeAnalyzer priceChangeProcessor = new StockPriceChangeAnalyzer(stockPriceAdminService);
         Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(stockPrices);
         assertThat(results.keySet().size()).isEqualTo(1); // we should only have one
         assertThat(results.get(TimePeriod.SevenDays)).isNotNull(); // should be a value

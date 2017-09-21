@@ -1,6 +1,7 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.PropertyNames;
+import com.nevex.investing.config.property.ApplicationProperties;
 import com.nevex.investing.database.DataLoaderErrorsRepository;
 import com.nevex.investing.database.DataLoaderRunsRepository;
 import com.nevex.investing.ws.DataLoaderAdminEndpoint;
@@ -19,22 +20,16 @@ import org.springframework.validation.annotation.Validated;
 @Configuration
 class ControllerConfiguration {
 
-    @NotBlank(message = "The api-admin-key is blank")
-    private String apiAdminKey;
     @Autowired
     private DataLoaderRunsRepository dataLoaderRunsRepository;
     @Autowired
     private DataLoaderErrorsRepository dataLoaderErrorsRepository;
+    @Autowired
+    private ApplicationProperties applicationProperties;
 
     @Bean
     DataLoaderAdminEndpoint dataLoaderAdminEndpoint() {
-        return new DataLoaderAdminEndpoint(dataLoaderRunsRepository, dataLoaderErrorsRepository, apiAdminKey);
+        return new DataLoaderAdminEndpoint(dataLoaderRunsRepository, dataLoaderErrorsRepository, applicationProperties.getApiAdminKey());
     }
-
-    public void setApiAdminKey(String apiAdminKey) {
-        this.apiAdminKey = apiAdminKey;
-    }
-
-
 
 }

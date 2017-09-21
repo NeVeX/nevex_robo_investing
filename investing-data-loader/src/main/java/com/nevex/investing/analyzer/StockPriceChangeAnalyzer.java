@@ -1,10 +1,10 @@
-package com.nevex.investing.processor;
+package com.nevex.investing.analyzer;
 
 import com.nevex.investing.event.EventConsumer;
 import com.nevex.investing.event.type.StockPriceUpdatedEvent;
 import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.model.StockPriceSummary;
-import com.nevex.investing.processor.model.StockPriceSummaryCollector;
+import com.nevex.investing.analyzer.model.StockPriceSummaryCollector;
 import com.nevex.investing.service.model.ServiceException;
 import com.nevex.investing.service.StockPriceAdminService;
 import com.nevex.investing.service.exception.TickerNotFoundException;
@@ -23,12 +23,12 @@ import static java.util.stream.Collectors.groupingBy;
 /**
  * Created by Mark Cunningham on 9/6/2017.
  */
-public class StockPriceChangeSummaryProcessor extends EventConsumer<StockPriceUpdatedEvent> {
+public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEvent> {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(StockPriceChangeSummaryProcessor.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(StockPriceChangeAnalyzer.class);
     private final StockPriceAdminService stockPriceAdminService;
 
-    public StockPriceChangeSummaryProcessor(StockPriceAdminService stockPriceAdminService) {
+    public StockPriceChangeAnalyzer(StockPriceAdminService stockPriceAdminService) {
         super(StockPriceUpdatedEvent.class);
         if ( stockPriceAdminService == null ) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
         this.stockPriceAdminService = stockPriceAdminService;
@@ -36,7 +36,7 @@ public class StockPriceChangeSummaryProcessor extends EventConsumer<StockPriceUp
 
     @Override
     public String getConsumerName() {
-        return "stock-price-change-summary-processor";
+        return "stock-price-change-summary-analyzer";
     }
 
     @Override
@@ -47,7 +47,7 @@ public class StockPriceChangeSummaryProcessor extends EventConsumer<StockPriceUp
             List<StockPrice> stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, TimePeriod.OneYear.getDays());
             Map<TimePeriod, StockPriceSummary> averages = calculateStockPriceAverages(stockPrices);
             if ( averages == null || averages.isEmpty()) {
-                LOGGER.info("Stock price change summary processor cannot summarize for ticker [{}], probably not enough data", tickerId);
+                LOGGER.info("Stock price change summary analyzer cannot summarize for ticker [{}], probably not enough data", tickerId);
                 return;
             }
             for ( Map.Entry<TimePeriod, StockPriceSummary> entry : averages.entrySet()) {

@@ -12,6 +12,8 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.PostConstruct;
 
+import java.time.LocalDate;
+
 import static com.nevex.investing.config.TestingConfiguration.TESTING_PREFIX;
 
 /**
@@ -21,7 +23,7 @@ import static com.nevex.investing.config.TestingConfiguration.TESTING_PREFIX;
 @Configuration
 @ConfigurationProperties(prefix = TESTING_PREFIX)
 @ConditionalOnProperty(name = ApplicationProperties.Testing.ENABLED, havingValue = "true")
-public class DataLoaderTestConfiguration {
+class DataLoaderTestConfiguration {
 
     @Autowired
     private EventManager eventManager;
@@ -30,7 +32,7 @@ public class DataLoaderTestConfiguration {
     void init() {
         // send fake events
 
-        eventManager.sendEvent(new StockFinancialsUpdatedEvent(6379));
+        eventManager.sendEvent(new StockFinancialsUpdatedEvent(6379, LocalDate.now()));
 
     }
 

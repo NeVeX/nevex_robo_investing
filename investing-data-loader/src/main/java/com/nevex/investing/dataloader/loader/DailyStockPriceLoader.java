@@ -129,7 +129,6 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
                 savePrice(entry.getKey(), entry.getValue().get());
             }
         }
-
     }
 
     private void loadCurrentPrice(TickerEntity tickerEntity) {
@@ -155,7 +154,7 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
     private void savePrice(String symbol, ApiStockPrice stockPrice) {
         try {
             stockPriceAdminService.saveNewCurrentPrice(symbol, stockPrice);
-            eventManager.sendEvent(new StockPriceUpdatedEvent(tickerService.getIdForSymbol(symbol)));
+            eventManager.sendEvent(new StockPriceUpdatedEvent(tickerService.getIdForSymbol(symbol), stockPrice.getDate()));
         } catch (Exception ex) {
             LOGGER.error("Could not save the stock price for ticker [{}]", symbol, ex);
         }

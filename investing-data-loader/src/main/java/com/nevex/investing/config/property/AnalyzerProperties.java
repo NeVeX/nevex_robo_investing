@@ -1,6 +1,5 @@
 package com.nevex.investing.config.property;
 
-import com.nevex.investing.processor.StockFinancialsAnalyzer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
@@ -24,10 +23,12 @@ public class AnalyzerProperties {
     @NotNull
     @Valid
     private StockFinancialsAnalyzerProperties stockFinancialsAnalyzer;
+    @NotNull
+    @Valid
+    private StockPriceChangeAnalyzerProperties stockPriceChangeAnalyzer;
 
     public static class StockFinancialsAnalyzerProperties {
-
-        public final static String ENABLED = AnalyzerProperties.PREFIX + ".enabled";
+        public final static String ENABLED = AnalyzerProperties.PREFIX + ".stock-financials-analyzer.enabled";
 
         @NotNull
         private Boolean enabled;
@@ -43,6 +44,29 @@ public class AnalyzerProperties {
         @Override
         public String toString() {
             return "StockFinancialsAnalyzerProperties{" +
+                    "enabled=" + enabled +
+                    '}';
+        }
+    }
+
+    public static class StockPriceChangeAnalyzerProperties {
+
+        public final static String ENABLED = AnalyzerProperties.PREFIX + ".stock-price-change-analyzer.enabled";
+
+        @NotNull
+        private Boolean enabled;
+
+        public Boolean getEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(Boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        @Override
+        public String toString() {
+            return "StockPriceChangeAnalyzerProperties{" +
                     "enabled=" + enabled +
                     '}';
         }
@@ -64,11 +88,20 @@ public class AnalyzerProperties {
         this.stockFinancialsAnalyzer = stockFinancialsAnalyzer;
     }
 
+    public StockPriceChangeAnalyzerProperties getStockPriceChangeAnalyzer() {
+        return stockPriceChangeAnalyzer;
+    }
+
+    public void setStockPriceChangeAnalyzer(StockPriceChangeAnalyzerProperties stockPriceChangeAnalyzer) {
+        this.stockPriceChangeAnalyzer = stockPriceChangeAnalyzer;
+    }
+
     @Override
     public String toString() {
         return "AnalyzerProperties{" +
                 "configurationEnabled=" + configurationEnabled +
                 ", stockFinancialsAnalyzer=" + stockFinancialsAnalyzer +
+                ", stockPriceChangeAnalyzer=" + stockPriceChangeAnalyzer +
                 '}';
     }
 }
