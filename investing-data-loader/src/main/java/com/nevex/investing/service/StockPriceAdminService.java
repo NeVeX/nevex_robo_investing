@@ -111,7 +111,7 @@ public class StockPriceAdminService extends StockPriceService {
     public void savePriceChanges(int tickerId, TimePeriod timePeriod, StockPriceSummary summary) throws ServiceException {
 
         String periodName = timePeriod.getTitle();
-        StockPricePeriodSummaryEntity newEntity = new StockPricePeriodSummaryEntity(tickerId, timePeriod, summary, LocalDate.now());
+        StockPricePeriodSummaryEntity newEntity = new StockPricePeriodSummaryEntity(tickerId, timePeriod, summary);
 
         try {
             RepositoryUtils.createOrUpdate(stockPricePeriodSummaryRepository, newEntity,

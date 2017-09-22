@@ -56,12 +56,8 @@ public class StockPricePeriodSummaryEntity implements MergeableEntity<StockPrice
     public StockPricePeriodSummaryEntity() {}
 
     public StockPricePeriodSummaryEntity(int tickerId, TimePeriod timePeriod, StockPriceSummary summary) {
-        this(tickerId, timePeriod, summary, LocalDate.now());
-    }
-
-    public StockPricePeriodSummaryEntity(int tickerId, TimePeriod timePeriod, StockPriceSummary summary, LocalDate date) {
         this.tickerId = tickerId;
-        this.date = date;
+        this.date = summary.getAsOfDate();
         this.periodName = timePeriod.getTitle();
         this.openAvg = summary.getOpenAvg();
         this.openLowest = summary.getOpenLowest();

@@ -6,6 +6,7 @@ import com.nevex.investing.event.EventManager;
 import com.nevex.investing.event.type.StockFinancialsUpdatedEvent;
 import com.nevex.investing.event.type.TickerAnalyzerUpdatedEvent;
 import com.nevex.investing.analyzer.model.AnalyzerResult;
+import com.nevex.investing.model.Analyzer;
 import com.nevex.investing.service.TickerAnalyzersService;
 import com.nevex.investing.service.YahooStockInfoService;
 import com.nevex.investing.service.model.ServiceException;
@@ -25,15 +26,19 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
     private final static Logger LOGGER = LoggerFactory.getLogger(StockFinancialsAnalyzer.class);
     private final YahooStockInfoService yahooStockInfoService;
     private final TickerAnalyzersService tickerAnalyzersService;
+    private final AnalyzerService analyzerService;
     private EventManager eventManager;
 
     public StockFinancialsAnalyzer(YahooStockInfoService yahooStockInfoService,
-                                   TickerAnalyzersService tickerAnalyzersService) {
+                                   TickerAnalyzersService tickerAnalyzersService,
+                                   AnalyzerService analyzerService) {
         super(StockFinancialsUpdatedEvent.class);
         if ( yahooStockInfoService == null ) { throw new IllegalArgumentException("Provided yahooStockInfoService is null"); }
         if ( tickerAnalyzersService == null ) { throw new IllegalArgumentException("Provided tickerAnalyzersService is null"); }
+        if ( analyzerService == null ) { throw new IllegalArgumentException("Provided analyzerService is null"); }
         this.yahooStockInfoService = yahooStockInfoService;
         this.tickerAnalyzersService = tickerAnalyzersService;
+        this.analyzerService = analyzerService;
     }
 
     @Override
@@ -44,7 +49,8 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
     @Override
     protected void onEvent(StockFinancialsUpdatedEvent event) {
         int tickerId = event.getTickerId();
-        Optional<YahooStockInfoEntity> entityOpt = yahooStockInfoService.getLatestStockInfo(tickerId);
+        LocalDate asOfDate = event.getAsOfDate();
+        Optional<YahooStockInfoEntity> entityOpt = yahooStockInfoService.getLatestStockInfo(tickerId, asOfDate);
         if ( !entityOpt.isPresent()) {
             return; // nothing to do
         }
@@ -52,9 +58,8 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
         Set<AnalyzerResult> analyzerResults = new HashSet<>();
 
         YahooStockInfoEntity entity = entityOpt.get();
-        if ( entity.getPriceToEarningsRatio() != null ) {
-            analyzerResults.add(new AnalyzerResult(entity.getTickerId(), "price-to-earnings", getResultForPE(entity.getPriceToEarningsRatio())));
-        }
+
+        addResult(analyzerResults, tickerId, asOfDate, entity.getPriceToEarningsRatio(), Analyzer.PRICE_TO_EARNINGS_RATIO);
 
         try {
             // Save all our analyzers
@@ -69,6 +74,15 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
         LOGGER.info("{} has finished processing ticker {}", getConsumerName(), tickerId);
     }
 
+    private void addResult(Set<AnalyzerResult> analyzerResults, int tickerId, LocalDate asOfDate, BigDecimal value, Analyzer analyzer) {
+        if ( value != null ) {
+            Optional<Double> weightResultOpt = analyzerService.getWeight(analyzer, value);
+            if ( weightResultOpt.isPresent()) {
+                analyzerResults.add(new AnalyzerResult(tickerId, analyzer.getTitle(), weightResultOpt.get(), asOfDate));
+            }
+        }
+    }
+
     private void sendTickerAnalyzerUpdatedEvent(int tickerId, LocalDate asOfDate) {
         if ( eventManager != null ) {
             eventManager.sendEvent(new TickerAnalyzerUpdatedEvent(tickerId, asOfDate));
@@ -78,30 +92,5 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
     public void setEventManager(EventManager eventManager) {
         this.eventManager = eventManager;
     }
-
-    private double getResultForPE(BigDecimal priceToEarningsRatio) {
-        if ( priceToEarningsRatio.compareTo(BigDecimal.ZERO) <= 0 ) {
-            if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(-10)) >= 0) {
-                return -0.3;
-            } else if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(-30)) >= 0) {
-                return -0.6;
-            }
-            return -1.0;
-        } else {
-            if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(5)) <= 0) {
-                return 0.8;
-            } else if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(10)) <= 0) {
-                return 0.7;
-            } else if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(20)) <= 0) {
-                return 0.6;
-            } else if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(30)) <= 0) {
-                return 0.4;
-            } else if (priceToEarningsRatio.compareTo(BigDecimal.valueOf(50)) <= 0) {
-                return 0.1;
-            }
-            return 0;
-        }
-    }
-
 
 }

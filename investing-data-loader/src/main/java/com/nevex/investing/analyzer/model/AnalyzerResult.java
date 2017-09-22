@@ -16,10 +16,6 @@ public class AnalyzerResult {
     private final double weight;
     private final LocalDate date;
 
-    public AnalyzerResult(int tickerId, String name, double weight) {
-        this(tickerId, name, weight, LocalDate.now());
-    }
-
     public AnalyzerResult(TickerAnalyzerEntity entity) {
         this(entity.getTickerId(), entity.getName(), entity.getWeight(), entity.getDate());
     }

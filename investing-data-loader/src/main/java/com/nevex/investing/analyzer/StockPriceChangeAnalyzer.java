@@ -12,6 +12,7 @@ import com.nevex.investing.service.model.StockPrice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,10 +43,11 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
     @Override
     public void onEvent(StockPriceUpdatedEvent event) {
         int tickerId = event.getTickerId();
+        LocalDate asOfDate = event.getAsOfDate();
         LOGGER.info("Received new ticker [{}] that has had it's stock price updated - will process it now", tickerId);
         try {
-            List<StockPrice> stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, TimePeriod.OneYear.getDays());
-            Map<TimePeriod, StockPriceSummary> averages = calculateStockPriceAverages(stockPrices);
+            List<StockPrice> stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, asOfDate, TimePeriod.OneYear.getDays());
+            Map<TimePeriod, StockPriceSummary> averages = calculateStockPriceAverages(stockPrices, asOfDate);
             if ( averages == null || averages.isEmpty()) {
                 LOGGER.info("Stock price change summary analyzer cannot summarize for ticker [{}], probably not enough data", tickerId);
                 return;
@@ -63,7 +65,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         LOGGER.info("{} has finished processing ticker {}", getConsumerName(), tickerId);
     }
 
-    Map<TimePeriod, StockPriceSummary> calculateStockPriceAverages(List<StockPrice> stockPrices) {
+    Map<TimePeriod, StockPriceSummary> calculateStockPriceAverages(List<StockPrice> stockPrices, LocalDate asOfDate) {
         // Order the stock prices
         TreeSet<StockPrice> orderedStockPrices = new TreeSet<>(stockPrices);
         // Get a mapping of time periods for all stock prices
@@ -72,7 +74,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         Map<TimePeriod, StockPriceSummary> timePeriodSummaries = timePeriodBuckets.entrySet()
                 .stream()
                 .flatMap(e -> e.getValue().stream().map(p -> new TimePeriodToStockPrice(e.getKey(), p)))
-                .collect(groupingBy(TimePeriodToStockPrice::getTimePeriod, Collectors.mapping(TimePeriodToStockPrice::getPrice, new StockPriceSummaryCollector())));
+                .collect(groupingBy(TimePeriodToStockPrice::getTimePeriod, Collectors.mapping(TimePeriodToStockPrice::getPrice, new StockPriceSummaryCollector(asOfDate))));
 
         return timePeriodSummaries;
     }

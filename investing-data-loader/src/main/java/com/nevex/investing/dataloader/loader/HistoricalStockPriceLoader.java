@@ -10,13 +10,10 @@ import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.event.EventManager;
 import com.nevex.investing.event.type.StockPriceUpdatedEvent;
-import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.service.StockPriceAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,7 +79,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         tickers = TestingControlUtil.getAllowedTickers(tickers); // remove tickers that are not allowed under test
         Map<String, Set<ApiStockPrice>> prices = null;
         try {
-            prices = apiStockPriceClient.getHistoricalPricesForSymbols(tickers, maxDaysToFetch);
+            prices = apiStockPriceClient.getHistoricalPricesForSymbols(tickers, getWorkerStartTime().toLocalDate(), maxDaysToFetch);
         } catch (ApiException apiEx) {
             saveExceptionToDatabase("Could not get historical price for bulk ["+tickers.size()+"] symbols. Reason: ["+apiEx.getMessage()+"]");
             LOGGER.error("Could not bulk get historical prices for symbols [{}]", tickers, apiEx);
@@ -107,7 +104,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
 
         Set<ApiStockPrice> historicalPrices = null;
         try {
-            historicalPrices = apiStockPriceClient.getHistoricalPricesForSymbol(tickerEntity.getSymbol(), maxDaysToFetch);
+            historicalPrices = apiStockPriceClient.getHistoricalPricesForSymbol(tickerEntity.getSymbol(), getWorkerStartTime().toLocalDate(), maxDaysToFetch);
         } catch (ApiException apiEx ) {
             saveExceptionToDatabase("Could not get historical price for symbol symbol ["+tickerEntity.getSymbol()+"]. Reason: ["+apiEx.getMessage()+"]");
             LOGGER.error("Could not get historical prices for symbol [{}]", tickerEntity.getSymbol(), apiEx);
@@ -118,10 +115,9 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
             return;
         }
         if ( savePrices(tickerEntity.getSymbol(), historicalPrices) ) {
-            eventManager.sendEvent(new StockPriceUpdatedEvent(tickerEntity.getId(), LocalDate.now()));
+            eventManager.sendEvent(new StockPriceUpdatedEvent(tickerEntity.getId(), getWorkerStartTime().toLocalDate()));
             LOGGER.info("Successfully loaded [{}] historical prices for [{}]", historicalPrices.size(), tickerEntity.getSymbol());
         }
-
     }
 
     private boolean savePrices(String symbol, Set<ApiStockPrice> prices) {

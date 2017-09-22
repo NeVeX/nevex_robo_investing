@@ -6,6 +6,7 @@ import com.nevex.investing.service.model.StockPrice;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -18,6 +19,12 @@ import java.util.stream.Collector;
  * Created by Mark Cunningham on 9/12/2017.
  */
 public class StockPriceSummaryCollector implements Collector<StockPrice, StockPriceSummaryCollector, StockPriceSummary> {
+
+    private final LocalDate asOfDate;
+
+    public StockPriceSummaryCollector(LocalDate asOfDate) {
+        this.asOfDate = asOfDate;
+    }
 
     private int openCounter = 0;
     private int highCounter = 0;
@@ -129,6 +136,7 @@ public class StockPriceSummaryCollector implements Collector<StockPrice, StockPr
         Long volumeAvg = collector.volumeCounter > 0 ? collector.volume.divide(BigInteger.valueOf(collector.volumeCounter)).longValue() : null;
 
         return new StockPriceSummary(
+                collector.asOfDate,
                 openAvg, collector.openLowest, collector.openHighest,
                 highAvg, collector.highest,
                 lowAvg, collector.lowest,
@@ -138,7 +146,7 @@ public class StockPriceSummaryCollector implements Collector<StockPrice, StockPr
 
     @Override
     public Supplier<StockPriceSummaryCollector> supplier() {
-        return StockPriceSummaryCollector::new;
+        return () -> new StockPriceSummaryCollector(asOfDate);
     }
 
     @Override

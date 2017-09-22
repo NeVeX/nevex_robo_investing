@@ -7,6 +7,7 @@ import yahoofinance.quotes.stock.StockQuote;
 import yahoofinance.quotes.stock.StockStats;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
 
 /**
@@ -51,6 +52,7 @@ public class YahooStockInfo {
     private final BigDecimal annualDividendYieldPercent;
 
     public YahooStockInfo(Stock stock) {
+
         if (StringUtils.isBlank(stock.getSymbol())) { throw new IllegalArgumentException("Symbol cannot be blank"); }
         this.symbol = stock.getSymbol();
         this.currency = stock.getCurrency();

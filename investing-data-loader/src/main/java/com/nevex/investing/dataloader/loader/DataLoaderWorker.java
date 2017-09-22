@@ -21,6 +21,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(DataLoaderWorker.class);
     private final DataLoaderService dataLoaderService;
+    private OffsetDateTime workerStartTime;
 
     DataLoaderWorker(DataLoaderService dataLoaderService) {
         if ( dataLoaderService == null ) { throw new IllegalArgumentException("Provided dataLoaderService is null"); }
@@ -40,6 +41,8 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
     abstract DataLoaderWorkerResult doWork() throws DataLoaderWorkerException;
 
+    protected OffsetDateTime getWorkerStartTime() { return workerStartTime; }
+
     /**
      * Entry point to start the loader
      */
@@ -52,12 +55,12 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
      */
     void start(DataWorkerSupplier worker) {
         LOGGER.info("Started data loader worker [{}]", getName());
-        OffsetDateTime startTime = OffsetDateTime.now();
+        workerStartTime = OffsetDateTime.now();
         long startTimeMs = System.currentTimeMillis();
         try {
             DataLoaderWorkerResult result = worker.doWork();
             // Save the work done
-            dataLoaderService.saveRun(getName(), startTime, result.getRecordsProcessed());
+            dataLoaderService.saveRun(getName(), workerStartTime, result.getRecordsProcessed());
             LOGGER.info("[{}] finished it's work in [{}] ms", getName(), (System.currentTimeMillis() - startTimeMs));
         } catch (DataLoaderWorkerException ex) {
             dataLoaderService.saveError(getName(), ex.getMessage());

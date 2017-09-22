@@ -14,7 +14,6 @@ import com.nevex.investing.service.TickerService;
 import com.nevex.investing.service.YahooStockInfoService;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -94,8 +93,8 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
                     Optional<Integer> tickerIdOpt = tickerService.tryGetIdForSymbol(stockInfo.getSymbol());
                     if ( tickerIdOpt.isPresent()) {
                         try {
-                            yahooStockInfoService.saveYahooStockInfo(tickerIdOpt.get(), stockInfo);
-                            eventManager.sendEvent(new StockFinancialsUpdatedEvent(tickerIdOpt.get(), LocalDate.now()));
+                            yahooStockInfoService.saveYahooStockInfo(tickerIdOpt.get(), getWorkerStartTime().toLocalDate(), stockInfo);
+                            eventManager.sendEvent(new StockFinancialsUpdatedEvent(tickerIdOpt.get(), getWorkerStartTime().toLocalDate()));
                         } catch (ServiceException e) {
                             saveExceptionToDatabase("A exception occurred trying to save yahoo stock info for ticker ["+tickerIdOpt.get()+"]. Reason: "+e.getMessage());
                         }

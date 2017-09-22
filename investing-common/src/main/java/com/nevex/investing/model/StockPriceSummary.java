@@ -1,6 +1,7 @@
 package com.nevex.investing.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -8,6 +9,7 @@ import java.util.Objects;
  */
 public class StockPriceSummary {
 
+    private final LocalDate asOfDate;
     private final BigDecimal openAvg;
     private final BigDecimal openLowest;
     private final BigDecimal openHighest;
@@ -22,7 +24,8 @@ public class StockPriceSummary {
     private final Long volumeHighest;
     private final Long volumeLowest;
 
-    public StockPriceSummary(BigDecimal openAvg, BigDecimal openLowest, BigDecimal openHighest, BigDecimal highAvg, BigDecimal highest, BigDecimal lowAvg, BigDecimal lowest, BigDecimal closeAvg, BigDecimal closeLowest, BigDecimal closeHighest, Long volumeAvg, Long volumeHighest, Long volumeLowest) {
+    public StockPriceSummary(LocalDate asOfDate, BigDecimal openAvg, BigDecimal openLowest, BigDecimal openHighest, BigDecimal highAvg, BigDecimal highest, BigDecimal lowAvg, BigDecimal lowest, BigDecimal closeAvg, BigDecimal closeLowest, BigDecimal closeHighest, Long volumeAvg, Long volumeHighest, Long volumeLowest) {
+        this.asOfDate = asOfDate;
         this.openAvg = openAvg;
         this.openLowest = openLowest;
         this.openHighest = openHighest;
@@ -36,6 +39,10 @@ public class StockPriceSummary {
         this.volumeAvg = volumeAvg;
         this.volumeHighest = volumeHighest;
         this.volumeLowest = volumeLowest;
+    }
+
+    public LocalDate getAsOfDate() {
+        return asOfDate;
     }
 
     public BigDecimal getOpenAvg() {
@@ -96,6 +103,7 @@ public class StockPriceSummary {
         if (o == null || getClass() != o.getClass()) return false;
         StockPriceSummary that = (StockPriceSummary) o;
         return Objects.equals(openAvg, that.openAvg) &&
+                Objects.equals(asOfDate, that.asOfDate) &&
                 Objects.equals(openLowest, that.openLowest) &&
                 Objects.equals(openHighest, that.openHighest) &&
                 Objects.equals(highAvg, that.highAvg) &&
@@ -112,12 +120,13 @@ public class StockPriceSummary {
 
     @Override
     public int hashCode() {
-        return Objects.hash(openAvg, openLowest, openHighest, highAvg, highest, lowAvg, lowest, closeAvg, closeLowest, closeHighest, volumeAvg, volumeHighest, volumeLowest);
+        return Objects.hash(openAvg, asOfDate, openLowest, openHighest, highAvg, highest, lowAvg, lowest, closeAvg, closeLowest, closeHighest, volumeAvg, volumeHighest, volumeLowest);
     }
 
     @Override
     public String toString() {
         return "StockPriceSummary{" +
+                "asOfDate=" + asOfDate +
                 "openAvg=" + openAvg +
                 ", openLowest=" + openLowest +
                 ", openHighest=" + openHighest +

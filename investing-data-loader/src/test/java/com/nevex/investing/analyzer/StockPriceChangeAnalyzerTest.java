@@ -32,14 +32,15 @@ public class StockPriceChangeAnalyzerTest {
 
     @Test
     public void testStockPriceAverageCalculations() {
-        StockPriceSummary summary = new StockPriceSummary(BigDecimal.valueOf(2), BigDecimal.valueOf(2), BigDecimal.valueOf(2),
+        StockPriceSummary summary = new StockPriceSummary(LocalDate.now(),
+                BigDecimal.valueOf(2), BigDecimal.valueOf(2), BigDecimal.valueOf(2),
                 BigDecimal.valueOf(10), BigDecimal.valueOf(10),
                 BigDecimal.valueOf(5), BigDecimal.valueOf(5),
                 BigDecimal.valueOf(100), BigDecimal.valueOf(100), BigDecimal.valueOf(100),
                 Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE);
         List<StockPrice> oneYearStockPrices = generateStockPrices(TimePeriod.OneYear.getDays(), summary);
         StockPriceChangeAnalyzer priceChangeProcessor = new StockPriceChangeAnalyzer(stockPriceAdminService);
-        Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(oneYearStockPrices);
+        Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(oneYearStockPrices, LocalDate.now());
         assertThat(results.keySet().size()).isEqualTo(5); // we have 5 periods so far
         // Each period we get should be equal to the summary we created above (2+2+2+...) = 2 on average
         results.values().forEach(result -> assertThat(result).isEqualTo(summary));
@@ -47,14 +48,16 @@ public class StockPriceChangeAnalyzerTest {
 
     @Test
     public void testStockPriceAverageCalculationsFor7DaysOnly() {
-        StockPriceSummary summary = new StockPriceSummary(BigDecimal.valueOf(2), BigDecimal.valueOf(2), BigDecimal.valueOf(2),
+        StockPriceSummary summary = new StockPriceSummary(
+                LocalDate.now(),
+                BigDecimal.valueOf(2), BigDecimal.valueOf(2), BigDecimal.valueOf(2),
                 BigDecimal.valueOf(10), BigDecimal.valueOf(10),
                 BigDecimal.valueOf(5), BigDecimal.valueOf(5),
                 BigDecimal.valueOf(100), BigDecimal.valueOf(100), BigDecimal.valueOf(100),
                 Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE);
         List<StockPrice> oneYearStockPrices = generateStockPrices(10, summary); // only 10 days
         StockPriceChangeAnalyzer priceChangeProcessor = new StockPriceChangeAnalyzer(stockPriceAdminService);
-        Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(oneYearStockPrices);
+        Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(oneYearStockPrices, LocalDate.now());
         assertThat(results.keySet().size()).isEqualTo(1); // we should only have one
         assertThat(results.get(TimePeriod.SevenDays)).isNotNull(); // should be a value
         results.values().forEach(result -> assertThat(result).isEqualTo(summary)); // test it's as we expect
@@ -74,7 +77,7 @@ public class StockPriceChangeAnalyzerTest {
         stockPrices.add(new StockPrice("TEST", LocalDate.now(),              BigDecimal.valueOf(7), BigDecimal.valueOf(11), BigDecimal.valueOf(8), BigDecimal.valueOf(9), 700, null, null, null, null, null, null, null));
 
         StockPriceChangeAnalyzer priceChangeProcessor = new StockPriceChangeAnalyzer(stockPriceAdminService);
-        Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(stockPrices);
+        Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(stockPrices, LocalDate.now());
         assertThat(results.keySet().size()).isEqualTo(1); // we should only have one
         assertThat(results.get(TimePeriod.SevenDays)).isNotNull(); // should be a value
 

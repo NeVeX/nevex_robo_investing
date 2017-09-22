@@ -32,7 +32,7 @@ class DataLoaderTestConfiguration {
     void init() {
         // send fake events
 
-        eventManager.sendEvent(new StockFinancialsUpdatedEvent(6379, LocalDate.now()));
+//        eventManager.sendEvent(new StockFinancialsUpdatedEvent(6379, LocalDate.now()));
 
     }
 

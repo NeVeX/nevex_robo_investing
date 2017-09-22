@@ -17,5 +17,5 @@ public interface YahooStockInfoRepository extends PagingAndSortingRepository<Yah
 
     Optional<YahooStockInfoEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
 
-    Page<YahooStockInfoEntity> findByTickerId(int tickerId, Pageable pageable);
+    Page<YahooStockInfoEntity> findByTickerIdAndDateLessThanEqual(int tickerId, LocalDate date, Pageable pageable);
 }

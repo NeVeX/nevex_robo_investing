@@ -1,9 +1,11 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.PropertyNames;
+import com.nevex.investing.analyzer.AnalyzerService;
 import com.nevex.investing.analyzer.StockFinancialsSummaryAnalyzer;
 import com.nevex.investing.analyzer.StockPriceChangeAnalyzer;
 import com.nevex.investing.config.property.AnalyzerProperties;
+import com.nevex.investing.database.AnalyzerWeightsRepository;
 import com.nevex.investing.database.TickerAnalyzersRepository;
 import com.nevex.investing.database.TickerAnalyzersSummaryRepository;
 import com.nevex.investing.event.EventManager;
@@ -11,6 +13,7 @@ import com.nevex.investing.analyzer.StockFinancialsAnalyzer;
 import com.nevex.investing.service.StockPriceAdminService;
 import com.nevex.investing.service.TickerAnalyzersService;
 import com.nevex.investing.service.YahooStockInfoService;
+import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,8 @@ class AnalyzersConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnalyzersConfiguration.class);
     @Autowired
+    private AnalyzerWeightsRepository analyzerWeightsRepository;
+    @Autowired
     private StockPriceAdminService stockPriceAdminService;
     @Autowired
     private TickerAnalyzersRepository tickerAnalyzersRepository;
@@ -48,11 +53,17 @@ class AnalyzersConfiguration {
     private AnalyzerProperties analyzerProperties;
 
     @PostConstruct
-    void init() {
+    void init() throws ServiceException {
         LOGGER.info("{} is setup and active with properties: [{}]", this.getClass().getSimpleName(), analyzerProperties);
         if ( stockFinancialsAnalyzer() != null ) {
             stockFinancialsAnalyzer().setEventManager(eventManager);
         }
+        analyzerService().refresh();
+    }
+
+    @Bean
+    AnalyzerService analyzerService() {
+        return new AnalyzerService(analyzerWeightsRepository);
     }
 
     @Bean
@@ -63,7 +74,7 @@ class AnalyzersConfiguration {
     @Bean
     @ConditionalOnProperty(name = AnalyzerProperties.StockFinancialsAnalyzerProperties.ENABLED, havingValue = "true")
     StockFinancialsAnalyzer stockFinancialsAnalyzer() {
-        return new StockFinancialsAnalyzer(yahooStockInfoService, tickerAnalyzersService());
+        return new StockFinancialsAnalyzer(yahooStockInfoService, tickerAnalyzersService(), analyzerService());
     }
 
     @Bean
@@ -75,6 +86,9 @@ class AnalyzersConfiguration {
     @Bean
     @ConditionalOnProperty(value = AnalyzerProperties.StockFinancialsSummaryAnalyzerProperties.ENABLED, havingValue = "true")
     StockFinancialsSummaryAnalyzer stockFinancialsSummaryAnalyzer() {
-        return new StockFinancialsSummaryAnalyzer(tickerAnalyzersService());
+        return new StockFinancialsSummaryAnalyzer(tickerAnalyzersService(), analyzerService());
     }
+
+
+
 }

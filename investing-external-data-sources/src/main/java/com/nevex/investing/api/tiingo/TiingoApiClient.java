@@ -60,12 +60,11 @@ public class TiingoApiClient implements ApiStockPriceClient {
         return results;
     }
 
-    public Set<ApiStockPrice> getHistoricalPricesForSymbol(String symbol, int maxDaysToFetch) throws ApiException {
+    public Set<ApiStockPrice> getHistoricalPricesForSymbol(String symbol, LocalDate asOfDate, int maxDaysToFetch) throws ApiException {
         // Build the date to use
-        LocalDate todaysDate = LocalDate.now();
-        LocalDate earliestDate = todaysDate.minus(maxDaysToFetch, ChronoUnit.DAYS);
+        LocalDate earliestDate = asOfDate.minus(maxDaysToFetch, ChronoUnit.DAYS);
 
-        String todaysDateAsString = todaysDate.format(HISTORICAL_DATE_FORMATTER);
+        String todaysDateAsString = asOfDate.format(HISTORICAL_DATE_FORMATTER);
         String earliestDateAsString = earliestDate.format(HISTORICAL_DATE_FORMATTER);
 
         String url = StringUtils.replace(historicalStockPriceUrl, "{SYMBOL}", symbol);
@@ -76,10 +75,10 @@ public class TiingoApiClient implements ApiStockPriceClient {
     }
 
     @Override
-    public Map<String, Set<ApiStockPrice>> getHistoricalPricesForSymbols(List<String> symbols, int maxDaysToFetch) throws ApiException {
+    public Map<String, Set<ApiStockPrice>> getHistoricalPricesForSymbols(List<String> symbols, LocalDate asOfDate, int maxDaysToFetch) throws ApiException {
         Map<String, Set<ApiStockPrice>> results = new HashMap<>();
         for (String symbol : symbols) {
-            results.put(symbol, getHistoricalPricesForSymbol(symbol, maxDaysToFetch));
+            results.put(symbol, getHistoricalPricesForSymbol(symbol, asOfDate, maxDaysToFetch));
         }
         return results;
     }

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,8 +51,7 @@ public class StockPriceService {
     }
 
     public List<StockPrice> getHistoricalPrices(int tickerId, int maxDays) throws TickerNotFoundException {
-        String symbol = tickerService.getSymbolForId(tickerId);
-        return getHistoricalPrices(tickerId, symbol, maxDays);
+        return getHistoricalPrices(tickerId, LocalDate.now(), maxDays);
     }
 
     public List<StockPrice> getHistoricalPrices(String symbol, int maxDays) throws TickerNotFoundException {
@@ -59,9 +59,19 @@ public class StockPriceService {
         return getHistoricalPrices(tickerId, maxDays);
     }
 
-    private List<StockPrice> getHistoricalPrices(int tickerId, String tickerSymbol, int maxDays) {
+    public List<StockPrice> getHistoricalPrices(int tickerId, LocalDate asOfDate, int maxDays) throws TickerNotFoundException {
+        String symbol = tickerService.getSymbolForId(tickerId);
+        return getHistoricalPrices(tickerId, symbol, asOfDate, maxDays);
+    }
+
+//    public List<StockPrice> getHistoricalPrices(String symbol, LocalDate asOfDate, int maxDays) throws TickerNotFoundException {
+//        int tickerId = tickerService.getIdForSymbol(symbol);
+//        return getHistoricalPrices(tickerId, asOfDate, maxDays);
+//    }
+
+    private List<StockPrice> getHistoricalPrices(int tickerId, String tickerSymbol, LocalDate asOfDate, int maxDays) {
         Pageable pageable = new PageRequest(0, maxDays, new Sort(Sort.Direction.DESC, StockPriceHistoricalEntity.DATE_COLUMN));
-        List<StockPriceHistoricalEntity> historicalEntities = stockPricesHistoricalRepository.findAllByTickerId(tickerId, pageable);
+        List<StockPriceHistoricalEntity> historicalEntities = stockPricesHistoricalRepository.findAllByTickerIdAndDateLessThanEqual(tickerId, asOfDate, pageable);
         if ( historicalEntities == null || historicalEntities.isEmpty()) {
             return new ArrayList<>();
         }

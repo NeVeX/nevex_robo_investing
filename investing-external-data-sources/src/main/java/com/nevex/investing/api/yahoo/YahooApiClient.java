@@ -69,8 +69,8 @@ public class YahooApiClient implements ApiStockPriceClient {
     }
 
     @Override
-    public Set<ApiStockPrice> getHistoricalPricesForSymbol(String symbol, int maxDaysToFetch) throws ApiException {
-        Map<String, Set<ApiStockPrice>> historicals = getHistoricalPricesForSymbols(Collections.singletonList(symbol), maxDaysToFetch, true);
+    public Set<ApiStockPrice> getHistoricalPricesForSymbol(String symbol, LocalDate asOfDate, int maxDaysToFetch) throws ApiException {
+        Map<String, Set<ApiStockPrice>> historicals = getHistoricalPricesForSymbols(Collections.singletonList(symbol), asOfDate, maxDaysToFetch, true);
         if ( historicals.containsKey(symbol) ) {
             return historicals.get(symbol);
         }
@@ -78,15 +78,15 @@ public class YahooApiClient implements ApiStockPriceClient {
     }
 
     @Override
-    public Map<String, Set<ApiStockPrice>> getHistoricalPricesForSymbols(List<String> symbols, int maxDaysToFetch) throws ApiException {
-        return getHistoricalPricesForSymbols(symbols, maxDaysToFetch, true);
+    public Map<String, Set<ApiStockPrice>> getHistoricalPricesForSymbols(List<String> symbols, LocalDate asOfDate, int maxDaysToFetch) throws ApiException {
+        return getHistoricalPricesForSymbols(symbols, asOfDate, maxDaysToFetch, true);
     }
 
-    private Map<String, Set<ApiStockPrice>> getHistoricalPricesForSymbols(List<String> symbols, int maxDaysToFetch, boolean includeHistoryInitially) throws ApiException {
+    private Map<String, Set<ApiStockPrice>> getHistoricalPricesForSymbols(List<String> symbols, LocalDate asOfDate, int maxDaysToFetch, boolean includeHistoryInitially) throws ApiException {
 
         LOGGER.warn("Use of the Yahoo historical price function is flaky - so it may fail...");
 
-        Calendar to = Calendar.getInstance();
+        Calendar to = GregorianCalendar.from(asOfDate.atStartOfDay(ZoneId.systemDefault()));
         Calendar from = Calendar.getInstance();
         from.add(Calendar.DAY_OF_MONTH, -maxDaysToFetch); // go back the required days
 
@@ -119,7 +119,7 @@ public class YahooApiClient implements ApiStockPriceClient {
                     .withClose(quote.getPrice()) // close is the current price. TODO: Need to make sure this is ok
 //                    .withAdjustedClose(stock.getQuote().getA)
                     // TODO: need to make sure this is ok
-                    .withDate(quote.getLastTradeTime() != null ? quote.getLastTradeTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : LocalDate.now())
+                    .withDate(quote.getLastTradeTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
                     .withHigh(quote.getDayHigh())
                     .withOpen(quote.getOpen())
                     .withVolume(quote.getVolume())

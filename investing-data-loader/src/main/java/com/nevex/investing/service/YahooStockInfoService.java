@@ -33,8 +33,8 @@ public class YahooStockInfoService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveYahooStockInfo(int tickerId, YahooStockInfo yahooStockInfo) throws ServiceException {
-        final YahooStockInfoEntity newEntity = createEntity(tickerId, yahooStockInfo);
+    public void saveYahooStockInfo(int tickerId, LocalDate asOfDate, YahooStockInfo yahooStockInfo) throws ServiceException {
+        final YahooStockInfoEntity newEntity = createEntity(tickerId, asOfDate, yahooStockInfo);
         try {
             RepositoryUtils.createOrUpdate(yahooStockInfoRepository, newEntity,
                     () -> yahooStockInfoRepository.findByTickerIdAndDate(tickerId, newEntity.getDate()));
@@ -44,19 +44,19 @@ public class YahooStockInfoService {
     }
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public Optional<YahooStockInfoEntity> getLatestStockInfo(int tickerId) {
+    public Optional<YahooStockInfoEntity> getLatestStockInfo(int tickerId, LocalDate asOfDate) {
         Pageable pageable = new PageRequest(0, 1, new Sort(Sort.Direction.DESC, YahooStockInfoEntity.DATE_COL));
-        Page<YahooStockInfoEntity> pageResult = yahooStockInfoRepository.findByTickerId(tickerId, pageable);
+        Page<YahooStockInfoEntity> pageResult = yahooStockInfoRepository.findByTickerIdAndDateLessThanEqual(tickerId, asOfDate, pageable);
         if ( pageResult.hasContent() && pageResult.getNumberOfElements() > 0 ) {
             return Optional.of(pageResult.getContent().get(0));
         }
         return Optional.empty();
     }
 
-    private YahooStockInfoEntity createEntity(int tickerId, YahooStockInfo yahooStockInfo) {
+    private YahooStockInfoEntity createEntity(int tickerId, LocalDate asOfDate, YahooStockInfo yahooStockInfo) {
         return new YahooStockInfoEntity(
                 tickerId,
-                LocalDate.now(),
+                asOfDate,
                 yahooStockInfo.getCurrency().isPresent() ? yahooStockInfo.getCurrency().get() : null,
                 yahooStockInfo.getStockExchange().isPresent() ? yahooStockInfo.getStockExchange().get() : null,
                 yahooStockInfo.getAsk().isPresent() ? yahooStockInfo.getAsk().get() : null,

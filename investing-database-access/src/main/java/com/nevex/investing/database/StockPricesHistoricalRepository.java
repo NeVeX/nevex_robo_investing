@@ -18,7 +18,7 @@ import java.util.Optional;
 @Repository
 public interface StockPricesHistoricalRepository extends PagingAndSortingRepository<StockPriceHistoricalEntity, BigInteger> {
 
-    List<StockPriceHistoricalEntity> findAllByTickerId(int tickerId, Pageable pageable);
+    List<StockPriceHistoricalEntity> findAllByTickerIdAndDateLessThanEqual(int tickerId, LocalDate asOfDate, Pageable pageable);
 
     Optional<StockPriceHistoricalEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
 
