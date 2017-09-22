@@ -23,23 +23,12 @@ import java.util.stream.Collectors;
 /**
  * Created by Mark Cunningham on 9/20/2017.
  */
-public class TickerAnalyzersService {
+public class TickerAnalyzersAdminService extends TickerAnalyzersService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(TickerAnalyzersService.class);
-    private final TickerAnalyzersRepository tickerAnalyzersRepository;
-    private final TickerAnalyzersSummaryRepository tickerAnalyzersSummaryRepository;
+    private final static Logger LOGGER = LoggerFactory.getLogger(TickerAnalyzersAdminService.class);
 
-    public TickerAnalyzersService(TickerAnalyzersRepository tickerAnalyzersRepository, TickerAnalyzersSummaryRepository tickerAnalyzersSummaryRepository) {
-        if ( tickerAnalyzersRepository == null) { throw new IllegalArgumentException("Provided tickerAnalyzersRepository is null"); }
-        if ( tickerAnalyzersSummaryRepository == null) { throw new IllegalArgumentException("Provided tickerAnalyzersSummaryRepository is null"); }
-        this.tickerAnalyzersRepository = tickerAnalyzersRepository;
-        this.tickerAnalyzersSummaryRepository = tickerAnalyzersSummaryRepository;
-    }
-
-    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public List<AnalyzerResult> getAllAnalyzers(int tickerId, LocalDate date) {
-        List<TickerAnalyzerEntity> entities = tickerAnalyzersRepository.findByTickerIdAndDate(tickerId, date);
-        return entities.stream().map(AnalyzerResult::new).collect(Collectors.toList());
+    public TickerAnalyzersAdminService(TickerAnalyzersRepository tickerAnalyzersRepository, TickerAnalyzersSummaryRepository tickerAnalyzersSummaryRepository) {
+        super(tickerAnalyzersRepository, tickerAnalyzersSummaryRepository);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

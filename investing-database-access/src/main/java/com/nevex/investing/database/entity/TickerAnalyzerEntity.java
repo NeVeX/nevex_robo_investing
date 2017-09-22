@@ -11,13 +11,14 @@ import java.util.Objects;
 @Table(schema = "investing", name = "ticker_analyzers_v1", uniqueConstraints = @UniqueConstraint(columnNames = {"ticker_id", "date", "name"}))
 public class TickerAnalyzerEntity implements MergeableEntity<TickerAnalyzerEntity> {
 
+    public final static String DATE_COL = "date";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
     @Column(name = "ticker_id")
     private int tickerId;
-    @Column(name = "date", columnDefinition = "DATE")
+    @Column(name = DATE_COL, columnDefinition = "DATE")
     private LocalDate date;
     @Column(name = "name")
     private String name;

@@ -8,7 +8,6 @@ import com.nevex.investing.database.utils.RepositoryUtils;
 import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -45,12 +44,8 @@ public class YahooStockInfoService {
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public Optional<YahooStockInfoEntity> getLatestStockInfo(int tickerId, LocalDate asOfDate) {
-        Pageable pageable = new PageRequest(0, 1, new Sort(Sort.Direction.DESC, YahooStockInfoEntity.DATE_COL));
-        Page<YahooStockInfoEntity> pageResult = yahooStockInfoRepository.findByTickerIdAndDateLessThanEqual(tickerId, asOfDate, pageable);
-        if ( pageResult.hasContent() && pageResult.getNumberOfElements() > 0 ) {
-            return Optional.of(pageResult.getContent().get(0));
-        }
-        return Optional.empty();
+        Optional<YahooStockInfoEntity> foundEntityOpt = yahooStockInfoRepository.findTopByTickerIdAndDateOrderByDateDesc(tickerId, asOfDate);
+        return foundEntityOpt;
     }
 
     private YahooStockInfoEntity createEntity(int tickerId, LocalDate asOfDate, YahooStockInfo yahooStockInfo) {

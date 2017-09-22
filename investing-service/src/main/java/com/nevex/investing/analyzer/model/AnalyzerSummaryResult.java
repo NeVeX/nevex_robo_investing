@@ -1,6 +1,7 @@
 package com.nevex.investing.analyzer.model;
 
 import com.nevex.investing.database.entity.TickerAnalyzerEntity;
+import com.nevex.investing.database.entity.TickerAnalyzerSummaryEntity;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
@@ -24,6 +25,10 @@ public class AnalyzerSummaryResult {
         this.adjustedWeight = adjustedWeight;
         this.date = date;
         this.analyzerCount = analyzerCount;
+    }
+
+    public AnalyzerSummaryResult(TickerAnalyzerSummaryEntity entity) {
+        this(entity.getTickerId(), entity.getAverageWeight(), entity.getAdjustedWeight(), entity.getTotalAnalyzers(), entity.getDate());
     }
 
     public int getTickerId() {

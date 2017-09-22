@@ -1,9 +1,8 @@
 package com.nevex.investing.config;
 
-import com.nevex.investing.database.StockPricesHistoricalRepository;
-import com.nevex.investing.database.StockPricesRepository;
-import com.nevex.investing.database.TickersRepository;
+import com.nevex.investing.database.*;
 import com.nevex.investing.service.StockPriceService;
+import com.nevex.investing.service.TickerAnalyzersService;
 import com.nevex.investing.service.TickerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -18,11 +17,20 @@ import org.springframework.context.annotation.Profile;
 class ServicesConfiguration {
 
     @Autowired
+    private TickerAnalyzersSummaryRepository tickerAnalyzersSummaryRepository;
+    @Autowired
+    private TickerAnalyzersRepository tickerAnalyzersRepository;
+    @Autowired
     private TickersRepository tickersRepository;
     @Autowired
     private StockPricesRepository stockPricesRepository;
     @Autowired
     private StockPricesHistoricalRepository stockPricesHistoricalRepository;
+
+    @Bean
+    TickerAnalyzersService tickerAnalyzersService() {
+        return new TickerAnalyzersService(tickerAnalyzersRepository, tickerAnalyzersSummaryRepository);
+    }
 
     @Bean
     TickerService tickerService() {
@@ -33,5 +41,6 @@ class ServicesConfiguration {
     StockPriceService stockPriceService() {
         return new StockPriceService(tickerService(), stockPricesRepository, stockPricesHistoricalRepository);
     }
+
 
 }

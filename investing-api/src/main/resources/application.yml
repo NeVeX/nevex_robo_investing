@@ -11,7 +11,7 @@ spring:
   jackson.serialization.write_dates_as_timestamps: false
   jackson.serialization.indent_output: true # Should disable this in the future
   profiles:
-    active: sensitive, mock
+    active: sensitive
   properties.hibernate.format_sql: true
   # Need to get rid of the below - it should be read in from the module included (database-access)
   jpa:
@@ -24,6 +24,7 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 nevex-investing:
+  api-admin-key: testing
   testing:
     enabled: false
     allowed-symbols: LC, FB, APPL, NAKD, GOOGL, MSFT

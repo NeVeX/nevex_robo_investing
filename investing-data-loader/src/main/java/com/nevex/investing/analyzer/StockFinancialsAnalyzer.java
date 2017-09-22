@@ -7,7 +7,7 @@ import com.nevex.investing.event.type.StockFinancialsUpdatedEvent;
 import com.nevex.investing.event.type.TickerAnalyzerUpdatedEvent;
 import com.nevex.investing.analyzer.model.AnalyzerResult;
 import com.nevex.investing.model.Analyzer;
-import com.nevex.investing.service.TickerAnalyzersService;
+import com.nevex.investing.service.TickerAnalyzersAdminService;
 import com.nevex.investing.service.YahooStockInfoService;
 import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
@@ -25,19 +25,19 @@ import java.util.Set;
 public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdatedEvent> {
     private final static Logger LOGGER = LoggerFactory.getLogger(StockFinancialsAnalyzer.class);
     private final YahooStockInfoService yahooStockInfoService;
-    private final TickerAnalyzersService tickerAnalyzersService;
+    private final TickerAnalyzersAdminService tickerAnalyzersAdminService;
     private final AnalyzerService analyzerService;
     private EventManager eventManager;
 
     public StockFinancialsAnalyzer(YahooStockInfoService yahooStockInfoService,
-                                   TickerAnalyzersService tickerAnalyzersService,
+                                   TickerAnalyzersAdminService tickerAnalyzersAdminService,
                                    AnalyzerService analyzerService) {
         super(StockFinancialsUpdatedEvent.class);
         if ( yahooStockInfoService == null ) { throw new IllegalArgumentException("Provided yahooStockInfoService is null"); }
-        if ( tickerAnalyzersService == null ) { throw new IllegalArgumentException("Provided tickerAnalyzersService is null"); }
+        if ( tickerAnalyzersAdminService == null ) { throw new IllegalArgumentException("Provided tickerAnalyzersAdminService is null"); }
         if ( analyzerService == null ) { throw new IllegalArgumentException("Provided analyzerService is null"); }
         this.yahooStockInfoService = yahooStockInfoService;
-        this.tickerAnalyzersService = tickerAnalyzersService;
+        this.tickerAnalyzersAdminService = tickerAnalyzersAdminService;
         this.analyzerService = analyzerService;
     }
 
@@ -63,7 +63,7 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
 
         try {
             // Save all our analyzers
-            tickerAnalyzersService.saveNewAnalyzers(analyzerResults);
+            tickerAnalyzersAdminService.saveNewAnalyzers(analyzerResults);
         } catch (ServiceException sEx) {
             LOGGER.error("Could not save analyzer data in consumer [{}] for [{}] analyzer entries", getConsumerName(), analyzerResults.size(), sEx);
             return;

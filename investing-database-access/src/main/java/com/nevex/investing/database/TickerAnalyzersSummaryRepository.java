@@ -15,6 +15,8 @@ import java.util.Optional;
 @Repository
 public interface TickerAnalyzersSummaryRepository extends PagingAndSortingRepository<TickerAnalyzerSummaryEntity, Integer> {
 
+    Optional<TickerAnalyzerSummaryEntity> findTopByTickerIdOrderByDateDesc(int tickerId);
+
     Optional<TickerAnalyzerSummaryEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
 
 }

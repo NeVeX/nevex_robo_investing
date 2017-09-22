@@ -3,6 +3,7 @@ package com.nevex.investing.database;
 import com.nevex.investing.database.entity.TickerAnalyzerEntity;
 import com.nevex.investing.database.entity.YahooStockInfoEntity;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +16,8 @@ import java.util.Optional;
  */
 @Repository
 public interface TickerAnalyzersRepository extends PagingAndSortingRepository<TickerAnalyzerEntity, Integer> {
+
+    Optional<TickerAnalyzerEntity> findTopByTickerIdOrderByDateDesc(int tickerId);
 
     List<TickerAnalyzerEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
 

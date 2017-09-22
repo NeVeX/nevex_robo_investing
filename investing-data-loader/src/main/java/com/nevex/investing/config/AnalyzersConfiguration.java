@@ -1,6 +1,5 @@
 package com.nevex.investing.config;
 
-import com.nevex.investing.PropertyNames;
 import com.nevex.investing.analyzer.AnalyzerService;
 import com.nevex.investing.analyzer.StockFinancialsSummaryAnalyzer;
 import com.nevex.investing.analyzer.StockPriceChangeAnalyzer;
@@ -11,7 +10,7 @@ import com.nevex.investing.database.TickerAnalyzersSummaryRepository;
 import com.nevex.investing.event.EventManager;
 import com.nevex.investing.analyzer.StockFinancialsAnalyzer;
 import com.nevex.investing.service.StockPriceAdminService;
-import com.nevex.investing.service.TickerAnalyzersService;
+import com.nevex.investing.service.TickerAnalyzersAdminService;
 import com.nevex.investing.service.YahooStockInfoService;
 import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
@@ -67,14 +66,14 @@ class AnalyzersConfiguration {
     }
 
     @Bean
-    TickerAnalyzersService tickerAnalyzersService() {
-        return new TickerAnalyzersService(tickerAnalyzersRepository, tickerAnalyzersSummaryRepository);
+    TickerAnalyzersAdminService tickerAnalyzersAdminService() {
+        return new TickerAnalyzersAdminService(tickerAnalyzersRepository, tickerAnalyzersSummaryRepository);
     }
 
     @Bean
     @ConditionalOnProperty(name = AnalyzerProperties.StockFinancialsAnalyzerProperties.ENABLED, havingValue = "true")
     StockFinancialsAnalyzer stockFinancialsAnalyzer() {
-        return new StockFinancialsAnalyzer(yahooStockInfoService, tickerAnalyzersService(), analyzerService());
+        return new StockFinancialsAnalyzer(yahooStockInfoService, tickerAnalyzersAdminService(), analyzerService());
     }
 
     @Bean
@@ -86,7 +85,7 @@ class AnalyzersConfiguration {
     @Bean
     @ConditionalOnProperty(value = AnalyzerProperties.StockFinancialsSummaryAnalyzerProperties.ENABLED, havingValue = "true")
     StockFinancialsSummaryAnalyzer stockFinancialsSummaryAnalyzer() {
-        return new StockFinancialsSummaryAnalyzer(tickerAnalyzersService(), analyzerService());
+        return new StockFinancialsSummaryAnalyzer(tickerAnalyzersAdminService(), analyzerService());
     }
 
 
