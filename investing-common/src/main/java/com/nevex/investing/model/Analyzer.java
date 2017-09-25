@@ -11,6 +11,12 @@ import java.util.Optional;
 public enum Analyzer {
 
     PRICE_TO_EARNINGS_RATIO("price-to-earnings-ratio"),
+    CURRENT_STOCK_PRICE_COMPARED_TO_SEVEN_DAYS_PREVIOUS_CLOSE_AVG_PERCENT_DEVIATION("current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation"),
+    CURRENT_STOCK_PRICE_COMPARED_TO_SEVEN_DAYS_PREVIOUS_HIGH_AVG_PERCENT_DEVIATION("current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation"),
+    CURRENT_STOCK_PRICE_COMPARED_TO_SEVEN_DAYS_PREVIOUS_LOW_AVG_PERCENT_DEVIATION("current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation"),
+    CURRENT_STOCK_VOL_COMPARED_TO_SEVEN_DAYS_PREVIOUS_VOL_AVG_PERCENT_DEVIATION("current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation"),
+    CURRENT_STOCK_VOL_COMPARED_TO_SEVEN_DAYS_PREVIOUS_VOL_HIGH_AVG_PERCENT_DEVIATION("current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation"),
+    CURRENT_STOCK_VOL_COMPARED_TO_SEVEN_DAYS_PREVIOUS_VOL_LOW_AVG_PERCENT_DEVIATION("current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation"),
     ANALYZER_SUMMARY_COUNTER_ADJUST_WEIGHT("analyzer-summary-counter-adjust-weight");
 
     private final String title;

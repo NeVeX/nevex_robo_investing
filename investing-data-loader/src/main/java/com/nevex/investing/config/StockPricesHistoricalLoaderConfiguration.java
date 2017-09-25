@@ -40,8 +40,6 @@ class StockPricesHistoricalLoaderConfiguration {
     private StockPriceAdminService stockPriceAdminService;
     @Autowired
     private DataLoaderProperties dataLoaderProperties;
-    @Autowired
-    private EventManager eventManager;
 
     @PostConstruct
     void init() throws Exception {
@@ -50,7 +48,7 @@ class StockPricesHistoricalLoaderConfiguration {
 
     @Bean
     HistoricalStockPriceLoader historicalStockPriceLoader() {
-        return new HistoricalStockPriceLoader(tickersRepository, tiingoApiClient, stockPriceAdminService, dataLoaderService, eventManager, dataLoaderProperties.getStockHistoricalLoader());
+        return new HistoricalStockPriceLoader(tickersRepository, tiingoApiClient, stockPriceAdminService, dataLoaderService, dataLoaderProperties.getStockHistoricalLoader());
     }
 
 }

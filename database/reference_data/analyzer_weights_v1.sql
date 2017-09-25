@@ -1,7 +1,7 @@
 
 
 SET search_path TO investing;
--- delete from analyzer_weights_v1;
+--delete from analyzer_weights_v1;
 
 insert into analyzer_weights_v1("name", "start", "end", "weight")
 values
@@ -20,7 +20,91 @@ values
 ('analyzer-summary-counter-adjust-weight', 5, 10, 0.1),
 ('analyzer-summary-counter-adjust-weight', 10, 20, 0.15),
 ('analyzer-summary-counter-adjust-weight', 20, 50, 0.2),
-('analyzer-summary-counter-adjust-weight', 50, 100000, 0.22);
+('analyzer-summary-counter-adjust-weight', 50, 100000, 0.22),
+
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', -10000, -100, 1.0),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', -100, -70, 0.9),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', -70, -40, 0.8),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', -40, -20, 0.7),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', -20, -10, 0.6),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', -10, -5, 0.5),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', -5, -2, 0.4),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', -2, -1, 0.2),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', -1, 0, 0.1),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', 0, 2, -0.2),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', 2, 5, -0.3),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', 5, 10, -0.5),
+('current-stock-price-compared-to-seven-days-previous-close-average-percent-deviation', 10, 1000000, -1.0),
+
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', -10000, -100, 1.0),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', -100, -70, 0.9),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', -70, -40, 0.8),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', -40, -20, 0.7),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', -20, -10, 0.6),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', -10, -5, 0.5),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', -5, -2, 0.4),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', -2, -1, 0.2),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', -1, 0, 0.1),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', 0, 2, -0.2),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', 2, 5, -0.3),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', 5, 10, -0.5),
+('current-stock-price-compared-to-seven-days-previous-high-average-percent-deviation', 10, 1000000, -1.0),
+
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', -10000, -100, 1.0),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', -100, -70, 0.9),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', -70, -40, 0.8),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', -40, -20, 0.7),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', -20, -10, 0.6),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', -10, -5, 0.5),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', -5, -2, 0.4),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', -2, -1, 0.2),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', -1, 0, 0.1),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', 0, 2, -0.2),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', 2, 5, -0.3),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', 5, 10, -0.5),
+('current-stock-price-compared-to-seven-days-previous-low-average-percent-deviation', 10, 1000000, -1.0),
+
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', -10000, -100, 1.0),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', -100, -70, 0.9),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', -70, -40, 0.8),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', -40, -20, 0.7),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', -20, -10, 0.6),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', -10, -5, 0.5),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', -5, -2, 0.4),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', -2, -1, 0.2),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', -1, 0, 0.1),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', 0, 2, -0.2),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', 2, 5, -0.3),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', 5, 10, -0.5),
+('current-stock-vol-compared-to-seven-days-previous-vol-average-percent-deviation', 10, 1000000, -1.0),
+
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', -10000, -100, 1.0),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', -100, -70, 0.9),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', -70, -40, 0.8),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', -40, -20, 0.7),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', -20, -10, 0.6),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', -10, -5, 0.5),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', -5, -2, 0.4),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', -2, -1, 0.2),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', -1, 0, 0.1),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', 0, 2, -0.2),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', 2, 5, -0.3),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', 5, 10, -0.5),
+('current-stock-vol-compared-to-seven-days-previous-vol-high-average-percent-deviation', 10, 1000000, -1.0),
+
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', -10000, -100, 1.0),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', -100, -70, 0.9),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', -70, -40, 0.8),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', -40, -20, 0.7),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', -20, -10, 0.6),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', -10, -5, 0.5),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', -5, -2, 0.4),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', -2, -1, 0.2),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', -1, 0, 0.1),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', 0, 2, -0.2),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', 2, 5, -0.3),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', 5, 10, -0.5),
+('current-stock-vol-compared-to-seven-days-previous-vol-low-average-percent-deviation', 10, 1000000, -1.0);
 
 
 select * from analyzer_weights_v1;

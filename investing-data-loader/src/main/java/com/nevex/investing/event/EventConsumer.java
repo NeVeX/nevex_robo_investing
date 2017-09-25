@@ -10,7 +10,7 @@ import java.util.function.Consumer;
  */
 public abstract class EventConsumer<T extends Event> implements Consumer<Object> {
 
-    private Class<T> supportedEventType;
+    private final Class<T> supportedEventType;
 
     public abstract String getConsumerName();
     protected abstract void onEvent(T event);

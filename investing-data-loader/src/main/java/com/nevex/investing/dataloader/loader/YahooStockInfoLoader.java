@@ -27,7 +27,6 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
     private final YahooApiClient yahooApiClient;
     private final YahooStockInfoService yahooStockInfoService;
     private final TickerService tickerService;
-    private final EventManager eventManager;
     private final long waitTimeBetweenBulkMs;
     private final int bulkAmountPerPage;
 
@@ -36,19 +35,16 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
                                 YahooApiClient yahooApiClient,
                                 YahooStockInfoService yahooStockInfoService,
                                 TickerService tickerService,
-                                EventManager eventManager,
                                 DataLoaderProperties.YahooStockInfoDataLoaderProperties properties) {
         super(dataLoaderService, properties.getForceStartOnAppStartup());
         if ( tickersRepository == null ) { throw new IllegalArgumentException("Provided tickersRepository is null"); }
         if ( yahooApiClient == null ) { throw new IllegalArgumentException("Provided yahooApiClient is null"); }
         if ( yahooStockInfoService == null ) { throw new IllegalArgumentException("Provided yahooStockInfoService is null"); }
         if ( tickerService == null ) { throw new IllegalArgumentException("Provided tickerService is null"); }
-        if ( eventManager == null ) { throw new IllegalArgumentException("Provided eventManager is null"); }
         this.tickersRepository = tickersRepository;
         this.yahooApiClient = yahooApiClient;
         this.yahooStockInfoService = yahooStockInfoService;
         this.tickerService = tickerService;
-        this.eventManager = eventManager;
         this.waitTimeBetweenBulkMs = properties.getWaitTimeBetweenBulkMs();
         this.bulkAmountPerPage = properties.getBulkAmountPerPage();
     }
@@ -94,7 +90,7 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
                     if ( tickerIdOpt.isPresent()) {
                         try {
                             yahooStockInfoService.saveYahooStockInfo(tickerIdOpt.get(), getWorkerStartTime().toLocalDate(), stockInfo);
-                            eventManager.sendEvent(new StockFinancialsUpdatedEvent(tickerIdOpt.get(), getWorkerStartTime().toLocalDate()));
+                            EventManager.sendEvent(new StockFinancialsUpdatedEvent(tickerIdOpt.get(), getWorkerStartTime().toLocalDate()));
                         } catch (ServiceException e) {
                             saveExceptionToDatabase("A exception occurred trying to save yahoo stock info for ticker ["+tickerIdOpt.get()+"]. Reason: "+e.getMessage());
                         }

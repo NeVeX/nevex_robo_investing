@@ -126,7 +126,7 @@ public class YahooApiClient implements ApiStockPriceClient {
                     .withLow(quote.getDayLow())
                     .build();
         } catch (Exception e ) {
-            LOGGER.error("Could not convert historical yahoo quote into "+ApiStockPrice.class.getSimpleName(), e);
+            LOGGER.error("Could not convert [{}] historical yahoo quote into [{}]", quote != null ? quote.getSymbol() : "null", ApiStockPrice.class.getSimpleName(), e);
             return null;
         }
     }

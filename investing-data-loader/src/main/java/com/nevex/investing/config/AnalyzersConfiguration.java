@@ -36,6 +36,7 @@ import static com.nevex.investing.config.TestingConfiguration.TESTING_PREFIX;
 class AnalyzersConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnalyzersConfiguration.class);
+
     @Autowired
     private AnalyzerWeightsRepository analyzerWeightsRepository;
     @Autowired
@@ -47,16 +48,11 @@ class AnalyzersConfiguration {
     @Autowired
     private YahooStockInfoService yahooStockInfoService;
     @Autowired
-    private EventManager eventManager;
-    @Autowired
     private AnalyzerProperties analyzerProperties;
 
     @PostConstruct
     void init() throws ServiceException {
         LOGGER.info("{} is setup and active with properties: [{}]", this.getClass().getSimpleName(), analyzerProperties);
-        if ( stockFinancialsAnalyzer() != null ) {
-            stockFinancialsAnalyzer().setEventManager(eventManager);
-        }
         analyzerService().refresh();
     }
 
@@ -79,7 +75,7 @@ class AnalyzersConfiguration {
     @Bean
     @ConditionalOnProperty(value = AnalyzerProperties.StockPriceChangeAnalyzerProperties.ENABLED, havingValue = "true")
     StockPriceChangeAnalyzer stockPriceChangeAnalyzer() {
-        return new StockPriceChangeAnalyzer(stockPriceAdminService);
+        return new StockPriceChangeAnalyzer(stockPriceAdminService, analyzerService(), tickerAnalyzersAdminService());
     }
 
     @Bean
@@ -87,7 +83,5 @@ class AnalyzersConfiguration {
     StockFinancialsSummaryAnalyzer stockFinancialsSummaryAnalyzer() {
         return new StockFinancialsSummaryAnalyzer(tickerAnalyzersAdminService(), analyzerService());
     }
-
-
 
 }

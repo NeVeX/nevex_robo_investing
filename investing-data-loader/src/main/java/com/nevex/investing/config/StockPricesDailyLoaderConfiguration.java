@@ -40,8 +40,6 @@ class StockPricesDailyLoaderConfiguration {
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
     @Autowired
-    private EventManager eventManager;
-    @Autowired
     private TickerService tickerService;
     @Autowired
     private DataLoaderProperties dataLoaderProperties;
@@ -55,7 +53,7 @@ class StockPricesDailyLoaderConfiguration {
     DailyStockPriceLoader currentStockPriceLoader() {
         // TODO: This loader is getting too big!
         return new DailyStockPriceLoader(tickersRepository, yahooApiClient,
-                stockPriceAdminService, dataLoaderService, eventManager, tickerService, dataLoaderProperties.getDailyStockPriceLoader());
+                stockPriceAdminService, dataLoaderService, tickerService, dataLoaderProperties.getDailyStockPriceLoader());
     }
 
 }

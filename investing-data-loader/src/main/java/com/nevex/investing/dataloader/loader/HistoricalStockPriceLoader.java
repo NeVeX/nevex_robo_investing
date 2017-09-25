@@ -28,7 +28,6 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     private final TickersRepository tickersRepository;
     private final ApiStockPriceClient apiStockPriceClient;
     private final StockPriceAdminService stockPriceAdminService;
-    private final EventManager eventManager;
     private final long waitTimeBetweenTickersMs;
     private final boolean useBulkMode;
     private final int maxDaysToFetch;
@@ -39,18 +38,15 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
                                       ApiStockPriceClient apiStockPriceClient,
                                       StockPriceAdminService stockPriceAdminService,
                                       DataLoaderService dataLoaderService,
-                                      EventManager eventManager,
                                       DataLoaderProperties.HistoricalStockLoaderProperties properties) {
         super(dataLoaderService);
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( apiStockPriceClient == null) { throw new IllegalArgumentException("Provided apiStockPriceClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
-        if ( eventManager == null) { throw new IllegalArgumentException("Provided eventManager is null"); }
         this.waitTimeBetweenTickersMs = properties.getWaitTimeBetweenTickersMs();
         this.tickersRepository = tickersRepository;
         this.apiStockPriceClient = apiStockPriceClient;
         this.stockPriceAdminService = stockPriceAdminService;
-        this.eventManager = eventManager;
         this.useBulkMode = properties.getUseBulkMode();
         this.maxDaysToFetch = properties.getMaxDaysToFetch();
         this.waitTimeBetweenBulkMs = properties.getWaitTimeBetweenBulkMs();
@@ -115,7 +111,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
             return;
         }
         if ( savePrices(tickerEntity.getSymbol(), historicalPrices) ) {
-            eventManager.sendEvent(new StockPriceUpdatedEvent(tickerEntity.getId(), getWorkerStartTime().toLocalDate()));
+            EventManager.sendEvent(new StockPriceUpdatedEvent(tickerEntity.getId(), getWorkerStartTime().toLocalDate()));
             LOGGER.info("Successfully loaded [{}] historical prices for [{}]", historicalPrices.size(), tickerEntity.getSymbol());
         }
     }

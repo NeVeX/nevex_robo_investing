@@ -27,7 +27,6 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
     private final YahooStockInfoService yahooStockInfoService;
     private final TickerAnalyzersAdminService tickerAnalyzersAdminService;
     private final AnalyzerService analyzerService;
-    private EventManager eventManager;
 
     public StockFinancialsAnalyzer(YahooStockInfoService yahooStockInfoService,
                                    TickerAnalyzersAdminService tickerAnalyzersAdminService,
@@ -84,13 +83,7 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
     }
 
     private void sendTickerAnalyzerUpdatedEvent(int tickerId, LocalDate asOfDate) {
-        if ( eventManager != null ) {
-            eventManager.sendEvent(new TickerAnalyzerUpdatedEvent(tickerId, asOfDate));
-        }
-    }
-
-    public void setEventManager(EventManager eventManager) {
-        this.eventManager = eventManager;
+        EventManager.sendEvent(new TickerAnalyzerUpdatedEvent(tickerId, asOfDate));
     }
 
 }

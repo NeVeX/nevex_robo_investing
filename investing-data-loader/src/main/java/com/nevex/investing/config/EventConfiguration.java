@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import javax.annotation.PostConstruct;
 import java.util.Set;
@@ -32,7 +33,7 @@ class EventConfiguration {
     }
 
     @Bean
-    EventManager eventManager(@Autowired Set<EventConsumer<? extends Event>> eventConsumers) {
+    EventManager eventManager(@Autowired Set<EventConsumer> eventConsumers) {
         return new EventManager(eventConsumers, eventProperties.getEventQueueSize());
     }
 }

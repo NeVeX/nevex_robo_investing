@@ -39,8 +39,18 @@ public class StockPriceService {
         this.tickerService = tickerService;
     }
 
+    public Optional<StockPrice> getCurrentPrice(int tickerId) throws TickerNotFoundException {
+        String symbol = tickerService.getSymbolForId(tickerId);
+        return getCurrentPrice(tickerId, symbol);
+    }
+
     public Optional<StockPrice> getCurrentPrice(String symbol) throws TickerNotFoundException {
         int tickerId = tickerService.getIdForSymbol(symbol);
+        return getCurrentPrice(tickerId, symbol);
+    }
+
+    private Optional<StockPrice> getCurrentPrice(int tickerId, String symbol) {
+
         Optional<StockPriceEntity> stockPriceOpt = stockPricesRepository.findByTickerId(tickerId);
         if ( !stockPriceOpt.isPresent()) {
             return Optional.empty();

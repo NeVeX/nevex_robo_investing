@@ -42,8 +42,6 @@ class YahooStockInfoDataLoaderConfiguration {
     private TickerService tickerService;
     @Autowired
     private DataLoaderProperties dataLoaderProperties;
-    @Autowired
-    private EventManager eventManager;
 
     @PostConstruct
     void init() throws Exception {
@@ -53,7 +51,7 @@ class YahooStockInfoDataLoaderConfiguration {
     @Bean
     YahooStockInfoLoader yahooStockInfoLoader() {
         return new YahooStockInfoLoader(dataLoaderService, tickersRepository, yahooApiClient,
-                yahooStockInfoService, tickerService, eventManager, dataLoaderProperties.getYahooStockInfoDataLoader());
+                yahooStockInfoService, tickerService, dataLoaderProperties.getYahooStockInfoDataLoader());
     }
 
 }

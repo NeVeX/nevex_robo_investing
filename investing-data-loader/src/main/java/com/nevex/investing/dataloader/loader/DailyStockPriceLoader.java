@@ -32,7 +32,6 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
     private final AtomicBoolean isUnlockedFromDataLoaders = new AtomicBoolean(false);
     private final TickersRepository tickersRepository;
     private final ApiStockPriceClient apiStockPriceClient;
-    private final EventManager eventManager;
     private final StockPriceAdminService stockPriceAdminService;
     private final TickerService tickerService;
     private final long waitTimeBetweenTickersMs;
@@ -44,20 +43,17 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
                                  ApiStockPriceClient apiStockPriceClient,
                                  StockPriceAdminService stockPriceAdminService,
                                  DataLoaderService dataLoaderService,
-                                 EventManager eventManager,
                                  TickerService tickerService,
                                  DataLoaderProperties.DailyStockPriceLoaderProperties properties) {
         super(dataLoaderService, properties.getForceStartOnAppStartup());
         if ( tickersRepository == null) { throw new IllegalArgumentException("Provided tickers repository is null"); }
         if ( apiStockPriceClient == null) { throw new IllegalArgumentException("Provided apiStockPriceClient is null"); }
         if ( stockPriceAdminService == null) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
-        if ( eventManager == null) { throw new IllegalArgumentException("Provided eventManager is null"); }
         if ( tickerService == null) { throw new IllegalArgumentException("Provided tickerService is null"); }
         this.waitTimeBetweenTickersMs = properties.getWaitTimeBetweenTickersMs();
         this.tickersRepository = tickersRepository;
         this.apiStockPriceClient = apiStockPriceClient;
         this.stockPriceAdminService = stockPriceAdminService;
-        this.eventManager = eventManager;
         this.tickerService = tickerService;
         this.useBulkMode = properties.getUseBulkMode();
         this.waitTimeBetweenBulkMs = properties.getWaitTimeBetweenBulkMs();
@@ -154,7 +150,7 @@ public class DailyStockPriceLoader extends DataLoaderSchedulingSingleWorker {
     private void savePrice(String symbol, ApiStockPrice stockPrice) {
         try {
             stockPriceAdminService.saveNewCurrentPrice(symbol, stockPrice);
-            eventManager.sendEvent(new StockPriceUpdatedEvent(tickerService.getIdForSymbol(symbol), stockPrice.getDate()));
+            EventManager.sendEvent(new StockPriceUpdatedEvent(tickerService.getIdForSymbol(symbol), stockPrice.getDate()));
         } catch (Exception ex) {
             LOGGER.error("Could not save the stock price for ticker [{}]", symbol, ex);
         }

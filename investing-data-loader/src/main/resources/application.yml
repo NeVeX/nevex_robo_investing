@@ -49,7 +49,7 @@ nevex-investing:
       bulk-amount-per-page: 50
       max-days-to-fetch: 1850 # About 5 years
     daily-stock-price-loader:
-      enabled: false
+      enabled: true
       wait-time-between-tickers-ms: 1000
       force-start-on-app-startup: true
       use-bulk-mode: true
@@ -67,8 +67,8 @@ nevex-investing:
       force-start-on-app-startup: false
       wait-time-between-tickers-ms: 1000
     yahoo-stock-info-data-loader:
-      enabled: true
-      force-start-on-app-startup: true
+      enabled: false
+      force-start-on-app-startup: false
       wait-time-between-bulk-ms: 10000
       bulk-amount-per-page: 100
   api-clients:
