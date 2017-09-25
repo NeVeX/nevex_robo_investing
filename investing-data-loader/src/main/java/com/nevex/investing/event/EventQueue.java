@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -17,10 +18,10 @@ class EventQueue {
     private final static Logger LOGGER = LoggerFactory.getLogger(EventQueue.class);
     private final BlockingQueue<Event> queue;
     private final ExecutorService executorService;
-    private final Set<EventConsumer> consumers;
+    private final TreeSet<EventConsumer> consumers;
     private final Class<Event> eventType;
 
-    public EventQueue(int queueSize, Class<Event> eventType, Set<EventConsumer> consumers) {
+    public EventQueue(int queueSize, Class<Event> eventType, TreeSet<EventConsumer> consumers) {
         this.queue = new ArrayBlockingQueue<>(queueSize);
         this.executorService = Executors.newSingleThreadExecutor();
         this.consumers = consumers;

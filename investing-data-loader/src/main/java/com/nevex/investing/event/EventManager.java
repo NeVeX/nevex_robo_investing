@@ -24,8 +24,8 @@ public final class EventManager {
             }
             INSTANCE = this;
         }
-        Map<Class, Set<EventConsumer>> mappings = getEventTypeToConsumerMappings(consumers);
-        for ( Map.Entry<Class, Set<EventConsumer>> entry : mappings.entrySet()) {
+        Map<Class, TreeSet<EventConsumer>> mappings = getEventTypeToConsumerMappings(consumers);
+        for ( Map.Entry<Class, TreeSet<EventConsumer>> entry : mappings.entrySet()) {
             EventQueue eventQueue = new EventQueue(queueSize, entry.getKey(), entry.getValue());
             eventTypeToConsumers.put(entry.getKey(), eventQueue);
         }
@@ -59,13 +59,13 @@ public final class EventManager {
         LOGGER.warn("Shut down the event manager all of the [{}] queues", eventTypeToConsumers.size());
     }
 
-    private Map<Class, Set<EventConsumer>> getEventTypeToConsumerMappings(Set<EventConsumer> consumers) {
-        Map<Class, Set<EventConsumer>> mapping = new HashMap<>();
+    private Map<Class, TreeSet<EventConsumer>> getEventTypeToConsumerMappings(Set<EventConsumer> consumers) {
+        Map<Class, TreeSet<EventConsumer>> mapping = new HashMap<>();
         for ( EventConsumer consumer : consumers) {
             // check what event it supports
             Class supportedEvent = consumer.getSupportedEventType();
 
-            Set<EventConsumer> thisEventConsumers = new HashSet<>();
+            TreeSet<EventConsumer> thisEventConsumers = new TreeSet<>();
             if ( mapping.containsKey(supportedEvent)) {
                 thisEventConsumers = mapping.get(supportedEvent);
             } else {

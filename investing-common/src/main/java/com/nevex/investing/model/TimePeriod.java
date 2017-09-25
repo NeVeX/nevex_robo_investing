@@ -9,11 +9,12 @@ import java.util.stream.Collectors;
  */
 public enum TimePeriod {
 
-    SevenDays("7_days", Period.ofDays(7)),
-    OneMonth("1_month", Period.ofMonths(1)),
-    ThreeMonths("3_months", Period.ofMonths(3)),
-    SixMonths("6_months", Period.ofMonths(6)),
-    OneYear("1_year", Period.ofYears(1));
+    OneDay("1-day", Period.ofDays(1)),
+    SevenDays("7-days", Period.ofDays(7)),
+    OneMonth("1-month", Period.ofMonths(1)),
+    ThreeMonths("3-months", Period.ofMonths(3)),
+    SixMonths("6-months", Period.ofMonths(6)),
+    OneYear("1-year", Period.ofYears(1));
 
     private String title;
     private int days;
@@ -41,19 +42,17 @@ public enum TimePeriod {
     public static <T extends Comparable<T>> Map<TimePeriod, Set<T>> groupDailyElementsIntoExactBuckets(Collection<T> collection) {
 
         Map<TimePeriod, Set<T>> periodBuckets = new HashMap<>();
-        periodBuckets.put(TimePeriod.SevenDays, new HashSet<>());
-        periodBuckets.put(TimePeriod.OneMonth, new HashSet<>());
-        periodBuckets.put(TimePeriod.ThreeMonths, new HashSet<>());
-        periodBuckets.put(TimePeriod.SixMonths, new HashSet<>());
-        periodBuckets.put(TimePeriod.OneYear, new HashSet<>());
+        for (TimePeriod tp : values()) {
+            periodBuckets.put(tp, new HashSet<>());
+        }
 
         int counter = 0;
         for ( T data : collection) {
-            if ( counter < TimePeriod.SevenDays.getDays()) { periodBuckets.get(TimePeriod.SevenDays).add(data); }
-            if ( counter < TimePeriod.OneMonth.getDays()) { periodBuckets.get(TimePeriod.OneMonth).add(data); }
-            if ( counter < TimePeriod.ThreeMonths.getDays() ) { periodBuckets.get(TimePeriod.ThreeMonths).add(data); }
-            if ( counter < TimePeriod.SixMonths.getDays()) { periodBuckets.get(TimePeriod.SixMonths).add(data); }
-            if ( counter < TimePeriod.OneYear.getDays()) { periodBuckets.get(TimePeriod.OneYear).add(data); }
+            for ( Map.Entry<TimePeriod, Set<T>> entry : periodBuckets.entrySet()) {
+                if ( counter < entry.getKey().getDays()) {
+                    entry.getValue().add(data);
+                }
+            }
             counter++;
         }
 

@@ -74,7 +74,7 @@ public class AnalyzerWeight implements Comparable<AnalyzerWeight> {
     @Override
     public String toString() {
         return "AnalyzerWeight{" +
-                "analyzer=" + analyzer +
+                "analyzer=" + analyzer.getTitle() +
                 ", start=" + start +
                 ", end=" + end +
                 ", weight=" + weight +

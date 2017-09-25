@@ -1,16 +1,20 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.analyzer.AnalyzerService;
-import com.nevex.investing.analyzer.StockFinancialsSummaryAnalyzer;
+import com.nevex.investing.analyzer.AllAnalyzersSummaryAnalyzer;
 import com.nevex.investing.analyzer.StockPriceChangeAnalyzer;
 import com.nevex.investing.config.property.AnalyzerProperties;
 import com.nevex.investing.database.AnalyzerWeightsRepository;
 import com.nevex.investing.database.TickerAnalyzersRepository;
 import com.nevex.investing.database.TickerAnalyzersSummaryRepository;
-import com.nevex.investing.event.EventManager;
 import com.nevex.investing.analyzer.StockFinancialsAnalyzer;
+import com.nevex.investing.dataloader.DataLoaderService;
+import com.nevex.investing.dataloader.loader.AnalyzerEventDataLoader;
+import com.nevex.investing.event.EventManager;
+import com.nevex.investing.event.type.StockPriceUpdatedEvent;
 import com.nevex.investing.service.StockPriceAdminService;
 import com.nevex.investing.service.TickerAnalyzersAdminService;
+import com.nevex.investing.service.TickerService;
 import com.nevex.investing.service.YahooStockInfoService;
 import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
@@ -23,6 +27,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.PostConstruct;
+
+import java.time.LocalDate;
 
 import static com.nevex.investing.config.TestingConfiguration.TESTING_PREFIX;
 
@@ -38,6 +44,8 @@ class AnalyzersConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(AnalyzersConfiguration.class);
 
     @Autowired
+    private TickerService tickerService;
+    @Autowired
     private AnalyzerWeightsRepository analyzerWeightsRepository;
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
@@ -49,11 +57,18 @@ class AnalyzersConfiguration {
     private YahooStockInfoService yahooStockInfoService;
     @Autowired
     private AnalyzerProperties analyzerProperties;
+    @Autowired
+    private DataLoaderService dataLoaderService;
 
     @PostConstruct
     void init() throws ServiceException {
         LOGGER.info("{} is setup and active with properties: [{}]", this.getClass().getSimpleName(), analyzerProperties);
         analyzerService().refresh();
+    }
+
+    @Bean
+    AnalyzerEventDataLoader analyzerEventDataLoader() {
+        return new AnalyzerEventDataLoader(tickerService, dataLoaderService, analyzerProperties);
     }
 
     @Bean
@@ -79,9 +94,9 @@ class AnalyzersConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(value = AnalyzerProperties.StockFinancialsSummaryAnalyzerProperties.ENABLED, havingValue = "true")
-    StockFinancialsSummaryAnalyzer stockFinancialsSummaryAnalyzer() {
-        return new StockFinancialsSummaryAnalyzer(tickerAnalyzersAdminService(), analyzerService());
+    @ConditionalOnProperty(value = AnalyzerProperties.AllAnalyzersSummaryAnalyzerProperties.ENABLED, havingValue = "true")
+    AllAnalyzersSummaryAnalyzer allAnalyzersSummaryAnalyzer() {
+        return new AllAnalyzersSummaryAnalyzer(tickerAnalyzersAdminService(), analyzerService());
     }
 
 }

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Mark Cunningham on 9/21/2017.
@@ -31,6 +32,11 @@ public class AnalyzerService {
     public void refresh() throws ServiceException {
         int previousCount = analyzerWeights.size();
         for (AnalyzerWeightEntity entity : analyzerWeightsRepository.findAll()) {
+
+            if ( !Analyzer.fromTitle(entity.getName()).isPresent()) {
+                throw new ServiceException("The database name for analyzer ["+entity.getName()+"] does not exist in the code");
+            }
+
             AnalyzerWeight weight = new AnalyzerWeight(entity);
             if ( !analyzerWeights.containsKey(weight.getAnalyzer())) {
                 analyzerWeights.put(weight.getAnalyzer(), new TreeSet<>());
@@ -47,7 +53,9 @@ public class AnalyzerService {
     }
 
     private void validateAnalyzerWeights() throws ServiceException {
+        Set<Analyzer> databaseAnalyzers = new HashSet<>();
         for ( Analyzer analyzer : analyzerWeights.keySet()) {
+            databaseAnalyzers.add(analyzer);
             for ( AnalyzerWeight weight : analyzerWeights.get(analyzer)) {
 
                 for ( AnalyzerWeight compareWeight : analyzerWeights.get(analyzer)) {
@@ -57,12 +65,21 @@ public class AnalyzerService {
                         throw new ServiceException("Analyzer ["+analyzer.getTitle()+"] has incorrect weight configurations for ["+weight+"] and ["+compareWeight+"]");
                     }
                 }
-
             }
+        }
+
+        // Check we have the same amount of analyzers
+        if ( databaseAnalyzers.size() != Analyzer.values().length) {
+            throw new ServiceException("Amount of database analyzers ["+databaseAnalyzers.size()+"] does not equal to the amount of code analyzers ["+Analyzer.values().length+"]");
+//            LOGGER.warn("The amount of database analyzers [{}] does not equal to the amount of defined code analyzers [{}]", databaseAnalyzers.size(), Analyzer.values().length);
+        }
+        List<Analyzer> missingAnalyzers = Arrays.stream(Analyzer.values()).filter( analyzer -> !databaseAnalyzers.contains(analyzer)).collect(Collectors.toList());
+        if ( !missingAnalyzers.isEmpty()) {
+            throw new ServiceException("Missing the following analyzers ["+missingAnalyzers+"] in the database");
         }
     }
 
-    public Optional<Double> getWeight(Analyzer analyzer, BigDecimal value) {
+    Optional<Double> getWeight(Analyzer analyzer, BigDecimal value) {
         if ( !analyzerWeights.containsKey(analyzer)) {
             return Optional.empty();
         }

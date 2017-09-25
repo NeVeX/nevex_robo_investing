@@ -41,6 +41,11 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
     }
 
     @Override
+    public int getOrder() {
+        return AnalyzerOrder.STOCK_FINANCIALS_ANALYZER;
+    }
+
+    @Override
     public String getConsumerName() {
         return "stock-financials-analyzer";
     }
@@ -59,6 +64,7 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
         YahooStockInfoEntity entity = entityOpt.get();
 
         addResult(analyzerResults, tickerId, asOfDate, entity.getPriceToEarningsRatio(), Analyzer.PRICE_TO_EARNINGS_RATIO);
+        addResult(analyzerResults, tickerId, asOfDate, entity.getEarningsPerShare(), Analyzer.EARNINGS_PER_SHARE);
 
         try {
             // Save all our analyzers

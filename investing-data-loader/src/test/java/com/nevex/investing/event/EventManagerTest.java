@@ -18,7 +18,7 @@ public class EventManagerTest {
 
     @Test
     public void makeSureMappingsAreCorrectForVariousEventTypes() {
-        Set<EventConsumer<? extends Event>> consumers = new HashSet<>();
+        Set<EventConsumer> consumers = new HashSet<>();
         EventOneConsumer eventOneConsumer = new EventOneConsumer();
         EventTwoConsumer eventTwoConsumer = new EventTwoConsumer();
         EventThreeConsumer eventThreeConsumer = new EventThreeConsumer();
@@ -33,16 +33,16 @@ public class EventManagerTest {
         assertThat(eventThreeConsumer.getCounter()).isEqualTo(0);
 
         // send an event
-        eventManager.sendEvent(new EventOne());
+        EventManager.sendEvent(new EventOne());
         sleepForSeconds(1); // allow it to process the event
 
         assertThat(eventOneConsumer.getCounter()).isEqualTo(1); // should of gotten updated
         assertThat(eventTwoConsumer.getCounter()).isEqualTo(0);
         assertThat(eventThreeConsumer.getCounter()).isEqualTo(1); // should of gotten updated
 
-        eventManager.sendEvent(new EventTwo());
-        eventManager.sendEvent(new EventTwo());
-        eventManager.sendEvent(new EventTwo());
+        EventManager.sendEvent(new EventTwo());
+        EventManager.sendEvent(new EventTwo());
+        EventManager.sendEvent(new EventTwo());
 
         sleepForSeconds(1); // allow it to process the event
 
@@ -73,6 +73,13 @@ public class EventManagerTest {
         public void onEvent(T event) {
             counter++;
         }
+
+
+        @Override
+        public int getOrder() {
+            return 10;
+        }
+
 
         int getCounter() { return counter; }
     }

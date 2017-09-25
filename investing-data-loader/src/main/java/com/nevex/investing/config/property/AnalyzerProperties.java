@@ -28,13 +28,15 @@ public class AnalyzerProperties {
     private StockPriceChangeAnalyzerProperties stockPriceChangeAnalyzer;
     @NotNull
     @Valid
-    private StockFinancialsSummaryAnalyzerProperties stockFinancialsSummaryAnalyzer;
+    private AllAnalyzersSummaryAnalyzerProperties allAnalyzersSummaryAnalyzer;
 
-    public static class StockFinancialsSummaryAnalyzerProperties {
-        public final static String ENABLED = AnalyzerProperties.PREFIX + ".stock-financials-summary-analyzer.enabled";
+    public static class AllAnalyzersSummaryAnalyzerProperties {
+        public final static String ENABLED = AnalyzerProperties.PREFIX + ".all-analyzers-summary-analyzer.enabled";
 
         @NotNull
         private Boolean enabled;
+        @NotNull
+        private Boolean sendEventsOnStartup;
 
         public Boolean getEnabled() {
             return enabled;
@@ -44,9 +46,17 @@ public class AnalyzerProperties {
             this.enabled = enabled;
         }
 
+        public Boolean getSendEventsOnStartup() {
+            return sendEventsOnStartup;
+        }
+
+        public void setSendEventsOnStartup(Boolean sendEventsOnStartup) {
+            this.sendEventsOnStartup = sendEventsOnStartup;
+        }
+
         @Override
         public String toString() {
-            return "StockFinancialsSummaryAnalyzerProperties{" +
+            return "AllAnalyzersSummaryAnalyzerProperties{" +
                     "enabled=" + enabled +
                     '}';
         }
@@ -57,6 +67,16 @@ public class AnalyzerProperties {
 
         @NotNull
         private Boolean enabled;
+        @NotNull
+        private Boolean sendEventsOnStartup;
+
+        public Boolean getSendEventsOnStartup() {
+            return sendEventsOnStartup;
+        }
+
+        public void setSendEventsOnStartup(Boolean sendEventsOnStartup) {
+            this.sendEventsOnStartup = sendEventsOnStartup;
+        }
 
         public Boolean getEnabled() {
             return enabled;
@@ -80,6 +100,16 @@ public class AnalyzerProperties {
 
         @NotNull
         private Boolean enabled;
+        @NotNull
+        private Boolean sendEventsOnStartup;
+
+        public Boolean getSendEventsOnStartup() {
+            return sendEventsOnStartup;
+        }
+
+        public void setSendEventsOnStartup(Boolean sendEventsOnStartup) {
+            this.sendEventsOnStartup = sendEventsOnStartup;
+        }
 
         public Boolean getEnabled() {
             return enabled;
@@ -121,12 +151,12 @@ public class AnalyzerProperties {
         this.stockPriceChangeAnalyzer = stockPriceChangeAnalyzer;
     }
 
-    public StockFinancialsSummaryAnalyzerProperties getStockFinancialsSummaryAnalyzer() {
-        return stockFinancialsSummaryAnalyzer;
+    public AllAnalyzersSummaryAnalyzerProperties getAllAnalyzersSummaryAnalyzer() {
+        return allAnalyzersSummaryAnalyzer;
     }
 
-    public void setStockFinancialsSummaryAnalyzer(StockFinancialsSummaryAnalyzerProperties stockFinancialsSummaryAnalyzer) {
-        this.stockFinancialsSummaryAnalyzer = stockFinancialsSummaryAnalyzer;
+    public void setAllAnalyzersSummaryAnalyzer(AllAnalyzersSummaryAnalyzerProperties allAnalyzersSummaryAnalyzer) {
+        this.allAnalyzersSummaryAnalyzer = allAnalyzersSummaryAnalyzer;
     }
 
     @Override
@@ -135,7 +165,7 @@ public class AnalyzerProperties {
                 "configurationEnabled=" + configurationEnabled +
                 ", stockFinancialsAnalyzer=" + stockFinancialsAnalyzer +
                 ", stockPriceChangeAnalyzer=" + stockPriceChangeAnalyzer +
-                ", stockFinancialsSummaryAnalyzer=" + stockFinancialsSummaryAnalyzer +
+                ", allAnalyzersSummaryAnalyzer=" + allAnalyzersSummaryAnalyzer +
                 '}';
     }
 }

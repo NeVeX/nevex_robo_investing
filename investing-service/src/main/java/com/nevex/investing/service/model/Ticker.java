@@ -10,6 +10,7 @@ import java.util.Objects;
  */
 public final class Ticker {
 
+    private final int tickerId;
     private final String symbol;
     private final String name;
     private final String sector;
@@ -20,7 +21,7 @@ public final class Ticker {
     public Ticker(TickerEntity tickerEntity, StockExchange stockExchange) {
         if ( tickerEntity == null ) { throw new IllegalArgumentException("TickerEntity cannot be null"); }
         if ( stockExchange == null ) { throw new IllegalArgumentException("StockExchange cannot be null"); }
-
+        this.tickerId = tickerEntity.getId();
         this.symbol = tickerEntity.getSymbol();
         this.name = tickerEntity.getName();
         this.sector = tickerEntity.getSector();
@@ -58,6 +59,10 @@ public final class Ticker {
         return isTradable;
     }
 
+    public int getTickerId() {
+        return tickerId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -76,6 +81,7 @@ public final class Ticker {
         return "Ticker{" +
                 "symbol='" + symbol + '\'' +
                 ", name='" + name + '\'' +
+                ", tickerId='" + tickerId + '\'' +
                 ", sector='" + sector + '\'' +
                 ", industry='" + industry + '\'' +
                 ", isTradable=" + isTradable +

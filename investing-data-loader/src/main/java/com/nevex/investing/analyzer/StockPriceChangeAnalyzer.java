@@ -2,7 +2,6 @@ package com.nevex.investing.analyzer;
 
 import com.nevex.investing.analyzer.model.AnalyzerResult;
 import com.nevex.investing.event.EventConsumer;
-import com.nevex.investing.event.EventManager;
 import com.nevex.investing.event.type.StockPriceUpdatedEvent;
 import com.nevex.investing.model.Analyzer;
 import com.nevex.investing.model.TimePeriod;
@@ -30,10 +29,23 @@ import static java.util.stream.Collectors.groupingBy;
 public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEvent> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(StockPriceChangeAnalyzer.class);
+
+    private final static String PERCENT_DEVIATION = "percent-deviation";
+    private final static String COMPARED_TO = "compared-to";
+    private final static String CURRENT_STOCK_PRICE = "current-stock-price";
+    private final static String CURRENT_LOWEST_STOCK_PRICE = "current-lowest-stock-price";
+    private final static String CURRENT_STOCK_VOLUME = "current-stock-vol";
+    private final static String PREVIOUS_CLOSE_AVG = "previous-close-average";
+    private final static String PREVIOUS_HIGH_AVG = "previous-high-average";
+    private final static String PREVIOUS_LOW_AVG = "previous-low-average";
+    private final static String PREVIOUS_HIGHEST = "previous-highest";
+    private final static String PREVIOUS_LOWEST = "previous-lowest";
+    private final static String PREVIOUS_VOL_LOW = "previous-vol-low";
+    private final static String PREVIOUS_VOL_HIGH = "previous-vol-high";
+    private final static String PREVIOUS_VOL_AVG = "previous-vol-average";
     private final StockPriceAdminService stockPriceAdminService;
     private final AnalyzerService analyzerService;
     private final TickerAnalyzersAdminService tickerAnalyzersAdminService;
-    private final static BigDecimal ONE_HUNDERD = new BigDecimal("100");
 
     public StockPriceChangeAnalyzer(StockPriceAdminService stockPriceAdminService,
                                     AnalyzerService analyzerService,
@@ -48,6 +60,11 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
     }
 
     @Override
+    public int getOrder() {
+        return AnalyzerOrder.STOCK_PRICE_CHANGE_ANALYZER;
+    }
+
+    @Override
     public String getConsumerName() {
         return "stock-price-change-summary-analyzer";
     }
@@ -56,7 +73,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
     public void onEvent(StockPriceUpdatedEvent event) {
         int tickerId = event.getTickerId();
         LocalDate asOfDate = event.getAsOfDate();
-        LOGGER.info("Received new ticker [{}] that has had it's stock price updated - will process it now", tickerId);
+//        LOGGER.info("Received new ticker [{}] that has had it's stock price updated - will process it now", tickerId);
         Map<TimePeriod, StockPriceSummary> averages;
         try {
 
@@ -102,10 +119,18 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
 
     private void calculateAnalysis(int tickerId, LocalDate asOfDate, StockPrice currentStockPrice, Map<TimePeriod, StockPriceSummary> averages) {
 
-        Set<AnalyzerResult> analyzerResults = new HashSet<>();
-        if ( averages.containsKey(TimePeriod.SevenDays)) {
-            calculateAnalysisForSevenDays(analyzerResults, tickerId, asOfDate, currentStockPrice, averages.get(TimePeriod.SevenDays));
+        Set<TimePeriodAnalyzerResult> timePeriodAnalyzerResults = new HashSet<>();
+
+        for ( TimePeriod timePeriod : averages.keySet()) {
+            StockPriceSummary stockPriceSummary = averages.get(timePeriod);
+
+            timePeriodAnalyzerResults.addAll(getStockPriceDeviations(timePeriod, stockPriceSummary, currentStockPrice));
+            timePeriodAnalyzerResults.addAll(getStockVolumeDeviations(timePeriod, stockPriceSummary, currentStockPrice));
         }
+
+        Set<AnalyzerResult> analyzerResults = timePeriodAnalyzerResults.stream()
+                .map(period -> new AnalyzerResult(tickerId, period.analyzer.getTitle(), period.weight, asOfDate))
+                .collect(Collectors.toSet());
 
         if ( !analyzerResults.isEmpty()) {
             try {
@@ -113,53 +138,78 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
             } catch (ServiceException serEx) {
                 LOGGER.error("Could not save all ticker [{}] analyzer results", analyzerResults.size(), serEx);
             }
+        } else {
+            LOGGER.info("No price analyzer results were calculated for ticker id [{}] for date [{}]", tickerId, asOfDate);
+        }
+    }
+
+    private Set<TimePeriodAnalyzerResult> getStockPriceDeviations(TimePeriod timePeriod, StockPriceSummary stockPriceSummary, StockPrice currentStockPrice) {
+        Set<TimePeriodAnalyzerResult> results = new HashSet<>();
+
+        BigDecimal currentPrice = currentStockPrice.getClose();
+        TimePeriodAnalyzerResult result = getAnalyzerWeight(timePeriod, CURRENT_STOCK_PRICE, PREVIOUS_CLOSE_AVG, currentPrice, stockPriceSummary.getCloseAvg());
+        if ( result != null ) { results.add(result); }
+
+        result = getAnalyzerWeight(timePeriod, CURRENT_STOCK_PRICE, PREVIOUS_HIGH_AVG, currentPrice, stockPriceSummary.getHighAvg());
+        if ( result != null ) { results.add(result); }
+
+        result = getAnalyzerWeight(timePeriod, CURRENT_STOCK_PRICE,PREVIOUS_LOW_AVG, currentPrice, stockPriceSummary.getLowAvg());
+        if ( result != null ) { results.add(result); }
+
+        result = getAnalyzerWeight(timePeriod, CURRENT_STOCK_PRICE,PREVIOUS_LOWEST, currentPrice, stockPriceSummary.getLowest());
+        if ( result != null ) { results.add(result); }
+
+        result = getAnalyzerWeight(timePeriod, CURRENT_STOCK_PRICE, PREVIOUS_HIGHEST, currentPrice, stockPriceSummary.getHighest());
+        if ( result != null ) { results.add(result); }
+
+        result = getAnalyzerWeight(timePeriod, CURRENT_LOWEST_STOCK_PRICE, PREVIOUS_LOWEST, currentStockPrice.getLow(), stockPriceSummary.getLowest());
+        if ( result != null ) { results.add(result); }
+
+        result = getAnalyzerWeight(timePeriod, CURRENT_LOWEST_STOCK_PRICE, PREVIOUS_LOW_AVG, currentStockPrice.getLow(), stockPriceSummary.getLowAvg());
+        if ( result != null ) { results.add(result); }
+
+        return results;
+    }
+
+    private Set<TimePeriodAnalyzerResult> getStockVolumeDeviations(TimePeriod timePeriod, StockPriceSummary stockPriceSummary, StockPrice currentStockPrices) {
+        Set<TimePeriodAnalyzerResult> results = new HashSet<>();
+        BigDecimal currentVolume = BigDecimal.valueOf(currentStockPrices.getVolume());
+
+        TimePeriodAnalyzerResult result = getAnalyzerWeight(timePeriod, CURRENT_STOCK_VOLUME, PREVIOUS_VOL_AVG, currentVolume, BigDecimal.valueOf(stockPriceSummary.getVolumeAvg()));
+        if ( result != null ) { results.add(result); }
+
+        result = getAnalyzerWeight(timePeriod, CURRENT_STOCK_VOLUME, PREVIOUS_VOL_LOW, currentVolume, BigDecimal.valueOf(stockPriceSummary.getVolumeLowest()));
+        if ( result != null ) { results.add(result); }
+
+        result = getAnalyzerWeight(timePeriod, CURRENT_STOCK_VOLUME, PREVIOUS_VOL_HIGH, currentVolume, BigDecimal.valueOf(stockPriceSummary.getVolumeHighest()));
+        if ( result != null ) { results.add(result); }
+
+        return results;
+    }
+
+    private TimePeriodAnalyzerResult getAnalyzerWeight(TimePeriod timePeriod, String preFix, String comparisonName, BigDecimal value, BigDecimal summaryValue) {
+        String dynamicAnalyzerTitle = getAnalyzerTitle(preFix, timePeriod, comparisonName, PERCENT_DEVIATION);
+        BigDecimal percentDeviation = value.subtract(summaryValue).divide(summaryValue, RoundingMode.HALF_EVEN);
+        return getWeightForDeviation(dynamicAnalyzerTitle, percentDeviation);
+    }
+
+    private String getAnalyzerTitle(String prefix, TimePeriod timePeriod, String comparisonName, String postFix) {
+        return prefix+"-"+COMPARED_TO+"-"+timePeriod.getTitle()+"-"+comparisonName+"-"+postFix;
+    }
+
+    private TimePeriodAnalyzerResult getWeightForDeviation(String dynamicAnalyzerTitle, BigDecimal percentDeviation) {
+        Optional<Analyzer> analyzerOpt = Analyzer.fromTitle(dynamicAnalyzerTitle);
+        if (!analyzerOpt.isPresent()) {
+            LOGGER.warn("Could not get analyzer for dynamic analyzer name [{}]", dynamicAnalyzerTitle);
+            return null;
 
         }
-
-    }
-
-    private void calculateAnalysisForSevenDays(Set<AnalyzerResult> analyzerResults, int tickerId, LocalDate asOfDate, StockPrice currentStockPrice, StockPriceSummary stockPriceSummary) {
-
-        Analyzer analyzer = Analyzer.CURRENT_STOCK_PRICE_COMPARED_TO_SEVEN_DAYS_PREVIOUS_CLOSE_AVG_PERCENT_DEVIATION;
-        BigDecimal summaryDataPoint = stockPriceSummary.getCloseAvg();
-        BigDecimal currentDataPoint = currentStockPrice.getClose();
-        addAnalyzerEntry(analyzerResults, tickerId, asOfDate, analyzer, currentDataPoint, summaryDataPoint);
-
-        analyzer = Analyzer.CURRENT_STOCK_PRICE_COMPARED_TO_SEVEN_DAYS_PREVIOUS_HIGH_AVG_PERCENT_DEVIATION;
-        summaryDataPoint = stockPriceSummary.getHighAvg();
-        currentDataPoint = currentStockPrice.getClose();
-        addAnalyzerEntry(analyzerResults, tickerId, asOfDate, analyzer, currentDataPoint, summaryDataPoint);
-
-        analyzer = Analyzer.CURRENT_STOCK_PRICE_COMPARED_TO_SEVEN_DAYS_PREVIOUS_LOW_AVG_PERCENT_DEVIATION;
-        summaryDataPoint = stockPriceSummary.getLowAvg();
-        currentDataPoint = currentStockPrice.getClose();
-        addAnalyzerEntry(analyzerResults, tickerId, asOfDate, analyzer, currentDataPoint, summaryDataPoint);
-
-        analyzer = Analyzer.CURRENT_STOCK_VOL_COMPARED_TO_SEVEN_DAYS_PREVIOUS_VOL_AVG_PERCENT_DEVIATION;
-        summaryDataPoint = BigDecimal.valueOf(stockPriceSummary.getVolumeAvg());
-        currentDataPoint = BigDecimal.valueOf(currentStockPrice.getVolume());
-        addAnalyzerEntry(analyzerResults, tickerId, asOfDate, analyzer, currentDataPoint, summaryDataPoint);
-
-        analyzer = Analyzer.CURRENT_STOCK_VOL_COMPARED_TO_SEVEN_DAYS_PREVIOUS_VOL_HIGH_AVG_PERCENT_DEVIATION;
-        summaryDataPoint = BigDecimal.valueOf(stockPriceSummary.getVolumeHighest());
-        currentDataPoint = BigDecimal.valueOf(currentStockPrice.getVolume());
-        addAnalyzerEntry(analyzerResults, tickerId, asOfDate, analyzer, currentDataPoint, summaryDataPoint);
-
-        analyzer = Analyzer.CURRENT_STOCK_VOL_COMPARED_TO_SEVEN_DAYS_PREVIOUS_VOL_LOW_AVG_PERCENT_DEVIATION;
-        summaryDataPoint = BigDecimal.valueOf(stockPriceSummary.getVolumeLowest());
-        currentDataPoint = BigDecimal.valueOf(currentStockPrice.getVolume());
-        addAnalyzerEntry(analyzerResults, tickerId, asOfDate, analyzer, currentDataPoint, summaryDataPoint);
-
-    }
-
-    private void addAnalyzerEntry(Set<AnalyzerResult> analyzerResults, int tickerId, LocalDate asOfDate,
-                                  Analyzer analyzer, BigDecimal currentValue, BigDecimal summaryValue) {
-
-        BigDecimal percentDeviation = currentValue.subtract(summaryValue).divide(summaryValue, RoundingMode.HALF_EVEN).multiply(ONE_HUNDERD);
+        Analyzer analyzer = analyzerOpt.get();
         Optional<Double> weightOptional = analyzerService.getWeight(analyzer, percentDeviation);
         if ( weightOptional.isPresent()) {
-            analyzerResults.add(new AnalyzerResult(tickerId, analyzer.getTitle(), weightOptional.get(), asOfDate));
+            return new TimePeriodAnalyzerResult(analyzer, weightOptional.get());
         }
+        return null;
     }
 
     Map<TimePeriod, StockPriceSummary> calculateStockPriceAverages(List<StockPrice> stockPrices, LocalDate asOfDate) {
@@ -197,5 +247,16 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
             return price;
         }
     }
+
+    private static class TimePeriodAnalyzerResult {
+        private Analyzer analyzer;
+        private double weight;
+
+        private TimePeriodAnalyzerResult(Analyzer analyzer, double weight) {
+            this.analyzer = analyzer;
+            this.weight = weight;
+        }
+    }
+
 
 }

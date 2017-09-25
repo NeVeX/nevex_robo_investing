@@ -18,18 +18,23 @@ import java.util.stream.Collectors;
 /**
  * Created by Mark Cunningham on 9/19/2017.
  */
-public class StockFinancialsSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpdatedEvent> {
+public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpdatedEvent> {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(StockFinancialsSummaryAnalyzer.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(AllAnalyzersSummaryAnalyzer.class);
     private final TickerAnalyzersAdminService tickerAnalyzersAdminService;
     private final AnalyzerService analyzerService;
 
-    public StockFinancialsSummaryAnalyzer(TickerAnalyzersAdminService tickerAnalyzersAdminService, AnalyzerService analyzerService) {
+    public AllAnalyzersSummaryAnalyzer(TickerAnalyzersAdminService tickerAnalyzersAdminService, AnalyzerService analyzerService) {
         super(TickerAnalyzerUpdatedEvent.class);
         if ( tickerAnalyzersAdminService == null ) { throw new IllegalArgumentException("Provided tickerAnalyzersAdminService is null"); }
         if ( analyzerService == null ) { throw new IllegalArgumentException("Provided analyzerService is null"); }
         this.tickerAnalyzersAdminService = tickerAnalyzersAdminService;
         this.analyzerService = analyzerService;
+    }
+
+    @Override
+    public int getOrder() {
+        return AnalyzerOrder.ALL_ANALYZERS_SUMMARY_ANALYZER;
     }
 
     @Override

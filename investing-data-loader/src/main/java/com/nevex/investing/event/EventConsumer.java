@@ -8,10 +8,11 @@ import java.util.function.Consumer;
 /**
  * Created by Mark Cunningham on 9/19/2017.
  */
-public abstract class EventConsumer<T extends Event> implements Consumer<Object> {
+public abstract class EventConsumer<T extends Event> implements Consumer<Object>, Comparable<EventConsumer> {
 
     private final Class<T> supportedEventType;
 
+    public abstract int getOrder();
     public abstract String getConsumerName();
     protected abstract void onEvent(T event);
 
@@ -42,5 +43,14 @@ public abstract class EventConsumer<T extends Event> implements Consumer<Object>
     @Override
     public int hashCode() {
         return Objects.hash(supportedEventType, getConsumerName());
+    }
+
+    @Override
+    public final int compareTo(EventConsumer other) {
+        int comparison = Integer.compare(getOrder(), other.getOrder());
+        if (comparison == 0 ) {
+            return getConsumerName().compareTo(other.getConsumerName());
+        }
+        return comparison;
     }
 }

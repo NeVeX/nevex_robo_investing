@@ -50,6 +50,10 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
         refreshAllTickers();
     }
 
+    public Set<Ticker> getCachedTickers() {
+        return allTickers;
+    }
+
     public Optional<Integer> tryGetIdForSymbol(String symbol) {
         String ticker = symbol.toUpperCase();
         Integer tickerId = symbolToTickerIdMap.get(ticker);
@@ -134,7 +138,7 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
         } finally {
             tickersLock.readLock().unlock();
         }
-            return new HashSet<>();
+        return new HashSet<>();
     }
 
     private Set<Ticker> performSearchOnTickers(Predicate<Ticker> predicate, int limit) {

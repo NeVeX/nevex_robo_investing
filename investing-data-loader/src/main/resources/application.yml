@@ -32,10 +32,13 @@ nevex-investing:
     configuration-enabled: true
     stock-financials-analyzer:
       enabled: true
-    stock-financials-summary-analyzer:
+      send-events-on-startup: false
+    all-analyzers-summary-analyzer:
       enabled: true
+      send-events-on-startup: false
     stock-price-change-analyzer:
       enabled: true
+      send-events-on-startup: false
   data-loaders:
     ticker-data-loader:
       enabled: false # Set this to true and and put values in below for the optional csv to load data into the database
