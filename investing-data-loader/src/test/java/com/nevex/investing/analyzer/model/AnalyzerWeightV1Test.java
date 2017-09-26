@@ -10,11 +10,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by Mark Cunningham on 9/21/2017.
  */
-public class AnalyzerWeightTest {
+public class AnalyzerWeightV1Test {
 
     @Test
     public void testInBetweenCalculationIsCorrect() {
-        AnalyzerWeight weight = new AnalyzerWeight(Analyzer.PRICE_TO_EARNINGS_RATIO, BigDecimal.ONE, BigDecimal.TEN, 4.5);
+        AnalyzerWeightV1 weight = new AnalyzerWeightV1(Analyzer.PRICE_TO_EARNINGS_RATIO, BigDecimal.ONE, BigDecimal.TEN, 4.5);
         assertThat(weight.isAround(BigDecimal.valueOf(1.00001))).isTrue();
         assertThat(weight.isAround(BigDecimal.valueOf(3))).isTrue();
         assertThat(weight.isAround(BigDecimal.valueOf(7))).isTrue();
@@ -25,7 +25,7 @@ public class AnalyzerWeightTest {
         assertThat(weight.isAround(BigDecimal.valueOf(10.1))).isFalse(); // the start is exclusive
 
         // null out the start
-        weight = new AnalyzerWeight(Analyzer.PRICE_TO_EARNINGS_RATIO, null, BigDecimal.TEN, 4.5);
+        weight = new AnalyzerWeightV1(Analyzer.PRICE_TO_EARNINGS_RATIO, null, BigDecimal.TEN, 4.5);
         assertThat(weight.isAround(BigDecimal.valueOf(3))).isTrue();
     }
 

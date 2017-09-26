@@ -4,6 +4,7 @@ import com.nevex.investing.database.entity.TickerAnalyzerEntity;
 import com.nevex.investing.database.entity.TickerAnalyzerSummaryEntity;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 

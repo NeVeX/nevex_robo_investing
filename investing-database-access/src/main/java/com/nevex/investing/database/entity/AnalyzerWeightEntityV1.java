@@ -2,7 +2,6 @@ package com.nevex.investing.database.entity;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
@@ -11,7 +10,7 @@ import java.util.Objects;
 @Entity
 @Table(schema = "investing", name = "analyzer_weights_v1",
         uniqueConstraints = @UniqueConstraint(columnNames = {"name", "start", "end"}))
-public class AnalyzerWeightEntity {
+public class AnalyzerWeightEntityV1 {
 
     public static final String ID_COL = "id";
 
@@ -28,9 +27,9 @@ public class AnalyzerWeightEntity {
     @Column(name = "weight")
     private double weight;
 
-    public AnalyzerWeightEntity() { }
+    public AnalyzerWeightEntityV1() { }
 
-    public AnalyzerWeightEntity(String name, BigDecimal start, BigDecimal end, double weight) {
+    public AnalyzerWeightEntityV1(String name, BigDecimal start, BigDecimal end, double weight) {
         this.name = name;
         this.start = start;
         this.end = end;
@@ -39,7 +38,7 @@ public class AnalyzerWeightEntity {
 
     @Override
     public String toString() {
-        return "AnalyzerWeightEntity{" +
+        return "AnalyzerWeightEntityV1{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", start=" + start +
@@ -52,7 +51,7 @@ public class AnalyzerWeightEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AnalyzerWeightEntity that = (AnalyzerWeightEntity) o;
+        AnalyzerWeightEntityV1 that = (AnalyzerWeightEntityV1) o;
         return Objects.equals(name, that.name) &&
                 Objects.equals(start, that.start) &&
                 Objects.equals(end, that.end);

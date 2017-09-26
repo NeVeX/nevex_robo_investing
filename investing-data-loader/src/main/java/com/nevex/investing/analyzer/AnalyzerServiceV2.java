@@ -1,8 +1,8 @@
 package com.nevex.investing.analyzer;
 
-import com.nevex.investing.analyzer.model.AnalyzerWeight;
-import com.nevex.investing.database.AnalyzerWeightsRepository;
-import com.nevex.investing.database.entity.AnalyzerWeightEntity;
+import com.nevex.investing.analyzer.model.AnalyzerWeightV2;
+import com.nevex.investing.database.AnalyzerWeightsRepositoryV2;
+import com.nevex.investing.database.entity.AnalyzerWeightEntityV2;
 import com.nevex.investing.model.Analyzer;
 import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 /**
  * Created by Mark Cunningham on 9/21/2017.
  */
-public class AnalyzerService {
+public class AnalyzerServiceV2 {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(AnalyzerService.class);
-    private final Map<Analyzer, TreeSet<AnalyzerWeight>> analyzerWeights = new HashMap<>();
-    private final AnalyzerWeightsRepository analyzerWeightsRepository;
+    private final static Logger LOGGER = LoggerFactory.getLogger(AnalyzerServiceV2.class);
+    private final Map<Analyzer, AnalyzerWeightV2> analyzerWeights = new HashMap<>();
+    private final AnalyzerWeightsRepositoryV2 analyzerWeightsRepository;
 
-    public AnalyzerService(AnalyzerWeightsRepository analyzerWeightsRepository) {
+    public AnalyzerServiceV2(AnalyzerWeightsRepositoryV2 analyzerWeightsRepository) {
         if ( analyzerWeightsRepository == null ) { throw new IllegalArgumentException("Provided analyzerWeightsRepository is null"); }
         this.analyzerWeightsRepository = analyzerWeightsRepository;
     }
@@ -31,17 +31,18 @@ public class AnalyzerService {
     @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public void refresh() throws ServiceException {
         int previousCount = analyzerWeights.size();
-        for (AnalyzerWeightEntity entity : analyzerWeightsRepository.findAll()) {
+        for (AnalyzerWeightEntityV2 entity : analyzerWeightsRepository.findAll()) {
 
-            if ( !Analyzer.fromTitle(entity.getName()).isPresent()) {
+            Optional<Analyzer> analyzerOpt = Analyzer.fromTitle(entity.getName());
+            if ( !analyzerOpt.isPresent()) {
                 throw new ServiceException("The database name for analyzer ["+entity.getName()+"] does not exist in the code");
             }
 
-            AnalyzerWeight weight = new AnalyzerWeight(entity);
-            if ( !analyzerWeights.containsKey(weight.getAnalyzer())) {
-                analyzerWeights.put(weight.getAnalyzer(), new TreeSet<>());
+            AnalyzerWeightV2 weight = new AnalyzerWeightV2(analyzerOpt.get(), entity);
+            if ( analyzerWeights.containsKey(weight.getAnalyzer())) {
+                throw new ServiceException("There is already an analyzer weight - this should not happen. Weight found: ["+weight+"]");
             }
-            analyzerWeights.get(weight.getAnalyzer()).add(weight);
+            analyzerWeights.put(weight.getAnalyzer(), weight);
         }
 
         if ( !analyzerWeights.isEmpty()) {
@@ -56,22 +57,21 @@ public class AnalyzerService {
         Set<Analyzer> databaseAnalyzers = new HashSet<>();
         for ( Analyzer analyzer : analyzerWeights.keySet()) {
             databaseAnalyzers.add(analyzer);
-            for ( AnalyzerWeight weight : analyzerWeights.get(analyzer)) {
 
-                for ( AnalyzerWeight compareWeight : analyzerWeights.get(analyzer)) {
-                    if ( weight == compareWeight) { continue; }
+            AnalyzerWeightV2 weight = analyzerWeights.get(analyzer);
 
-                    if ( weight.isAround(compareWeight.getEnd())) {
-                        throw new ServiceException("Analyzer ["+analyzer.getTitle()+"] has incorrect weight configurations for ["+weight+"] and ["+compareWeight+"]");
-                    }
-                }
+            if ( weight.getLowest().compareTo(weight.getCenter()) > 0) {
+                throw new ServiceException("Invalid analyzer weight found. Lowest cannot be greater than center for weight ["+weight+"]");
+            }
+            if ( weight.getHighest().compareTo(weight.getCenter()) < 0 ) {
+                throw new ServiceException("Invalid analyzer weight found. Highest cannot be less than center for weight ["+weight+"]");
             }
         }
 
         // Check we have the same amount of analyzers
         if ( databaseAnalyzers.size() != Analyzer.values().length) {
-            throw new ServiceException("Amount of database analyzers ["+databaseAnalyzers.size()+"] does not equal to the amount of code analyzers ["+Analyzer.values().length+"]");
-//            LOGGER.warn("The amount of database analyzers [{}] does not equal to the amount of defined code analyzers [{}]", databaseAnalyzers.size(), Analyzer.values().length);
+            LOGGER.warn("\n\n\nThe amount of database analyzers [{}] does not equal to the amount of code analyzers [{}]", databaseAnalyzers.size(), Analyzer.values().length);
+//            throw new ServiceException("Amount of database analyzers ["+databaseAnalyzers.size()+"] does not equal to the amount of code analyzers ["+Analyzer.values().length+"]");
         }
         List<Analyzer> missingAnalyzers = Arrays.stream(Analyzer.values()).filter( analyzer -> !databaseAnalyzers.contains(analyzer)).collect(Collectors.toList());
         if ( !missingAnalyzers.isEmpty()) {
@@ -83,15 +83,7 @@ public class AnalyzerService {
         if ( !analyzerWeights.containsKey(analyzer)) {
             return Optional.empty();
         }
-
-        TreeSet<AnalyzerWeight> weights = analyzerWeights.get(analyzer);
-
-        Optional<AnalyzerWeight> foundWeightOpt = weights.stream().filter( weight -> weight.isAround(value)).findFirst();
-        if ( !foundWeightOpt.isPresent()) {
-            return Optional.empty();
-        }
-        AnalyzerWeight foundWeight = foundWeightOpt.get();
-        return Optional.of(foundWeight.getWeight());
+        return Optional.ofNullable(analyzerWeights.get(analyzer).calculateWeight(value));
     }
 
 }

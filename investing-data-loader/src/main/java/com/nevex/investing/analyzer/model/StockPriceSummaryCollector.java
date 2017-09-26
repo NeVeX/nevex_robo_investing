@@ -126,7 +126,7 @@ public class StockPriceSummaryCollector implements Collector<StockPrice, StockPr
         return finalCollector; // it's the combination of both one + two
     }
 
-    // This method is called when we can calculate all results
+    // This method is called when we can calculateWeight all results
     private StockPriceSummary getResults(StockPriceSummaryCollector collector) {
 
         BigDecimal openAvg = collector.openCounter > 0 ? collector.open.divide(BigDecimal.valueOf(collector.openCounter), RoundingMode.HALF_EVEN) : null;

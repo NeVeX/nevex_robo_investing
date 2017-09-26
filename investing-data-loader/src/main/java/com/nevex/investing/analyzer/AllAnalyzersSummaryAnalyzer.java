@@ -22,9 +22,9 @@ public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpd
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AllAnalyzersSummaryAnalyzer.class);
     private final TickerAnalyzersAdminService tickerAnalyzersAdminService;
-    private final AnalyzerService analyzerService;
+    private final AnalyzerServiceV2 analyzerService;
 
-    public AllAnalyzersSummaryAnalyzer(TickerAnalyzersAdminService tickerAnalyzersAdminService, AnalyzerService analyzerService) {
+    public AllAnalyzersSummaryAnalyzer(TickerAnalyzersAdminService tickerAnalyzersAdminService, AnalyzerServiceV2 analyzerService) {
         super(TickerAnalyzerUpdatedEvent.class);
         if ( tickerAnalyzersAdminService == null ) { throw new IllegalArgumentException("Provided tickerAnalyzersAdminService is null"); }
         if ( analyzerService == null ) { throw new IllegalArgumentException("Provided analyzerService is null"); }
@@ -39,7 +39,7 @@ public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpd
 
     @Override
     public String getConsumerName() {
-        return "stock-financials-summary-analyzer";
+        return "all-analyzers-summary-analyzer";
     }
 
     @Override
@@ -53,7 +53,7 @@ public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpd
             return;
         }
 
-        // Use the java api to calculate the average
+        // Use the java api to calculateWeight the average
         DoubleSummaryStatistics stats = analyzerResults.stream().collect(Collectors.summarizingDouble(AnalyzerResult::getWeight));
 
         Optional<Double> weightOptional = analyzerService.getWeight(Analyzer.ANALYZER_SUMMARY_COUNTER_ADJUST_WEIGHT, BigDecimal.valueOf(stats.getCount()));
@@ -70,7 +70,6 @@ public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpd
         } catch (ServiceException serEx) {
             LOGGER.error("Could not save summary analyzer entity ["+summaryResult+"]", serEx);
         }
-
         LOGGER.info("{} has finished processing ticker {}", getConsumerName(), tickerId);
     }
 

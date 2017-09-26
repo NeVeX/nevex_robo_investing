@@ -2,7 +2,10 @@ package com.nevex.investing.analyzer;
 
 import com.nevex.investing.analyzer.model.AnalyzerResult;
 import com.nevex.investing.event.EventConsumer;
+import com.nevex.investing.event.EventManager;
+import com.nevex.investing.event.type.Event;
 import com.nevex.investing.event.type.StockPriceUpdatedEvent;
+import com.nevex.investing.event.type.TickerAnalyzerUpdatedEvent;
 import com.nevex.investing.model.Analyzer;
 import com.nevex.investing.model.TimePeriod;
 import com.nevex.investing.model.StockPriceSummary;
@@ -44,11 +47,11 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
     private final static String PREVIOUS_VOL_HIGH = "previous-vol-high";
     private final static String PREVIOUS_VOL_AVG = "previous-vol-average";
     private final StockPriceAdminService stockPriceAdminService;
-    private final AnalyzerService analyzerService;
+    private final AnalyzerServiceV2 analyzerService;
     private final TickerAnalyzersAdminService tickerAnalyzersAdminService;
 
     public StockPriceChangeAnalyzer(StockPriceAdminService stockPriceAdminService,
-                                    AnalyzerService analyzerService,
+                                    AnalyzerServiceV2 analyzerService,
                                     TickerAnalyzersAdminService tickerAnalyzersAdminService) {
         super(StockPriceUpdatedEvent.class);
         if ( stockPriceAdminService == null ) { throw new IllegalArgumentException("Provided stockPriceAdminService is null"); }
@@ -66,7 +69,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
 
     @Override
     public String getConsumerName() {
-        return "stock-price-change-summary-analyzer";
+        return "stock-price-change-analyzer";
     }
 
     @Override
@@ -97,27 +100,29 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
             return;
         }
 
-        calculateAnalysis(tickerId, asOfDate, averages);
+        if ( calculateAnalysis(tickerId, asOfDate, averages) ) {
+            EventManager.sendEvent(new TickerAnalyzerUpdatedEvent(tickerId, asOfDate));
+        }
 
         LOGGER.info("{} has finished processing ticker {}", getConsumerName(), tickerId);
     }
 
-    private void calculateAnalysis(int tickerId, LocalDate asOfDate, Map<TimePeriod, StockPriceSummary> averages) {
+    private boolean calculateAnalysis(int tickerId, LocalDate asOfDate, Map<TimePeriod, StockPriceSummary> averages) {
         StockPrice currentStockPrice;
         try {
             Optional<StockPrice> foundStock = stockPriceAdminService.getCurrentPrice(tickerId);
             if ( !foundStock.isPresent()) {
-                return;
+                return false;
             }
             currentStockPrice = foundStock.get();
         } catch (TickerNotFoundException tickerNotFoundEx) {
             LOGGER.warn("[{}] - Could not find the current stock price for ticker [{}]", getConsumerName(), tickerId);
-            return;
+            return false;
         }
-        calculateAnalysis(tickerId, asOfDate, currentStockPrice, averages);
+        return calculateAnalysis(tickerId, asOfDate, currentStockPrice, averages);
     }
 
-    private void calculateAnalysis(int tickerId, LocalDate asOfDate, StockPrice currentStockPrice, Map<TimePeriod, StockPriceSummary> averages) {
+    private boolean calculateAnalysis(int tickerId, LocalDate asOfDate, StockPrice currentStockPrice, Map<TimePeriod, StockPriceSummary> averages) {
 
         Set<TimePeriodAnalyzerResult> timePeriodAnalyzerResults = new HashSet<>();
 
@@ -135,12 +140,14 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         if ( !analyzerResults.isEmpty()) {
             try {
                 tickerAnalyzersAdminService.saveNewAnalyzers(analyzerResults);
+                return true; // all good!
             } catch (ServiceException serEx) {
                 LOGGER.error("Could not save all ticker [{}] analyzer results", analyzerResults.size(), serEx);
             }
         } else {
             LOGGER.info("No price analyzer results were calculated for ticker id [{}] for date [{}]", tickerId, asOfDate);
         }
+        return false;
     }
 
     private Set<TimePeriodAnalyzerResult> getStockPriceDeviations(TimePeriod timePeriod, StockPriceSummary stockPriceSummary, StockPrice currentStockPrice) {
@@ -189,7 +196,12 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
 
     private TimePeriodAnalyzerResult getAnalyzerWeight(TimePeriod timePeriod, String preFix, String comparisonName, BigDecimal value, BigDecimal summaryValue) {
         String dynamicAnalyzerTitle = getAnalyzerTitle(preFix, timePeriod, comparisonName, PERCENT_DEVIATION);
-        BigDecimal percentDeviation = value.subtract(summaryValue).divide(summaryValue, RoundingMode.HALF_EVEN);
+        BigDecimal percentDeviation;
+        if ( summaryValue.compareTo(BigDecimal.ZERO) == 0) {
+            percentDeviation = value;
+        } else {
+            percentDeviation = value.subtract(summaryValue).divide(summaryValue, RoundingMode.HALF_EVEN);
+        }
         return getWeightForDeviation(dynamicAnalyzerTitle, percentDeviation);
     }
 
@@ -202,7 +214,6 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         if (!analyzerOpt.isPresent()) {
             LOGGER.warn("Could not get analyzer for dynamic analyzer name [{}]", dynamicAnalyzerTitle);
             return null;
-
         }
         Analyzer analyzer = analyzerOpt.get();
         Optional<Double> weightOptional = analyzerService.getWeight(analyzer, percentDeviation);
@@ -217,7 +228,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         TreeSet<StockPrice> orderedStockPrices = new TreeSet<>(stockPrices);
         // Get a mapping of time periods for all stock prices
         Map<TimePeriod, Set<StockPrice>> timePeriodBuckets = TimePeriod.groupDailyElementsIntoExactBuckets(orderedStockPrices);
-        // Do the magic - look at all elements and on the fly calculate various summaries
+        // Do the magic - look at all elements and on the fly calculateWeight various summaries
         Map<TimePeriod, StockPriceSummary> timePeriodSummaries = timePeriodBuckets.entrySet()
                 .stream()
                 .flatMap(e -> e.getValue().stream().map(p -> new TimePeriodToStockPrice(e.getKey(), p)))

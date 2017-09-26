@@ -5,6 +5,7 @@ import com.nevex.investing.analyzer.model.AnalyzerResult;
 import com.nevex.investing.service.model.StockPrice;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 
 /**
@@ -12,12 +13,14 @@ import java.time.LocalDate;
  */
 public class TickerAnalyzerDto {
 
+    private final static int SCALE = 4;
+
     @JsonProperty("ticker_id")
     private int tickerId;
     @JsonProperty("name")
     private String name;
     @JsonProperty("weight")
-    private double weight;
+    private BigDecimal weight;
     @JsonProperty("date")
     private LocalDate date;
 
@@ -26,7 +29,7 @@ public class TickerAnalyzerDto {
     public TickerAnalyzerDto(AnalyzerResult analyzerResult) {
         this.tickerId = analyzerResult.getTickerId();
         this.date = analyzerResult.getDate();
-        this.weight = analyzerResult.getWeight();
+        this.weight = new BigDecimal(analyzerResult.getWeight()).setScale(SCALE, RoundingMode.HALF_EVEN);
         this.name =analyzerResult.getName();
     }
 
@@ -46,11 +49,11 @@ public class TickerAnalyzerDto {
         this.name = name;
     }
 
-    public double getWeight() {
+    public BigDecimal getWeight() {
         return weight;
     }
 
-    public void setWeight(double weight) {
+    public void setWeight(BigDecimal weight) {
         this.weight = weight;
     }
 

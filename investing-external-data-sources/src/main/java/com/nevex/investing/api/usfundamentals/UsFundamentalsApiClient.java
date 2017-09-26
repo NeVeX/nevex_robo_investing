@@ -69,21 +69,25 @@ public class UsFundamentalsApiClient {
         return response;
     }
 
+    @Deprecated
     public Collection<UsFundamentalIndicatorDto> getFundamentalsForPeriod(long cik, LocalDate localDate, char frequency) throws ApiException {
         HttpUrl httpUrl = buildFundamentalsForPeriod(cik, localDate, frequency);
         return getAllFundamentalsForCik(cik, httpUrl);
     }
 
+    @Deprecated
     public List<UsFundamentalsUpdatableDto> getAllQuarterlyFundamentalsThatNeedsUpdates(long fromNanoTime) throws ApiException {
         HttpUrl httpUrlForQuarterlyUpdates = buildUpdatesFromNanoHttpUrl(fromNanoTime, "q");
         return getFundamentalsThatNeedsUpdates(httpUrlForQuarterlyUpdates);
     }
 
+    @Deprecated
     public List<UsFundamentalsUpdatableDto> getAllYearlyFundamentalsThatNeedsUpdates(long fromNanoTime) throws ApiException {
         HttpUrl httpUrlForYearlyUpdates = buildUpdatesFromNanoHttpUrl(fromNanoTime, "y");
         return getFundamentalsThatNeedsUpdates(httpUrlForYearlyUpdates);
     }
 
+    @Deprecated
     private List<UsFundamentalsUpdatableDto> getFundamentalsThatNeedsUpdates(HttpUrl httpUrl) throws ApiException {
         Request request = new Request.Builder()
                 .url(httpUrl)

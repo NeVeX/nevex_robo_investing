@@ -24,7 +24,7 @@ public class UsFundamentalsApiClientTest {
 
         UsFundamentalsApiClient client = new UsFundamentalsApiClient(host, apiKey, objectMapper);
 
-        List<UsFundamentalsUpdatableDto> updatableDtos = client.getAllQuarterlyFundamentalsThatNeedsUpdates(System.nanoTime());
+//        List<UsFundamentalsUpdatableDto> updatableDtos = client.getAllQuarterlyFundamentalsThatNeedsUpdates(System.nanoTime());
 
         UsFundamentalsResponseDto response = client.getAllFundamentalsForCik(cik);
 

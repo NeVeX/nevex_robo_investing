@@ -3,6 +3,7 @@ package com.nevex.investing.analyzer.model;
 import com.nevex.investing.database.entity.TickerAnalyzerEntity;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -51,8 +52,8 @@ public class AnalyzerResult {
         if (o == null || getClass() != o.getClass()) return false;
         AnalyzerResult that = (AnalyzerResult) o;
         return tickerId == that.tickerId &&
-                Double.compare(that.weight, weight) == 0 &&
                 Objects.equals(name, that.name) &&
+                Objects.equals(weight, that.weight) &&
                 Objects.equals(date, that.date);
     }
 

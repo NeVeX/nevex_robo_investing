@@ -26,11 +26,11 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
     private final static Logger LOGGER = LoggerFactory.getLogger(StockFinancialsAnalyzer.class);
     private final YahooStockInfoService yahooStockInfoService;
     private final TickerAnalyzersAdminService tickerAnalyzersAdminService;
-    private final AnalyzerService analyzerService;
+    private final AnalyzerServiceV2 analyzerService;
 
     public StockFinancialsAnalyzer(YahooStockInfoService yahooStockInfoService,
                                    TickerAnalyzersAdminService tickerAnalyzersAdminService,
-                                   AnalyzerService analyzerService) {
+                                   AnalyzerServiceV2 analyzerService) {
         super(StockFinancialsUpdatedEvent.class);
         if ( yahooStockInfoService == null ) { throw new IllegalArgumentException("Provided yahooStockInfoService is null"); }
         if ( tickerAnalyzersAdminService == null ) { throw new IllegalArgumentException("Provided tickerAnalyzersAdminService is null"); }

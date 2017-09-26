@@ -1,17 +1,13 @@
 package com.nevex.investing.config;
 
-import com.nevex.investing.analyzer.AnalyzerService;
-import com.nevex.investing.analyzer.AllAnalyzersSummaryAnalyzer;
-import com.nevex.investing.analyzer.StockPriceChangeAnalyzer;
+import com.nevex.investing.analyzer.*;
 import com.nevex.investing.config.property.AnalyzerProperties;
-import com.nevex.investing.database.AnalyzerWeightsRepository;
+import com.nevex.investing.database.AnalyzerWeightsRepositoryV1;
+import com.nevex.investing.database.AnalyzerWeightsRepositoryV2;
 import com.nevex.investing.database.TickerAnalyzersRepository;
 import com.nevex.investing.database.TickerAnalyzersSummaryRepository;
-import com.nevex.investing.analyzer.StockFinancialsAnalyzer;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.dataloader.loader.AnalyzerEventDataLoader;
-import com.nevex.investing.event.EventManager;
-import com.nevex.investing.event.type.StockPriceUpdatedEvent;
 import com.nevex.investing.service.StockPriceAdminService;
 import com.nevex.investing.service.TickerAnalyzersAdminService;
 import com.nevex.investing.service.TickerService;
@@ -28,8 +24,6 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.PostConstruct;
 
-import java.time.LocalDate;
-
 import static com.nevex.investing.config.TestingConfiguration.TESTING_PREFIX;
 
 /**
@@ -45,8 +39,10 @@ class AnalyzersConfiguration {
 
     @Autowired
     private TickerService tickerService;
+//    @Autowired
+//    private AnalyzerWeightsRepositoryV1 analyzerWeightsRepositoryV1;
     @Autowired
-    private AnalyzerWeightsRepository analyzerWeightsRepository;
+    private AnalyzerWeightsRepositoryV2 analyzerWeightsRepositoryV2;
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
     @Autowired
@@ -71,9 +67,14 @@ class AnalyzersConfiguration {
         return new AnalyzerEventDataLoader(tickerService, dataLoaderService, analyzerProperties);
     }
 
+//    @Bean
+//    AnalyzerServiceV1 analyzerService() {
+//        return new AnalyzerServiceV1(analyzerWeightsRepositoryV1);
+//    }
+
     @Bean
-    AnalyzerService analyzerService() {
-        return new AnalyzerService(analyzerWeightsRepository);
+    AnalyzerServiceV2 analyzerService() {
+        return new AnalyzerServiceV2(analyzerWeightsRepositoryV2);
     }
 
     @Bean

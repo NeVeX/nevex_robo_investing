@@ -59,10 +59,10 @@ public class AnalyzerEventDataLoader extends DataLoaderWorker {
     DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
         int processed = 0;
 
-        if ( analyzerProperties.getStockPriceChangeAnalyzer().getEnabled()) {
+        if ( analyzerProperties.getStockPriceChangeAnalyzer().getSendEventsOnStartup()) {
             processed += sendEvents( i -> new StockPriceUpdatedEvent(i, super.getWorkerStartTime().toLocalDate()));
         }
-        if ( analyzerProperties.getStockFinancialsAnalyzer().getEnabled()) {
+        if ( analyzerProperties.getStockFinancialsAnalyzer().getSendEventsOnStartup()) {
             processed += sendEvents( i -> new StockFinancialsUpdatedEvent(i, super.getWorkerStartTime().toLocalDate()));
         }
 

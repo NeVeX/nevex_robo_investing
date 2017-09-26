@@ -14,7 +14,9 @@ public enum TimePeriod {
     OneMonth("1-month", Period.ofMonths(1)),
     ThreeMonths("3-months", Period.ofMonths(3)),
     SixMonths("6-months", Period.ofMonths(6)),
-    OneYear("1-year", Period.ofYears(1));
+    OneYear("1-year", Period.ofYears(1)),
+    ThreeYears("3-years", Period.ofYears(3)),
+    FiveYears("5-years", Period.ofYears(5));
 
     private String title;
     private int days;

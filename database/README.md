@@ -57,3 +57,10 @@ SELECT setval('investing.stock_price_id_seq', 1); // next seq value will be 1
 SELECT setval('investing.stock_prices_historical_id_seq', 1);
 ```
 
+#### Executing a SQL script with PSQL
+
+An example is shown below (remember to be logged in as the postgres owner)
+```
+ psql -U postgres postgres -d viper -f /opt/srv/investing-svc/database/reference_data/analyzer_weights_v2.sql
+```
+

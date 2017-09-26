@@ -11,19 +11,23 @@ import java.util.Objects;
 @Table(schema = "investing", name = "ticker_analyzers_summary_v1", uniqueConstraints = @UniqueConstraint(columnNames = {"ticker_id", "date"}))
 public class TickerAnalyzerSummaryEntity implements MergeableEntity<TickerAnalyzerSummaryEntity> {
 
+    public final static String ADJUSTED_WEIGHT = "adjusted_weight";
+    public final static String ADJUSTED_WEIGHT_PROPERTY_NAME = "adjustedWeight";
+    public final static String DATE = "date";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
     @Column(name = "ticker_id")
     private int tickerId;
-    @Column(name = "date", columnDefinition = "DATE")
+    @Column(name = DATE, columnDefinition = "DATE")
     private LocalDate date;
     @Column(name = "total_analyzers")
     private int totalAnalyzers;
     @Column(name = "average_weight")
     private double averageWeight;
-    @Column(name = "adjusted_weight")
+    @Column(name = ADJUSTED_WEIGHT)
     private double adjustedWeight;
 
     public TickerAnalyzerSummaryEntity() { }

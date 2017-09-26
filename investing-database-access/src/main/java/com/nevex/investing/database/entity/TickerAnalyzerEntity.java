@@ -1,6 +1,7 @@
 package com.nevex.investing.database.entity;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
