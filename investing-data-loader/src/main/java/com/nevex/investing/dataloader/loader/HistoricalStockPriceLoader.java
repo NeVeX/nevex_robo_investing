@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,7 +69,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         if ( useBulkMode) {
             totalRecordsProcessed = super.processAllPagesInBulkForRepo(tickersRepository, this::loadHistoricalPricesForSymbols, waitTimeBetweenBulkMs, bulkAmountPerPage);
         } else {
-            totalRecordsProcessed = super.processAllPagesIndividuallyForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, waitTimeBetweenTickersMs);
+            totalRecordsProcessed = super.processAllPagesIndividuallyForRepo(tickersRepository, this::loadHistoricalPricesForSymbol, waitTimeBetweenTickersMs, 10);
         }
         return new DataLoaderWorkerResult(totalRecordsProcessed);
     }
@@ -78,7 +79,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         tickers = TestingControlUtil.getAllowedTickers(tickers); // remove tickers that are not allowed under test
         Map<String, Set<ApiStockPrice>> prices = null;
         try {
-            prices = apiStockPriceClient.getHistoricalPricesForSymbols(tickers, getWorkerStartTime().toLocalDate(), maxDaysToFetch);
+            prices = apiStockPriceClient.getHistoricalPricesForSymbols(tickers, getWorkerStartDate(), maxDaysToFetch);
         } catch (ApiException apiEx) {
             saveExceptionToDatabase("Could not get historical price for bulk ["+tickers.size()+"] symbols. Reason: ["+apiEx.getMessage()+"]");
             LOGGER.error("Could not bulk get historical prices for symbols [{}]", tickers, apiEx);
@@ -107,7 +108,7 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
 
         Set<ApiStockPrice> historicalPrices = null;
         try {
-            historicalPrices = apiStockPriceClient.getHistoricalPricesForSymbol(tickerEntity.getSymbol(), getWorkerStartTime().toLocalDate(), maxDaysToFetch);
+            historicalPrices = apiStockPriceClient.getHistoricalPricesForSymbol(tickerEntity.getSymbol(), getWorkerStartDate(), maxDaysToFetch);
         } catch (ApiException apiEx ) {
             saveExceptionToDatabase("Could not get historical price for symbol symbol ["+tickerEntity.getSymbol()+"]. Reason: ["+apiEx.getMessage()+"]");
             LOGGER.error("Could not get historical prices for symbol [{}]", tickerEntity.getSymbol(), apiEx);
@@ -126,13 +127,24 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     private boolean savePrices(TickerEntity tickerEntity, Set<ApiStockPrice> prices) {
         try {
             stockPriceAdminService.saveHistoricalPrices(tickerEntity.getSymbol(), prices);
-            EventManager.sendEvent(new StockPriceUpdatedEvent(tickerEntity.getId(), getWorkerStartTime().toLocalDate()));
+            sendEvents(tickerEntity.getId(), prices);
             return true;
         } catch (Exception e) {
             saveExceptionToDatabase("Could not save historical price for symbol ["+tickerEntity.getSymbol()+"]. Reason: ["+e.getMessage()+"]");
             LOGGER.error("Could not save historical prices for symbol [{}]", tickerEntity.getSymbol(), e);
             return false;
         }
+    }
+
+    private void sendEvents(int tickerId, Set<ApiStockPrice> prices) {
+        // just send one event for now, the latest date
+        prices.stream()
+                .map(ApiStockPrice::getDate)
+                .reduce((l1, l2) -> l1.isAfter(l2) ? l1 : l2)
+                .ifPresent(date -> EventManager.sendEvent(new StockPriceUpdatedEvent(tickerId, date)));
+        // TODO: Uncomment the below when the system can handle so many events (or really, when the event is purposeful)
+//        Set<LocalDate> dates = prices.stream().map(ApiStockPrice::getDate).collect(Collectors.toSet());
+//        dates.stream().forEach(date -> EventManager.sendEvent(new StockPriceUpdatedEvent(tickerId, date)));
     }
 
     @Override

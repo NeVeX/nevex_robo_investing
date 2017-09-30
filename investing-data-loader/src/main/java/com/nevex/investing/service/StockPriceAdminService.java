@@ -50,6 +50,8 @@ public class StockPriceAdminService extends StockPriceService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public <E extends ApiStockPrice> void saveHistoricalPrices(String symbol, Set<E> historicalPrices) throws TickerNotFoundException, ServiceException {
         int tickerId = tickerService.getIdForSymbol(symbol);
+
+
         historicalPrices.stream().forEach(price -> saveHistoricalPrice(tickerId, price));
 
         updateCurrentPriceAfterHistoricalPriceChanges(tickerId);

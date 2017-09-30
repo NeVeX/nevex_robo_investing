@@ -48,14 +48,14 @@ nevex-investing:
       nasdaq-file: D:\Coding\Git\nevex_investing\data\nasdaq_tickers_08_07_2017.csv
       nyse-file: D:\Coding\Git\nevex_investing\data\nyse_tickers_08_07_2017.csv
     stock-historical-loader:
-      enabled: false
+      enabled: true
       wait-time-between-tickers-ms: 4000
       use-bulk-mode: false
       wait-time-between-bulk-ms: 4000
       bulk-amount-per-page: 50
       max-days-to-fetch: 1850 # About 5 years
     daily-stock-price-loader:
-      enabled: true
+      enabled: false
       wait-time-between-tickers-ms: 1000
       force-start-on-app-startup: true
       use-bulk-mode: true

@@ -11,7 +11,13 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -42,8 +48,9 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
 
     abstract DataLoaderWorkerResult doWork() throws DataLoaderWorkerException;
 
-    protected OffsetDateTime getWorkerStartTime() { return workerStartTime; }
+//    protected OffsetDateTime getWorkerStartTime() { return workerStartTime; }
 
+    // TODO: Don't use this for events
     protected LocalDate getWorkerStartDate() { return workerStartTime.toLocalDate(); }
 
     /**
@@ -87,10 +94,24 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
                 20);
     }
 
+    <T, ID extends Serializable> int processAllPagesIndividuallyForRepo(
+            PagingAndSortingRepository<T, ID> sortingRepository, Consumer<T> consumer, long waitTimeBetweenTickersMs, int threadCount) {
+        return processAllPages(sortingRepository::findAll,
+                new IndividualPageProcessorMultiThreaded<>(consumer, waitTimeBetweenTickersMs, threadCount),
+                20);
+    }
+
     <T> int processAllPagesIndividuallyForIterable (
             Function<Pageable, Page<T>> pageSupplier, Consumer<T> consumer, long waitTimeBetweenTickersMs) {
         return processAllPages(pageSupplier,
                 new IndividualPageProcessor<>(consumer, waitTimeBetweenTickersMs),
+                20);
+    }
+
+    <T> int processAllPagesIndividuallyForIterable (
+            Function<Pageable, Page<T>> pageSupplier, Consumer<T> consumer, long waitTimeBetweenTickersMs, int threadCount) {
+        return processAllPages(pageSupplier,
+                new IndividualPageProcessorMultiThreaded<>(consumer, waitTimeBetweenTickersMs, threadCount),
                 20);
     }
 
@@ -109,23 +130,28 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
      */
     <T> int processAllPages(
             Function<Pageable, Page<T>> pageSupplier,
-            Function<Page<T>, Integer> pageProcessor,
+            PageProcessor<T> pageProcessor,
             int pageCountMax) {
+
         int totalRecordsProcessed = 0;
-        // Fetch all the ticker symbols we have
-        Pageable pageable = new PageRequest(0, pageCountMax);
-        while ( pageable != null ) {
-            // At some point the pageable will turn null
+        try {
+            // Fetch all the ticker symbols we have
+            Pageable pageable = new PageRequest(0, pageCountMax);
+            while (pageable != null) {
+                // At some point the pageable will turn null
 
-            Page<T> page = pageSupplier.apply(pageable);
-            if ( page != null && page.hasContent()) {
-                totalRecordsProcessed += pageProcessor.apply(page);
+                Page<T> page = pageSupplier.apply(pageable);
+                if (page != null && page.hasContent()) {
+                    totalRecordsProcessed += pageProcessor.processPage(page);
+                }
+
+                pageable = page != null && page.hasNext() ? page.nextPageable() : null;
+                long totalElements = page != null ? page.getTotalElements() : 0;
+                long percentDone = totalElements == 0 ? 100 : (long) ((totalRecordsProcessed / (double) totalElements) * 100);
+                LOGGER.info("[{}] job is {}% done. It has processed [{}] items of a total of [{}]", getName(), percentDone, totalRecordsProcessed, totalElements);
             }
-
-            pageable = page != null && page.hasNext() ? page.nextPageable() : null;
-            long totalElements = page != null ? page.getTotalElements() : 0;
-            long percentDone = totalElements == 0 ? 100 : (long) ((totalRecordsProcessed / (double) totalElements) * 100);
-            LOGGER.info("[{}] job is {}% done. It has processed [{}] items of a total of [{}]", getName(), percentDone, totalRecordsProcessed, totalElements);
+        } finally {
+            pageProcessor.onCompleted();
         }
         return totalRecordsProcessed;
     }
@@ -153,8 +179,13 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
         dataLoaderService.saveError(getName(), message);
     }
 
+    private interface PageProcessor<T> {
+        Integer processPage(Page<T> page);
+        void onCompleted();
+    }
+
     // Processor for individual elements
-    private static class IndividualPageProcessor<T> implements Function<Page<T>, Integer> {
+    private static class IndividualPageProcessor<T> implements PageProcessor<T> {
 
         final long waitTimeBetweenElementsMs;
         final Consumer<T> consumer;
@@ -165,7 +196,7 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
         }
 
         @Override
-        public Integer apply(Page<T> page) {
+        public Integer processPage(Page<T> page) {
             int totalRecordsProcessed = 0;
             for ( T data : page) {
                 consumer.accept(data);
@@ -177,12 +208,57 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
                 }
             }
             return totalRecordsProcessed;
+        }
 
+        @Override
+        public void onCompleted() {
         }
     }
 
+    private static class IndividualPageProcessorMultiThreaded<T> extends IndividualPageProcessor<T> {
+
+        final ExecutorService executorService;
+
+        IndividualPageProcessorMultiThreaded(Consumer<T> consumer, long waitTimeBetweenElementsMs, int threadCount) {
+            super(consumer, waitTimeBetweenElementsMs);
+            this.executorService = Executors.newFixedThreadPool(threadCount);
+        }
+
+        @Override
+        public Integer processPage(Page<T> page) {
+            AtomicInteger totalRecordsProcessed = new AtomicInteger();
+            List<Future> futures = new ArrayList<>();
+            for ( T data : page) {
+                futures.add(executorService.submit(() -> consumer.accept(data)));
+                totalRecordsProcessed.incrementAndGet();
+            }
+
+            for ( Future f : futures ) {
+                try {
+                    f.get();
+                } catch (Exception e ) {
+                    LOGGER.error("Could not get result for future while processing page", e.getMessage());
+                }
+            }
+
+            if ( waitTimeBetweenElementsMs > 0 ) {
+                if ( tryPauseThreadForMs(waitTimeBetweenElementsMs) ) {
+                    LOGGER.warn("Could not sleep the thread for [{}] ms in between bulk page processing. Will continue still...", waitTimeBetweenElementsMs);
+                }
+            }
+
+            return totalRecordsProcessed.get();
+        }
+
+        @Override
+        public void onCompleted() {
+            executorService.shutdownNow();
+        }
+
+    }
+
     // Processor for bulk elements
-    private static class BulkPageProcessor<T> implements Function<Page<T>, Integer> {
+    private static class BulkPageProcessor<T> implements PageProcessor<T> {
 
         final long waitTimeBetweenBulkMs;
         final Consumer<List<T>> bulkConsumer;
@@ -193,13 +269,18 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
         }
 
         @Override
-        public Integer apply(Page<T> page) {
+        public Integer processPage(Page<T> page) {
             int totalRecordsProcessed = page.getNumberOfElements();
             bulkConsumer.accept(page.getContent());
             if ( tryPauseThreadForMs(waitTimeBetweenBulkMs)) {
                 LOGGER.warn("Could not sleep the thread for [{}] ms in between bulk page processing. Will continue still...", waitTimeBetweenBulkMs);
             }
             return totalRecordsProcessed;
+        }
+
+        @Override
+        public void onCompleted() {
+
         }
     }
 

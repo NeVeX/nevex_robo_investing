@@ -90,8 +90,9 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
                     Optional<Integer> tickerIdOpt = tickerService.tryGetIdForSymbol(stockInfo.getSymbol());
                     if ( tickerIdOpt.isPresent()) {
                         try {
-                            yahooStockInfoService.saveYahooStockInfo(tickerIdOpt.get(), getWorkerStartTime().toLocalDate(), stockInfo);
-                            EventManager.sendEvent(new StockFinancialsUpdatedEvent(tickerIdOpt.get(), getWorkerStartTime().toLocalDate()));
+                            yahooStockInfoService.saveYahooStockInfo(tickerIdOpt.get(), getWorkerStartDate(), stockInfo);
+                            // TODO: use the date of the stock info??
+                            EventManager.sendEvent(new StockFinancialsUpdatedEvent(tickerIdOpt.get(), getWorkerStartDate()));
                         } catch (ServiceException e) {
                             saveExceptionToDatabase("A exception occurred trying to save yahoo stock info for ticker ["+tickerIdOpt.get()+"]. Reason: "+e.getMessage());
                         }

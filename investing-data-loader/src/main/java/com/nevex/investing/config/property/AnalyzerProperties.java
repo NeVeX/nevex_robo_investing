@@ -32,7 +32,6 @@ public class AnalyzerProperties {
     @Valid
     private AllAnalyzersSummaryAnalyzerProperties allAnalyzersSummaryAnalyzer;
 
-
     public static class BaseAnalyzerProperties {
         @NotNull
         private Boolean enabled;
@@ -76,6 +75,7 @@ public class AnalyzerProperties {
                     "enabled=" + enabled +
                     ", sendEventsOnStartup=" + sendEventsOnStartup +
                     ", sendEventsOnStartupStartingFromDate=" + sendEventsOnStartupStartingFromDate +
+                    ", sendEventsOnStartupStartingFromLocalDate=" + sendEventsOnStartupStartingFromLocalDate +
                     '}';
         }
     }

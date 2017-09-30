@@ -10,7 +10,7 @@ values
 (1, 'earnings-per-share', 0, -10, 40, false, false, 1),
 
 -- Summary of analyzers
-(1, 'analyzer-summary-counter-adjust-weight', 10, 0, 100, false, false, 1),
+(1, 'analyzer-summary-counter-adjust-weight', 20, -10, 50000, false, false, 1),
 
 ----------------------------------------------------------
 --- 1 Day analyzers
