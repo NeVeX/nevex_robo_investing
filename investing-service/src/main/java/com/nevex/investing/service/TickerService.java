@@ -112,7 +112,7 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
             int previousCount = allTickers.size();
             allTickers = newTickers;
             updateInternalTickerMaps(symbolToTickerIdMap);
-            LOGGER.info("Refreshed [{}] tickers into the cache from the previous size of [{}]", allTickers.size(), previousCount);
+            LOGGER.info("Refreshed [{}] tickers into the cache of the previous size of [{}]", allTickers.size(), previousCount);
         } finally {
             tickersLock.writeLock().unlock();
         }
@@ -152,17 +152,21 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
      * Returns found tickers using a default pageable result
      */
     public PageableData<Ticker> getTickers() {
-        return getTickers(DEFAULT_PAGEABLE);
+        return getTickersForPageable(DEFAULT_PAGEABLE);
     }
 
     /**
      * Returns found tickers using the given page as the start
      */
     public PageableData<Ticker> getTickers(int page) {
-        return getTickers(new PageRequest(page, DEFAULT_PAGE_ELEMENT_SIZE));
+        return getTickersForPageable(new PageRequest(page, DEFAULT_PAGE_ELEMENT_SIZE));
     }
 
-    private PageableData<Ticker> getTickers(Pageable pageable) {
+    public Page<TickerEntity> getTickers(Pageable pageable) {
+        return tickersRepository.findAll(pageable);
+    }
+
+    private PageableData<Ticker> getTickersForPageable(Pageable pageable) {
         Page<TickerEntity> foundTickers = tickersRepository.findAll(pageable);
 
         if ( foundTickers == null || !foundTickers.hasContent()) {
@@ -189,7 +193,7 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
                 Ticker ticker = new Ticker(foundTicker, stockExchangeOpt.get());
                 return Optional.of(ticker);
             } else {
-                LOGGER.warn("Could not parse stock exchange from ticker entity - this should not happen. [{}]", foundTicker);
+                LOGGER.warn("Could not parse stock exchange of ticker entity - this should not happen. [{}]", foundTicker);
             }
         }
         return Optional.empty();

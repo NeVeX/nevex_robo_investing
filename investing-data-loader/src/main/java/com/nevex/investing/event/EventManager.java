@@ -48,7 +48,7 @@ public final class EventManager {
             queue.addEvent(event);
             return true;
         } catch (Exception e) {
-            LOGGER.error("Could not add event [{}] onto the queue - will return from this attempt", event, e);
+            LOGGER.error("Could not add event [{}] onto the queue - will return of this attempt", event, e);
             return false;
         }
     }

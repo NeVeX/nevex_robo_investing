@@ -70,6 +70,7 @@ public class AnalyzerWeightV2 {
         BigDecimal weight = valueConstrained.divide(range, SCALE, RoundingMode.HALF_EVEN).abs();
 
         if ( shouldInvert ) {
+            // TODO: this right? It used to be ONE.subtract...
             weight = ONE.subtract(weight);
         }
         return weight.multiply(BigDecimal.valueOf(signValue)).doubleValue();

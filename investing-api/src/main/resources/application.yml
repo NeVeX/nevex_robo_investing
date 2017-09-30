@@ -13,7 +13,7 @@ spring:
   profiles:
     active: sensitive
   properties.hibernate.format_sql: true
-  # Need to get rid of the below - it should be read in from the module included (database-access)
+  # Need to get rid of the below - it should be read in of the module included (database-access)
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false

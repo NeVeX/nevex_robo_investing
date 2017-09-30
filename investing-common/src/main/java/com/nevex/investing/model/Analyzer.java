@@ -37,6 +37,10 @@ public enum Analyzer {
     CURRENT_STOCK_VOL_COMPARED_TO_SEVEN_DAYS_PREVIOUS_VOL_AVG_PERCENT_DEVIATION("current-stock-vol-compared-to-7-days-previous-vol-average-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_SEVEN_DAYS_PREVIOUS_VOL_HIGH_PERCENT_DEVIATION("current-stock-vol-compared-to-7-days-previous-vol-high-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_SEVEN_DAYS_PREVIOUS_VOL_LOW_PERCENT_DEVIATION("current-stock-vol-compared-to-7-days-previous-vol-low-percent-deviation"),
+    SEVEN_DAYS_CLOSE_PRICE_SIMPLE_REGRESSION_R("7-days-close-price-simple-regression-r"),
+    SEVEN_DAYS_CLOSE_PRICE_SIMPLE_REGRESSION_SLOPE("7-days-close-price-simple-regression-slope"),
+    SEVEN_DAYS_VOLUME_SIMPLE_REGRESSION_R("7-days-volume-simple-regression-r"),
+    SEVEN_DAYS_VOLUME_SIMPLE_REGRESSION_SLOPE("7-days-volume-simple-regression-slope"),
 
     // 1 month
     CURRENT_STOCK_PRICE_COMPARED_TO_ONE_MONTH_PREVIOUS_CLOSE_AVG_PERCENT_DEVIATION("current-stock-price-compared-to-1-month-previous-close-average-percent-deviation"),
@@ -49,6 +53,10 @@ public enum Analyzer {
     CURRENT_STOCK_VOL_COMPARED_TO_ONE_MONTH_PREVIOUS_VOL_AVG_PERCENT_DEVIATION("current-stock-vol-compared-to-1-month-previous-vol-average-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_ONE_MONTH_PREVIOUS_VOL_HIGH_PERCENT_DEVIATION("current-stock-vol-compared-to-1-month-previous-vol-high-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_ONE_MONTH_PREVIOUS_VOL_LOW_PERCENT_DEVIATION("current-stock-vol-compared-to-1-month-previous-vol-low-percent-deviation"),
+    ONE_MONTHS_CLOSE_PRICE_SIMPLE_REGRESSION_R("1-month-close-price-simple-regression-r"),
+    ONE_MONTHS_CLOSE_PRICE_SIMPLE_REGRESSION_SLOPE("1-month-close-price-simple-regression-slope"),
+    ONE_MONTHS_VOLUME_SIMPLE_REGRESSION_R("1-month-volume-simple-regression-r"),
+    ONE_MONTHS_VOLUME_SIMPLE_REGRESSION_SLOPE("1-month-volume-simple-regression-slope"),
 
     // 3 months
     CURRENT_STOCK_PRICE_COMPARED_TO_THREE_MONTHS_PREVIOUS_CLOSE_AVG_PERCENT_DEVIATION("current-stock-price-compared-to-3-months-previous-close-average-percent-deviation"),
@@ -61,6 +69,10 @@ public enum Analyzer {
     CURRENT_STOCK_VOL_COMPARED_TO_THREE_MONTHS_PREVIOUS_VOL_AVG_PERCENT_DEVIATION("current-stock-vol-compared-to-3-months-previous-vol-average-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_THREE_MONTHS_PREVIOUS_VOL_HIGH_PERCENT_DEVIATION("current-stock-vol-compared-to-3-months-previous-vol-high-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_THREE_MONTHS_PREVIOUS_VOL_LOW_PERCENT_DEVIATION("current-stock-vol-compared-to-3-months-previous-vol-low-percent-deviation"),
+    THREE_MONTHS_CLOSE_PRICE_SIMPLE_REGRESSION_R("3-months-close-price-simple-regression-r"),
+    THREE_MONTHS_CLOSE_PRICE_SIMPLE_REGRESSION_SLOPE("3-months-close-price-simple-regression-slope"),
+    THREE_MONTHS_VOLUME_SIMPLE_REGRESSION_R("3-months-volume-simple-regression-r"),
+    THREE_MONTHS_VOLUME_SIMPLE_REGRESSION_SLOPE("3-months-volume-simple-regression-slope"),
 
     // 6 months
     CURRENT_STOCK_PRICE_COMPARED_TO_SIX_MONTHS_PREVIOUS_CLOSE_AVG_PERCENT_DEVIATION("current-stock-price-compared-to-6-months-previous-close-average-percent-deviation"),
@@ -73,6 +85,10 @@ public enum Analyzer {
     CURRENT_STOCK_VOL_COMPARED_TO_SIX_MONTHS_PREVIOUS_VOL_AVG_PERCENT_DEVIATION("current-stock-vol-compared-to-6-months-previous-vol-average-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_SIX_MONTHS_PREVIOUS_VOL_HIGH_PERCENT_DEVIATION("current-stock-vol-compared-to-6-months-previous-vol-high-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_SIX_MONTHS_PREVIOUS_VOL_LOW_PERCENT_DEVIATION("current-stock-vol-compared-to-6-months-previous-vol-low-percent-deviation"),
+    SIX_MONTHS_CLOSE_PRICE_SIMPLE_REGRESSION_R("6-months-close-price-simple-regression-r"),
+    SIX_MONTHS_CLOSE_PRICE_SIMPLE_REGRESSION_SLOPE("6-months-close-price-simple-regression-slope"),
+    SIX_MONTHS_VOLUME_SIMPLE_REGRESSION_R("6-months-volume-simple-regression-r"),
+    SIX_MONTHS_VOLUME_SIMPLE_REGRESSION_SLOPE("6-months-volume-simple-regression-slope"),
 
     // 1 year
     CURRENT_STOCK_PRICE_COMPARED_TO_ONE_YEAR_PREVIOUS_CLOSE_AVG_PERCENT_DEVIATION("current-stock-price-compared-to-1-year-previous-close-average-percent-deviation"),
@@ -85,6 +101,10 @@ public enum Analyzer {
     CURRENT_STOCK_VOL_COMPARED_TO_ONE_YEAR_PREVIOUS_VOL_AVG_PERCENT_DEVIATION("current-stock-vol-compared-to-1-year-previous-vol-average-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_ONE_YEAR_PREVIOUS_VOL_HIGH_PERCENT_DEVIATION("current-stock-vol-compared-to-1-year-previous-vol-high-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_ONE_YEAR_PREVIOUS_VOL_LOW_PERCENT_DEVIATION("current-stock-vol-compared-to-1-year-previous-vol-low-percent-deviation"),
+    ONE_YEAR_CLOSE_PRICE_SIMPLE_REGRESSION_R("1-year-close-price-simple-regression-r"),
+    ONE_YEAR_CLOSE_PRICE_SIMPLE_REGRESSION_SLOPE("1-year-close-price-simple-regression-slope"),
+    ONE_YEAR_VOLUME_SIMPLE_REGRESSION_R("1-year-volume-simple-regression-r"),
+    ONE_YEAR_VOLUME_SIMPLE_REGRESSION_SLOPE("1-year-volume-simple-regression-slope"),
 
     // 3 years
     CURRENT_STOCK_PRICE_COMPARED_TO_THREE_YEARS_PREVIOUS_CLOSE_AVG_PERCENT_DEVIATION("current-stock-price-compared-to-3-years-previous-close-average-percent-deviation"),
@@ -97,6 +117,10 @@ public enum Analyzer {
     CURRENT_STOCK_VOL_COMPARED_TO_THREE_YEARS_PREVIOUS_VOL_AVG_PERCENT_DEVIATION("current-stock-vol-compared-to-3-years-previous-vol-average-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_THREE_YEARS_PREVIOUS_VOL_HIGH_PERCENT_DEVIATION("current-stock-vol-compared-to-3-years-previous-vol-high-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_THREE_YEARS_PREVIOUS_VOL_LOW_PERCENT_DEVIATION("current-stock-vol-compared-to-3-years-previous-vol-low-percent-deviation"),
+    THREE_YEARS_CLOSE_PRICE_SIMPLE_REGRESSION_R("3-years-close-price-simple-regression-r"),
+    THREE_YEARS_CLOSE_PRICE_SIMPLE_REGRESSION_SLOPE("3-years-close-price-simple-regression-slope"),
+    THREE_YEARS_VOLUME_SIMPLE_REGRESSION_R("3-years-volume-simple-regression-r"),
+    THREE_YEARS_VOLUME_SIMPLE_REGRESSION_SLOPE("3-years-volume-simple-regression-slope"),
 
     // 5 years
     CURRENT_STOCK_PRICE_COMPARED_TO_FIVE_YEARS_PREVIOUS_CLOSE_AVG_PERCENT_DEVIATION("current-stock-price-compared-to-5-years-previous-close-average-percent-deviation"),
@@ -108,7 +132,11 @@ public enum Analyzer {
     CURRENT_LOWEST_STOCK_PRICE_COMPARED_TO_FIVE_YEARS_PREVIOUS_LOWEST_AVG_PERCENT_DEVIATION("current-lowest-stock-price-compared-to-5-years-previous-low-average-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_FIVE_YEARS_PREVIOUS_VOL_AVG_PERCENT_DEVIATION("current-stock-vol-compared-to-5-years-previous-vol-average-percent-deviation"),
     CURRENT_STOCK_VOL_COMPARED_TO_FIVE_YEARS_PREVIOUS_VOL_HIGH_PERCENT_DEVIATION("current-stock-vol-compared-to-5-years-previous-vol-high-percent-deviation"),
-    CURRENT_STOCK_VOL_COMPARED_TO_FIVE_YEARS_PREVIOUS_VOL_LOW_PERCENT_DEVIATION("current-stock-vol-compared-to-5-years-previous-vol-low-percent-deviation");
+    CURRENT_STOCK_VOL_COMPARED_TO_FIVE_YEARS_PREVIOUS_VOL_LOW_PERCENT_DEVIATION("current-stock-vol-compared-to-5-years-previous-vol-low-percent-deviation"),
+    FIVE_YEARS_CLOSE_PRICE_SIMPLE_REGRESSION_R("5-years-close-price-simple-regression-r"),
+    FIVE_YEARS_CLOSE_PRICE_SIMPLE_REGRESSION_SLOPE("5-years-close-price-simple-regression-slope"),
+    FIVE_YEARS_VOLUME_SIMPLE_REGRESSION_R("5-years-volume-simple-regression-r"),
+    FIVE_YEARS_VOLUME_SIMPLE_REGRESSION_SLOPE("5-years-volume-simple-regression-slope");
 
     private final String title;
 

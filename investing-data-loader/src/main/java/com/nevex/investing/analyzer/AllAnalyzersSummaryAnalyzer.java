@@ -49,7 +49,7 @@ public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpd
         List<AnalyzerResult> analyzerResults = tickerAnalyzersAdminService.getAnalyzers(tickerId, asOfDate);
 
         if ( analyzerResults.isEmpty()) {
-            LOGGER.warn("{} cannot do anything for ticker [{}] since there are not ticker analyzers saved to process", getConsumerName(), tickerId);
+            LOGGER.warn("{} cannot do anything for ticker [{}] since there are no saved ticker analyzers to process", getConsumerName(), tickerId);
             return;
         }
 
@@ -70,7 +70,7 @@ public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpd
         } catch (ServiceException serEx) {
             LOGGER.error("Could not save summary analyzer entity ["+summaryResult+"]", serEx);
         }
-        LOGGER.info("{} has finished processing ticker {}", getConsumerName(), tickerId);
+        LOGGER.debug("{} has finished processing ticker {}", getConsumerName(), tickerId);
     }
 
 }

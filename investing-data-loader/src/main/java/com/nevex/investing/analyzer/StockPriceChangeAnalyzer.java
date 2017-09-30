@@ -15,6 +15,8 @@ import com.nevex.investing.service.model.ServiceException;
 import com.nevex.investing.service.StockPriceAdminService;
 import com.nevex.investing.service.exception.TickerNotFoundException;
 import com.nevex.investing.service.model.StockPrice;
+import com.nevex.investing.service.model.Ticker;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,14 +78,21 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
     public void onEvent(StockPriceUpdatedEvent event) {
         int tickerId = event.getTickerId();
         LocalDate asOfDate = event.getAsOfDate();
-//        LOGGER.info("Received new ticker [{}] that has had it's stock price updated - will process it now", tickerId);
+        Map<TimePeriod, Set<StockPrice>> timePeriodBuckets;
         Map<TimePeriod, StockPriceSummary> averages;
         try {
 
-            List<StockPrice> stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, asOfDate, TimePeriod.OneYear.getDays());
-            averages = calculateStockPriceAverages(stockPrices, asOfDate);
+            List<StockPrice> stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, asOfDate, TimePeriod.ThreeYears.getDays());
+
+            // Order the stock prices
+            TreeSet<StockPrice> orderedStockPrices = new TreeSet<>(stockPrices);
+            // Get a mapping of time periods for all stock prices
+            timePeriodBuckets = TimePeriod.groupDailyElementsIntoExactBuckets(orderedStockPrices);
+
+            averages = calculateStockPriceAverages(timePeriodBuckets, asOfDate);
+
             if ( averages == null || averages.isEmpty()) {
-                LOGGER.info("Stock price change summary analyzer cannot summarize for ticker [{}], probably not enough data", tickerId);
+                LOGGER.debug("Stock price change summary analyzer cannot summarize for ticker [{}], probably not enough data", tickerId);
                 return;
             }
 
@@ -101,10 +110,64 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         }
 
         if ( calculateAnalysis(tickerId, asOfDate, averages) ) {
+            calculateSimpleRegressions(tickerId, asOfDate, timePeriodBuckets);
             EventManager.sendEvent(new TickerAnalyzerUpdatedEvent(tickerId, asOfDate));
         }
 
-        LOGGER.info("{} has finished processing ticker {}", getConsumerName(), tickerId);
+        LOGGER.debug("{} has finished processing ticker {}", getConsumerName(), tickerId);
+    }
+
+    private void calculateSimpleRegressions(int tickerId, LocalDate asOfDate, Map<TimePeriod, Set<StockPrice>> timePeriodBuckets) {
+        Set<AnalyzerResult> analyzerResults = new HashSet<>();
+
+        try {
+            for ( Map.Entry<TimePeriod, Set<StockPrice>> prices : timePeriodBuckets.entrySet()) {
+                if (prices.getKey().getDays() < 3) {
+                    continue;
+                }
+                SimpleRegression simpleRegressionClosePrice = new SimpleRegression();
+                SimpleRegression simpleRegressionVolume = new SimpleRegression();
+                int counter = 1;
+                for (StockPrice price : prices.getValue()) {
+                    if (price.getClose() != null) {
+                        simpleRegressionClosePrice.addData(counter, price.getClose().doubleValue());
+                    }
+                    simpleRegressionVolume.addData(counter, price.getVolume());
+                    counter++;
+                }
+                String prefix = prices.getKey().getTitle();
+                addResultForSimpleRegression(analyzerResults, tickerId, prefix+"-close-price-simple-regression-r", simpleRegressionClosePrice.getR(), asOfDate);
+                addResultForSimpleRegression(analyzerResults, tickerId, prefix+"-close-price-simple-regression-slope", simpleRegressionClosePrice.getSlope(), asOfDate);
+                addResultForSimpleRegression(analyzerResults, tickerId, prefix+"-volume-simple-regression-r", simpleRegressionVolume.getR(), asOfDate);
+                addResultForSimpleRegression(analyzerResults, tickerId, prefix+"-volume-simple-regression-slope", simpleRegressionVolume.getSlope(), asOfDate);
+            }
+        } catch (Exception e ) {
+            LOGGER.error("Could not calculate simple regression analysis for tickerId [{}]. Reason: {}", tickerId, e.getMessage());
+            return;
+        }
+
+        if ( !analyzerResults.isEmpty()) {
+            saveAnalyzers(analyzerResults);
+        } else {
+            LOGGER.debug("No simple regressions were calculated for ticker [{}] for date [{}]", tickerId, asOfDate);
+        }
+    }
+
+    private void addResultForSimpleRegression(Set<AnalyzerResult> analyzerResults, int tickerId, String title, double value, LocalDate asOfDate) {
+        if ( Double.valueOf(value).isNaN()) {
+            return;
+        }
+        Optional<Analyzer> analyzerOptional = Analyzer.fromTitle(title);
+        if ( !analyzerOptional.isPresent()) {
+            LOGGER.warn("Could not find the analyzer for name [{}]", title);
+            return;
+        }
+        Optional<Double> weightOpt = analyzerService.getWeight(analyzerOptional.get(), BigDecimal.valueOf(value));
+        if ( weightOpt.isPresent()) {
+            analyzerResults.add(new AnalyzerResult(tickerId, title, weightOpt.get(), asOfDate));
+        } else {
+            LOGGER.warn("Could not get weight for analyzer [{}] with value [{}]", title, value);
+        }
     }
 
     private boolean calculateAnalysis(int tickerId, LocalDate asOfDate, Map<TimePeriod, StockPriceSummary> averages) {
@@ -138,16 +201,21 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
                 .collect(Collectors.toSet());
 
         if ( !analyzerResults.isEmpty()) {
-            try {
-                tickerAnalyzersAdminService.saveNewAnalyzers(analyzerResults);
-                return true; // all good!
-            } catch (ServiceException serEx) {
-                LOGGER.error("Could not save all ticker [{}] analyzer results", analyzerResults.size(), serEx);
-            }
+            return saveAnalyzers(analyzerResults);
         } else {
             LOGGER.info("No price analyzer results were calculated for ticker id [{}] for date [{}]", tickerId, asOfDate);
         }
         return false;
+    }
+
+    private boolean saveAnalyzers(Set<AnalyzerResult> analyzerResults) {
+        try {
+            tickerAnalyzersAdminService.saveNewAnalyzers(analyzerResults);
+            return true;
+        } catch (ServiceException serEx) {
+            LOGGER.error("Could not save all ticker [{}] analyzer results", analyzerResults.size(), serEx);
+            return false;
+        }
     }
 
     private Set<TimePeriodAnalyzerResult> getStockPriceDeviations(TimePeriod timePeriod, StockPriceSummary stockPriceSummary, StockPrice currentStockPrice) {
@@ -223,11 +291,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         return null;
     }
 
-    Map<TimePeriod, StockPriceSummary> calculateStockPriceAverages(List<StockPrice> stockPrices, LocalDate asOfDate) {
-        // Order the stock prices
-        TreeSet<StockPrice> orderedStockPrices = new TreeSet<>(stockPrices);
-        // Get a mapping of time periods for all stock prices
-        Map<TimePeriod, Set<StockPrice>> timePeriodBuckets = TimePeriod.groupDailyElementsIntoExactBuckets(orderedStockPrices);
+    Map<TimePeriod, StockPriceSummary> calculateStockPriceAverages(Map<TimePeriod, Set<StockPrice>> timePeriodBuckets, LocalDate asOfDate) {
         // Do the magic - look at all elements and on the fly calculateWeight various summaries
         Map<TimePeriod, StockPriceSummary> timePeriodSummaries = timePeriodBuckets.entrySet()
                 .stream()

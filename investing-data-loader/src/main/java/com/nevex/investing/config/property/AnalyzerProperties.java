@@ -6,6 +6,8 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Created by Mark Cunningham on 9/20/2017.
@@ -30,101 +32,64 @@ public class AnalyzerProperties {
     @Valid
     private AllAnalyzersSummaryAnalyzerProperties allAnalyzersSummaryAnalyzer;
 
+
+    public static class BaseAnalyzerProperties {
+        @NotNull
+        private Boolean enabled;
+        @NotNull
+        private Boolean sendEventsOnStartup;
+        private String sendEventsOnStartupStartingFromDate;
+        private LocalDate sendEventsOnStartupStartingFromLocalDate;
+
+        public Boolean getEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(Boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public Boolean getSendEventsOnStartup() {
+            return sendEventsOnStartup;
+        }
+
+        public void setSendEventsOnStartup(Boolean sendEventsOnStartup) {
+            this.sendEventsOnStartup = sendEventsOnStartup;
+        }
+
+        public LocalDate getSendEventsOnStartupStartingFromDate() {
+            return sendEventsOnStartupStartingFromLocalDate;
+        }
+
+        public void setSendEventsOnStartupStartingFromDate(String sendEventsOnStartupStartingFromDate) {
+            this.sendEventsOnStartupStartingFromDate = sendEventsOnStartupStartingFromDate;
+            if ( this.sendEventsOnStartupStartingFromDate == null ) {
+                sendEventsOnStartupStartingFromLocalDate = LocalDate.now();
+            } else {
+                sendEventsOnStartupStartingFromLocalDate = LocalDate.parse(sendEventsOnStartupStartingFromDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "BaseAnalyzerProperties{" +
+                    "enabled=" + enabled +
+                    ", sendEventsOnStartup=" + sendEventsOnStartup +
+                    ", sendEventsOnStartupStartingFromDate=" + sendEventsOnStartupStartingFromDate +
+                    '}';
+        }
+    }
+
     public static class AllAnalyzersSummaryAnalyzerProperties {
         public final static String ENABLED = AnalyzerProperties.PREFIX + ".all-analyzers-summary-analyzer.enabled";
-
-        @NotNull
-        private Boolean enabled;
-        @NotNull
-        private Boolean sendEventsOnStartup;
-
-        public Boolean getEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(Boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        public Boolean getSendEventsOnStartup() {
-            return sendEventsOnStartup;
-        }
-
-        public void setSendEventsOnStartup(Boolean sendEventsOnStartup) {
-            this.sendEventsOnStartup = sendEventsOnStartup;
-        }
-
-        @Override
-        public String toString() {
-            return "AllAnalyzersSummaryAnalyzerProperties{" +
-                    "enabled=" + enabled +
-                    '}';
-        }
     }
 
-    public static class StockFinancialsAnalyzerProperties {
+    public static class StockFinancialsAnalyzerProperties extends BaseAnalyzerProperties {
         public final static String ENABLED = AnalyzerProperties.PREFIX + ".stock-financials-analyzer.enabled";
-
-        @NotNull
-        private Boolean enabled;
-        @NotNull
-        private Boolean sendEventsOnStartup;
-
-        public Boolean getSendEventsOnStartup() {
-            return sendEventsOnStartup;
-        }
-
-        public void setSendEventsOnStartup(Boolean sendEventsOnStartup) {
-            this.sendEventsOnStartup = sendEventsOnStartup;
-        }
-
-        public Boolean getEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(Boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        @Override
-        public String toString() {
-            return "StockFinancialsAnalyzerProperties{" +
-                    "enabled=" + enabled +
-                    '}';
-        }
     }
 
-    public static class StockPriceChangeAnalyzerProperties {
-
+    public static class StockPriceChangeAnalyzerProperties extends BaseAnalyzerProperties {
         public final static String ENABLED = AnalyzerProperties.PREFIX + ".stock-price-change-analyzer.enabled";
-
-        @NotNull
-        private Boolean enabled;
-        @NotNull
-        private Boolean sendEventsOnStartup;
-
-        public Boolean getSendEventsOnStartup() {
-            return sendEventsOnStartup;
-        }
-
-        public void setSendEventsOnStartup(Boolean sendEventsOnStartup) {
-            this.sendEventsOnStartup = sendEventsOnStartup;
-        }
-
-        public Boolean getEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(Boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        @Override
-        public String toString() {
-            return "StockPriceChangeAnalyzerProperties{" +
-                    "enabled=" + enabled +
-                    '}';
-        }
     }
 
     public Boolean getConfigurationEnabled() {

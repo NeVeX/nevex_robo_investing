@@ -19,13 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Created by Mark Cunningham on 8/9/2017.
@@ -46,65 +41,46 @@ public class StockPriceAdminService extends StockPriceService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveNewCurrentPrice(String symbol, ApiStockPrice price) throws TickerNotFoundException, ServiceException {
-
         int tickerId = tickerService.getIdForSymbol(symbol);
-
         // save this to both the historical price and the current price
         saveHistoricalPrice(tickerId, price);
-
-        StockPriceEntity newCurrentPrice = convertToCurrentEntity(tickerId, price);
-        // Get the current one, if there is one
-        Optional<StockPriceEntity> existingCurrentPriceOpt = stockPricesRepository.findByTickerId(tickerId);
-        if ( existingCurrentPriceOpt.isPresent()) {
-            StockPriceEntity existingCurrentPrice = existingCurrentPriceOpt.get();
-
-            // See if the existing price is newer than what we are trying to save
-            if ( existingCurrentPrice.getDate().isAfter(newCurrentPrice.getDate()) ) {
-                // this is bad - we don't want to overwrite a future price with an older price
-                LOGGER.warn("Will not save current price for [{}] since the current price in the db is newer than the price trying to save", symbol);
-                return;
-            }
-
-            existingCurrentPrice.merge(newCurrentPrice); // merge in any changes
-            newCurrentPrice = existingCurrentPrice; // swap!
-        }
-
-        try {
-            stockPricesRepository.save(newCurrentPrice);
-        } catch (Exception e) {
-            throw new ServiceException("Could not save the current stock price entity ["+ newCurrentPrice +"]", e);
-        }
+        updateCurrentPriceAfterHistoricalPriceChanges(tickerId);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public <E extends ApiStockPrice> void saveHistoricalPrices(String symbol, Set<E> historicalPrices) throws TickerNotFoundException, ServiceException {
-
         int tickerId = tickerService.getIdForSymbol(symbol);
+        historicalPrices.stream().forEach(price -> saveHistoricalPrice(tickerId, price));
 
-        // delete all records we currently have
-        stockPricesHistoricalRepository.deleteByTickerId(tickerId);
+        updateCurrentPriceAfterHistoricalPriceChanges(tickerId);
+    }
 
-        Set<StockPriceHistoricalEntity> newEntitiesToSave = new HashSet<>();
+    private void updateCurrentPriceAfterHistoricalPriceChanges(int tickerId) throws ServiceException {
 
-        // We have data to save each one - duplicates will be removed by the entity equals/hash
-        newEntitiesToSave.addAll(
-                historicalPrices.stream().map(tPrice -> convertToHistoricalEntity(tickerId, tPrice))
-                .collect(Collectors.toList())
-        );
+        Optional<StockPriceHistoricalEntity> latestHistoricalPriceOpt = stockPricesHistoricalRepository.findTopByTickerIdOrderByDateDesc(tickerId);
 
-        if ( newEntitiesToSave.size() < historicalPrices.size()) {
-            LOGGER.warn("Some [{}] duplicate historical prices were removed from the given API stock prices",
-                    historicalPrices.size() - newEntitiesToSave.size());
+        if ( !latestHistoricalPriceOpt.isPresent()) {
+            LOGGER.warn("Could not get latest historical price for ticker [{}] to update it's current price", tickerId);
+            return; // nothing to do
         }
 
-        // Bulk save
-        stockPricesHistoricalRepository.save(newEntitiesToSave);
+        StockPriceHistoricalEntity latestHistoricalPrice = latestHistoricalPriceOpt.get();
 
-        // Order the prices to get the latest one
-        TreeSet<E> orderPrices = new TreeSet<>(historicalPrices);
-        // get the first one, that will be the "latest" using the comparable - can't use streams due to exceptions
-        E currentPrice = orderPrices.first();
-        if ( currentPrice != null ) { saveNewCurrentPrice(symbol, currentPrice); }
+        Optional<StockPriceEntity> latestCurrentPriceOpt = stockPricesRepository.findByTickerId(tickerId);
+        StockPriceEntity latestPrice;
+
+        if ( !latestCurrentPriceOpt.isPresent()) {
+            latestPrice = StockPriceEntity.of(latestHistoricalPrice);
+        } else {
+            latestPrice = latestCurrentPriceOpt.get();
+            latestPrice.from(latestHistoricalPrice);
+        }
+
+        try {
+            stockPricesRepository.save(latestPrice);
+        } catch (Exception e) {
+            throw new ServiceException("Could not save the current stock price entity ["+ latestPrice +"]", e);
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -128,7 +104,7 @@ public class StockPriceAdminService extends StockPriceService {
             RepositoryUtils.createOrUpdate(stockPricesHistoricalRepository, newHistoryEntityToSave,
                     () -> stockPricesHistoricalRepository.findByTickerIdAndDate(tickerId, price.getDate()));
         } catch (DataSaveException dataEx) {
-            LOGGER.warn("Could not save the historical stock price entity [{}]", dataEx.getDataFailedToSave());
+            LOGGER.warn("Could not create or update historical price for entity [{}]. Reason: [{}]", dataEx.getDataFailedToSave(), dataEx.getMessage());
         }
     }
 
@@ -155,6 +131,4 @@ public class StockPriceAdminService extends StockPriceService {
         baseEntity.setVolume(tPrice.getVolume());
         baseEntity.setAdjClose(tPrice.getAdjustedClose());
     }
-
-
 }

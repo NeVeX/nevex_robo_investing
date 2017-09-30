@@ -44,8 +44,19 @@ public class StockPriceEntity extends StockPriceBaseEntity implements MergeableE
                 '}';
     }
 
+    public void from(StockPriceBaseEntity entity) {
+        this.merge(entity);
+        this.setDate(entity.getDate());
+    }
+
     @Override
     public void merge(StockPriceEntity other) {
         super.merge(other);
+    }
+
+    public static StockPriceEntity of(StockPriceHistoricalEntity historical) {
+        StockPriceEntity price = new StockPriceEntity();
+        price.from(historical);
+        return price;
     }
 }

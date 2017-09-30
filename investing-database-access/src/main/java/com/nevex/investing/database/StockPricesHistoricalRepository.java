@@ -20,9 +20,11 @@ public interface StockPricesHistoricalRepository extends PagingAndSortingReposit
 
     List<StockPriceHistoricalEntity> findAllByTickerIdAndDateLessThanEqual(int tickerId, LocalDate asOfDate, Pageable pageable);
 
+    Optional<StockPriceHistoricalEntity> findTopByTickerIdOrderByDateDesc(int tickerId);
+
     Optional<StockPriceHistoricalEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    void deleteByTickerId(int tickerId);
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    void deleteByTickerId(int tickerId);
 
 }

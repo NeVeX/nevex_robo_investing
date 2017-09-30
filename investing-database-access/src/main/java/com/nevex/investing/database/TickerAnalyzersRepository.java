@@ -21,6 +21,8 @@ public interface TickerAnalyzersRepository extends PagingAndSortingRepository<Ti
 
     List<TickerAnalyzerEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
 
+    List<TickerAnalyzerEntity> findByTickerIdAndDateOrderByWeightDesc(int tickerId, LocalDate date);
+
     Optional<TickerAnalyzerEntity> findByTickerIdAndDateAndName(int tickerId, LocalDate date, String name);
 
 }

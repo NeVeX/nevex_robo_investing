@@ -99,7 +99,7 @@ public class TickerHistoricalFundamentalsLoader extends DataLoaderSchedulingSing
             if ( fundamentalsResponse != null ) {
                 tickerFundamentalsAdminService.saveHistoricalFundamentals(tickerToCikEntity.getTickerId(), fundamentalsResponse);
             } else {
-                saveExceptionToDatabase("No data was returned from us-fundamentals for ticker ["+symbol+"]");
+                saveExceptionToDatabase("No data was returned of us-fundamentals for ticker ["+symbol+"]");
             }
         } catch (ApiException apiEx) {
             saveExceptionToDatabase("Could not get fundamental data for ticker ["+symbol+"]. Reason: "+apiEx.getMessage());

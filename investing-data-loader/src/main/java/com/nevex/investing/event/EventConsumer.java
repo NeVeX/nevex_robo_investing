@@ -1,8 +1,12 @@
 package com.nevex.investing.event;
 
 import com.nevex.investing.event.type.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 /**
@@ -10,6 +14,8 @@ import java.util.function.Consumer;
  */
 public abstract class EventConsumer<T extends Event> implements Consumer<Object>, Comparable<EventConsumer> {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(EventConsumer.class);
+    private final AtomicLong eventCounter = new AtomicLong();
     private final Class<T> supportedEventType;
 
     public abstract int getOrder();
@@ -27,6 +33,10 @@ public abstract class EventConsumer<T extends Event> implements Consumer<Object>
 
     public final void accept(Object eventRaw) {
         if ( eventRaw.getClass().isAssignableFrom(supportedEventType)) {
+            long counter = eventCounter.incrementAndGet();
+            if ( counter % 50 == 0) {
+                LOGGER.info("{} has processed {} events", getConsumerName(), counter);
+            }
             onEvent(supportedEventType.cast(eventRaw));
         }
     }

@@ -59,7 +59,8 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
         return "yahoo-stock-info-loader";
     }
 
-    @Scheduled(initialDelay = 86400000L, fixedDelay = 86400000L) // Every 24 hours
+//    @Scheduled(initialDelay = 86400000L, fixedDelay = 86400000L) // Every 24 hours
+    @Scheduled(cron = "0 0 21 * * MON-FRI", zone = "America/Los_Angeles")
     @Override
     void onScheduleStartInvoked() throws DataLoaderWorkerException {
         super.scheduleStart();
@@ -95,11 +96,11 @@ public class YahooStockInfoLoader extends DataLoaderSchedulingSingleWorker {
                             saveExceptionToDatabase("A exception occurred trying to save yahoo stock info for ticker ["+tickerIdOpt.get()+"]. Reason: "+e.getMessage());
                         }
                     } else {
-                        saveExceptionToDatabase("Received stock info from yahoo for symbol ["+stockInfo.getSymbol()+"] but could not map to a ticker id");
+                        saveExceptionToDatabase("Received stock info of yahoo for symbol ["+stockInfo.getSymbol()+"] but could not map to a ticker id");
                     }
                 }
             } else {
-                saveExceptionToDatabase("No stock data info was returned from yahoo for stock symbols ["+symbols+"]");
+                saveExceptionToDatabase("No stock data info was returned of yahoo for stock symbols ["+symbols+"]");
             }
         } catch (ApiException apiEx) {
             saveExceptionToDatabase("An exception occurred getting yahoo stock info for ["+symbols.size()+"] symbols. Reason: "+apiEx.getMessage());

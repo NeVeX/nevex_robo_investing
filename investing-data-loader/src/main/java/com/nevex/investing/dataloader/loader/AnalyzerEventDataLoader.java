@@ -1,30 +1,21 @@
 package com.nevex.investing.dataloader.loader;
 
-import com.nevex.investing.api.ApiException;
-import com.nevex.investing.api.edgar.EdgarCikLookupClient;
 import com.nevex.investing.config.property.AnalyzerProperties;
-import com.nevex.investing.config.property.DataLoaderProperties;
-import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.event.EventManager;
 import com.nevex.investing.event.type.Event;
 import com.nevex.investing.event.type.StockFinancialsUpdatedEvent;
 import com.nevex.investing.event.type.StockPriceUpdatedEvent;
-import com.nevex.investing.service.EdgarAdminService;
 import com.nevex.investing.service.TickerService;
-import com.nevex.investing.service.model.ServiceException;
-import com.nevex.investing.service.model.Ticker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.nevex.investing.dataloader.loader.DataLoaderOrder.ANALYZER_EVENT_DATA_LOADER;
-import static com.nevex.investing.dataloader.loader.DataLoaderOrder.TICKER_TO_CIK_LOADER;
 
 /**
  * Created by Mark Cunningham on 9/25/2017.
@@ -57,22 +48,60 @@ public class AnalyzerEventDataLoader extends DataLoaderWorker {
 
     @Override
     DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
-        int processed = 0;
+        List<String> eventNamesToTrigger = new ArrayList<>();
 
         if ( analyzerProperties.getStockPriceChangeAnalyzer().getSendEventsOnStartup()) {
-            processed += sendEvents( i -> new StockPriceUpdatedEvent(i, super.getWorkerStartTime().toLocalDate()));
+            eventNamesToTrigger.add(StockPriceUpdatedEvent.class.getSimpleName());
         }
         if ( analyzerProperties.getStockFinancialsAnalyzer().getSendEventsOnStartup()) {
-            processed += sendEvents( i -> new StockFinancialsUpdatedEvent(i, super.getWorkerStartTime().toLocalDate()));
+            eventNamesToTrigger.add(StockFinancialsUpdatedEvent.class.getSimpleName());
         }
 
+        String message;
+        if (eventNamesToTrigger.isEmpty()) {
+            message = "No events will be triggered of this job";
+        } else {
+            StringBuilder sb = new StringBuilder("The following events will be triggered:");
+            eventNamesToTrigger.stream().forEach( s -> sb.append("\n    ").append(s));
+            message = sb.toString();
+        }
+
+        LOGGER.info("\n\n{} - {}\n\n", getName(), message);
+        int processed = 0;
+        if ( !eventNamesToTrigger.isEmpty()) {
+            processed = super.processAllPagesIndividuallyForIterable(tickerService::getTickers, this::sendEvents, 0);
+        }
         return new DataLoaderWorkerResult(processed);
     }
 
-    private int sendEvents(Function<Integer, Event> eventCreator) {
-        Set<Ticker> tickers = tickerService.getCachedTickers();
-        tickers.stream().forEach( t -> EventManager.sendEvent(eventCreator.apply(t.getTickerId())));
-        return tickers.size();
+    private void sendEvents(TickerEntity ticker) {
+        if ( analyzerProperties.getStockPriceChangeAnalyzer().getSendEventsOnStartup()) {
+            sendEvents(ticker,
+                    analyzerProperties.getStockPriceChangeAnalyzer().getSendEventsOnStartupStartingFromDate(),
+                    (t, date) -> new StockPriceUpdatedEvent(t.getId(), date)
+            );
+        }
+        if ( analyzerProperties.getStockFinancialsAnalyzer().getSendEventsOnStartup()) {
+            sendEvents(ticker,
+                    analyzerProperties.getStockFinancialsAnalyzer().getSendEventsOnStartupStartingFromDate(),
+                    (t, date) -> new StockFinancialsUpdatedEvent(t.getId(), date)
+            );
+        }
     }
 
+    private int sendEvents(TickerEntity ticker, LocalDate startDate, EventCreator eventCreator) {
+        LocalDate currentEventDate = startDate;
+        int processed = 0;
+        while ( currentEventDate.compareTo(super.getWorkerStartDate()) < 1) {
+            EventManager.sendEvent(eventCreator.createEvent(ticker, currentEventDate));
+            currentEventDate = currentEventDate.plusDays(1); // move forward a day
+            processed++;
+        }
+        return processed;
+    }
+
+    @FunctionalInterface
+    private interface EventCreator {
+        Event createEvent(TickerEntity ticker, LocalDate date);
+    }
 }

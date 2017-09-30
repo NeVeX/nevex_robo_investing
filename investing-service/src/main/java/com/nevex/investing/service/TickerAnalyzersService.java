@@ -37,12 +37,14 @@ public class TickerAnalyzersService {
     }
 
     public List<AnalyzerResult> getLatestAnalyzers(int tickerId) {
+        // Get the latest entry for this tickers analyzers
         Optional<TickerAnalyzerEntity> topAnalyzerOpt = tickerAnalyzersRepository.findTopByTickerIdOrderByDateDesc(tickerId);
         if ( !topAnalyzerOpt.isPresent()) {
             return new ArrayList<>();
         }
         TickerAnalyzerEntity topEntity = topAnalyzerOpt.get();
-        List<TickerAnalyzerEntity> entities = tickerAnalyzersRepository.findByTickerIdAndDate(tickerId, topEntity.getDate());
+        // Find all analyzers for this date - order by the weight desc
+        List<TickerAnalyzerEntity> entities = tickerAnalyzersRepository.findByTickerIdAndDateOrderByWeightDesc(tickerId, topEntity.getDate());
         return entities.stream().map(AnalyzerResult::new).collect(Collectors.toList());
     }
 

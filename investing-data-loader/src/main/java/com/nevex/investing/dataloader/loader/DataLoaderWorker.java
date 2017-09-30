@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.function.Consumer;
@@ -42,6 +43,8 @@ public abstract class DataLoaderWorker implements Comparable<DataLoaderWorker> {
     abstract DataLoaderWorkerResult doWork() throws DataLoaderWorkerException;
 
     protected OffsetDateTime getWorkerStartTime() { return workerStartTime; }
+
+    protected LocalDate getWorkerStartDate() { return workerStartTime.toLocalDate(); }
 
     /**
      * Entry point to start the loader

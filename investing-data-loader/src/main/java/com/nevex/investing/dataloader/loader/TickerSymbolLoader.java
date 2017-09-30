@@ -126,7 +126,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
                     LOGGER.warn("CSV Ticker row is invalid: [{}]. Raw Value [{}]", csvParsedTicker, csvRecord.toString());
                 }
             }
-            LOGGER.info("Successfully loaded a total of [{}] ticker records into the database from the file [{}]", csvParsedTickers.size(), tickersFile.getAbsolutePath());
+            LOGGER.info("Successfully loaded a total of [{}] ticker records into the database of the file [{}]", csvParsedTickers.size(), tickersFile.getAbsolutePath());
             return csvParsedTickers;
         } catch (Exception e ) {
             throw new DataLoaderWorkerException("Could not load file ["+tickersFile+"]", e);

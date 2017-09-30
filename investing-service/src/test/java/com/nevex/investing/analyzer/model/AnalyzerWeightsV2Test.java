@@ -105,4 +105,18 @@ public class AnalyzerWeightsV2Test {
         assertThat(weight).isEqualTo(-1); // the value far beyond the (lowest)
     }
 
+
+//    @Test
+//    public void makeSureFringeWeightsAreWeighedOk() {
+//        BigDecimal middle = BigDecimal.valueOf(0);
+//        BigDecimal lowest = BigDecimal.valueOf(-3.0);
+//        BigDecimal highest = BigDecimal.valueOf(3.0);
+//
+//        AnalyzerWeightV2 analyzerWeightV2 = new AnalyzerWeightV2(1, Analyzer.PRICE_TO_EARNINGS_RATIO, middle, lowest, highest, false, false, 1);
+//
+//        BigDecimal value = BigDecimal.valueOf(-0.5);
+//        double weight = analyzerWeightV2.calculateWeight(value);
+//        assertThat(weight).isEqualTo(1); // the value is far beyond the max
+//
+//    }
 }

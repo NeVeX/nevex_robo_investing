@@ -11,11 +11,13 @@ import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.event.EventManager;
 import com.nevex.investing.event.type.StockPriceUpdatedEvent;
 import com.nevex.investing.service.StockPriceAdminService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,7 +63,8 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
     @Override
     DataLoaderWorkerResult doWork() throws DataLoaderWorkerException {
         // Fetch all the ticker symbols we have
-        int totalRecordsProcessed = 0;
+        LOGGER.info("{} will fetch a maximum of [{}] historical days", getName(), maxDaysToFetch);
+        int totalRecordsProcessed;
         if ( useBulkMode) {
             totalRecordsProcessed = super.processAllPagesInBulkForRepo(tickersRepository, this::loadHistoricalPricesForSymbols, waitTimeBetweenBulkMs, bulkAmountPerPage);
         } else {
@@ -86,7 +89,11 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
         }
 
         for ( Map.Entry<String, Set<ApiStockPrice>> entry : prices.entrySet()) {
-            savePrices(entry.getKey(), entry.getValue());
+            // TODO: Don't do this - we already have the list above, shouldn't be looping again!!!!
+            Optional<TickerEntity> tickerEntityOpt = tickerEntities.stream().filter( te -> StringUtils.equalsIgnoreCase(te.getSymbol(), entry.getKey())).findFirst();
+            if ( tickerEntityOpt.isPresent()) {
+                savePrices(tickerEntityOpt.get(), entry.getValue());
+            }
         }
 
         LOGGER.info("Successfully bulk loaded [{}] symbol's worth of historical prices", tickers.size());
@@ -110,19 +117,20 @@ public class HistoricalStockPriceLoader extends DataLoaderWorker {
             LOGGER.warn("Received no historical prices for stock [{}]", tickerEntity.getSymbol());
             return;
         }
-        if ( savePrices(tickerEntity.getSymbol(), historicalPrices) ) {
-            EventManager.sendEvent(new StockPriceUpdatedEvent(tickerEntity.getId(), getWorkerStartTime().toLocalDate()));
+        if ( savePrices(tickerEntity, historicalPrices) ) {
+
             LOGGER.info("Successfully loaded [{}] historical prices for [{}]", historicalPrices.size(), tickerEntity.getSymbol());
         }
     }
 
-    private boolean savePrices(String symbol, Set<ApiStockPrice> prices) {
+    private boolean savePrices(TickerEntity tickerEntity, Set<ApiStockPrice> prices) {
         try {
-            stockPriceAdminService.saveHistoricalPrices(symbol, prices);
+            stockPriceAdminService.saveHistoricalPrices(tickerEntity.getSymbol(), prices);
+            EventManager.sendEvent(new StockPriceUpdatedEvent(tickerEntity.getId(), getWorkerStartTime().toLocalDate()));
             return true;
         } catch (Exception e) {
-            saveExceptionToDatabase("Could not save historical price for symbol ["+symbol+"]. Reason: ["+e.getMessage()+"]");
-            LOGGER.error("Could not save historical prices for symbol [{}]", symbol, e);
+            saveExceptionToDatabase("Could not save historical price for symbol ["+tickerEntity.getSymbol()+"]. Reason: ["+e.getMessage()+"]");
+            LOGGER.error("Could not save historical prices for symbol [{}]", tickerEntity.getSymbol(), e);
             return false;
         }
     }

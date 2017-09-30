@@ -61,6 +61,6 @@ SELECT setval('investing.stock_prices_historical_id_seq', 1);
 
 An example is shown below (remember to be logged in as the postgres owner)
 ```
- psql -U postgres postgres -d viper -f /opt/srv/investing-svc/database/reference_data/analyzer_weights_v2.sql
+psql -U postgres postgres -d viper -f /opt/srv/investing-svc/database/reference_data/analyzer_weights_v2.sql
 ```
 

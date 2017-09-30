@@ -62,9 +62,13 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
         Set<AnalyzerResult> analyzerResults = new HashSet<>();
 
         YahooStockInfoEntity entity = entityOpt.get();
-
         addResult(analyzerResults, tickerId, asOfDate, entity.getPriceToEarningsRatio(), Analyzer.PRICE_TO_EARNINGS_RATIO);
         addResult(analyzerResults, tickerId, asOfDate, entity.getEarningsPerShare(), Analyzer.EARNINGS_PER_SHARE);
+
+        if ( analyzerResults.isEmpty()) {
+            LOGGER.debug("No stock fundamental analyzers were created for ticker [{}]", tickerId);
+            return; // nothing to do
+        }
 
         try {
             // Save all our analyzers
@@ -76,7 +80,7 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
 
         sendTickerAnalyzerUpdatedEvent(tickerId, event.getAsOfDate());
 
-        LOGGER.info("{} has finished processing ticker {}", getConsumerName(), tickerId);
+        LOGGER.debug("{} has finished processing ticker {}", getConsumerName(), tickerId);
     }
 
     private void addResult(Set<AnalyzerResult> analyzerResults, int tickerId, LocalDate asOfDate, BigDecimal value, Analyzer analyzer) {
