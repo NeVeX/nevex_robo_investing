@@ -92,36 +92,36 @@ public class AnalyzerPricePerformanceService {
                 .collect(Collectors.toList());
 
         List<AnalyzerPricePerformance> bestPrices = correctEntities.stream()
-                .filter(entity -> entity.getPercentDifference().signum() >= 0)
-                .sorted(Comparator.comparing(AnalyzerPricePerformanceEntity::getPriceDifference).reversed())
+                .filter(entity -> entity.getPriceDifference().signum() >= 0)
                 .map(this::createAnalyzerPerformance)
                 .filter(perf -> perf != null)
+                .sorted(Comparator.comparing(AnalyzerPricePerformance::getPriceDifference).reversed())
                 .limit(10)
                 .collect(Collectors.toList());
 
         List<AnalyzerPricePerformance> bestPercents = correctEntities.stream()
                 .filter(entity -> entity.getPercentDifference().signum() >= 0)
-                .sorted(Comparator.comparing(AnalyzerPricePerformanceEntity::getPercentDifference).reversed())
                 .map(this::createAnalyzerPerformance)
                 .filter(perf -> perf != null)
+                .sorted(Comparator.comparing(AnalyzerPricePerformance::getPercentDifference).reversed())
                 .limit(10)
                 .collect(Collectors.toList());
 
         List<AnalyzerPricePerformance> worstPrices = allEntitiesForDate.stream()
                 .filter(entity -> !entity.getPriceDirectionAsExpected() )
-                .filter(entity -> entity.getPercentDifference().signum() < 1)
-                .sorted(Comparator.comparing(AnalyzerPricePerformanceEntity::getPriceDifference))
+                .filter(entity -> entity.getPriceDifference().signum() < 0)
                 .map(this::createAnalyzerPerformance)
                 .filter(perf -> perf != null)
+                .sorted(Comparator.comparing(AnalyzerPricePerformance::getPriceDifference))
                 .limit(10)
                 .collect(Collectors.toList());
 
         List<AnalyzerPricePerformance> worstPercents = allEntitiesForDate.stream()
                 .filter(entity -> !entity.getPriceDirectionAsExpected() )
-                .filter(entity -> entity.getPercentDifference().signum() < 1)
-                .sorted(Comparator.comparing(AnalyzerPricePerformanceEntity::getPercentDifference))
+                .filter(entity -> entity.getPercentDifference().signum() < 0)
                 .map(this::createAnalyzerPerformance)
                 .filter(perf -> perf != null)
+                .sorted(Comparator.comparing(AnalyzerPricePerformance::getPercentDifference))
                 .limit(10)
                 .collect(Collectors.toList());
 

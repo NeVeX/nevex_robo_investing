@@ -7,6 +7,7 @@ import com.nevex.investing.analyzer.model.AnalyzerPricePerformanceSummary;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,13 +31,13 @@ public class AnalyzerPricePerformanceSummaryDto {
     @JsonProperty("worst_percent_movement")
     private BigDecimal worstPricePercentMovement;
     @JsonProperty("best_price_movements")
-    private Set<AnalyzerPricePerformanceDto> bestPriceMovements;
+    private List<AnalyzerPricePerformanceDto> bestPriceMovements;
     @JsonProperty("best_percent_movements")
-    private Set<AnalyzerPricePerformanceDto> bestPricePercentMovements;
+    private List<AnalyzerPricePerformanceDto> bestPricePercentMovements;
     @JsonProperty("worst_price_movements")
-    private Set<AnalyzerPricePerformanceDto> worstPriceMovements;
+    private List<AnalyzerPricePerformanceDto> worstPriceMovements;
     @JsonProperty("worst_percent_movements")
-    private Set<AnalyzerPricePerformanceDto> worstPricePercentMovements;
+    private List<AnalyzerPricePerformanceDto> worstPricePercentMovements;
 
     public AnalyzerPricePerformanceSummaryDto() { }
 
@@ -48,10 +49,10 @@ public class AnalyzerPricePerformanceSummaryDto {
         this.bestPricePercentMovement = summary.getBestPricePercentMovement().multiply(ONE_HUNDRED).setScale(2, RoundingMode.HALF_EVEN);
         this.worstPriceMovement = summary.getWorstPriceMovement().setScale(2, RoundingMode.HALF_EVEN);
         this.worstPricePercentMovement = summary.getWorstPricePercentMovement().multiply(ONE_HUNDRED).setScale(2, RoundingMode.HALF_EVEN);
-        this.bestPriceMovements = summary.getBestPriceMovements().stream().map(AnalyzerPricePerformanceDto::new).collect(Collectors.toSet());
-        this.bestPricePercentMovements = summary.getBestPricePercentMovements().stream().map(AnalyzerPricePerformanceDto::new).collect(Collectors.toSet());
-        this.worstPriceMovements = summary.getWorstPriceMovements().stream().map(AnalyzerPricePerformanceDto::new).collect(Collectors.toSet());
-        this.worstPricePercentMovements = summary.getWorstPricePercentMovements().stream().map(AnalyzerPricePerformanceDto::new).collect(Collectors.toSet());
+        this.bestPriceMovements = summary.getBestPriceMovements().stream().map(AnalyzerPricePerformanceDto::new).collect(Collectors.toList());
+        this.bestPricePercentMovements = summary.getBestPricePercentMovements().stream().map(AnalyzerPricePerformanceDto::new).collect(Collectors.toList());
+        this.worstPriceMovements = summary.getWorstPriceMovements().stream().map(AnalyzerPricePerformanceDto::new).collect(Collectors.toList());
+        this.worstPricePercentMovements = summary.getWorstPricePercentMovements().stream().map(AnalyzerPricePerformanceDto::new).collect(Collectors.toList());
     }
 
     public LocalDate getDate() {
@@ -110,35 +111,35 @@ public class AnalyzerPricePerformanceSummaryDto {
         this.worstPricePercentMovement = worstPricePercentMovement;
     }
 
-    public Set<AnalyzerPricePerformanceDto> getBestPriceMovements() {
+    public List<AnalyzerPricePerformanceDto> getBestPriceMovements() {
         return bestPriceMovements;
     }
 
-    public void setBestPriceMovements(Set<AnalyzerPricePerformanceDto> bestPriceMovements) {
+    public void setBestPriceMovements(List<AnalyzerPricePerformanceDto> bestPriceMovements) {
         this.bestPriceMovements = bestPriceMovements;
     }
 
-    public Set<AnalyzerPricePerformanceDto> getBestPricePercentMovements() {
+    public List<AnalyzerPricePerformanceDto> getBestPricePercentMovements() {
         return bestPricePercentMovements;
     }
 
-    public void setBestPricePercentMovements(Set<AnalyzerPricePerformanceDto> bestPricePercentMovements) {
+    public void setBestPricePercentMovements(List<AnalyzerPricePerformanceDto> bestPricePercentMovements) {
         this.bestPricePercentMovements = bestPricePercentMovements;
     }
 
-    public Set<AnalyzerPricePerformanceDto> getWorstPriceMovements() {
+    public List<AnalyzerPricePerformanceDto> getWorstPriceMovements() {
         return worstPriceMovements;
     }
 
-    public void setWorstPriceMovements(Set<AnalyzerPricePerformanceDto> worstPriceMovements) {
+    public void setWorstPriceMovements(List<AnalyzerPricePerformanceDto> worstPriceMovements) {
         this.worstPriceMovements = worstPriceMovements;
     }
 
-    public Set<AnalyzerPricePerformanceDto> getWorstPricePercentMovements() {
+    public List<AnalyzerPricePerformanceDto> getWorstPricePercentMovements() {
         return worstPricePercentMovements;
     }
 
-    public void setWorstPricePercentMovements(Set<AnalyzerPricePerformanceDto> worstPricePercentMovements) {
+    public void setWorstPricePercentMovements(List<AnalyzerPricePerformanceDto> worstPricePercentMovements) {
         this.worstPricePercentMovements = worstPricePercentMovements;
     }
 }
