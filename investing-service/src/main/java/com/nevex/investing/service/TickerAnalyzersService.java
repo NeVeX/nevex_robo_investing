@@ -48,6 +48,15 @@ public class TickerAnalyzersService {
         return entities.stream().map(AnalyzerResult::new).collect(Collectors.toList());
     }
 
+    public Optional<AnalyzerSummaryResult> getAnalyzerSummary(int tickerId, LocalDate date) {
+        Optional<TickerAnalyzerSummaryEntity> summaryEntityOpt = tickerAnalyzersSummaryRepository.findByTickerIdAndDate(tickerId, date);
+        if ( !summaryEntityOpt.isPresent()) {
+            return Optional.empty();
+        }
+        TickerAnalyzerSummaryEntity summaryEntity = summaryEntityOpt.get();
+        return Optional.of(new AnalyzerSummaryResult(summaryEntity));
+    }
+
     public Optional<AnalyzerSummaryResult> getLatestAnalyzerSummary(int tickerId) {
         Optional<TickerAnalyzerSummaryEntity> summaryEntityOpt = tickerAnalyzersSummaryRepository.findTopByTickerIdOrderByDateDesc(tickerId);
         if ( !summaryEntityOpt.isPresent()) {

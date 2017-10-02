@@ -1,6 +1,7 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.database.*;
+import com.nevex.investing.service.AnalyzerPricePerformanceService;
 import com.nevex.investing.service.StockPriceService;
 import com.nevex.investing.service.TickerAnalyzersService;
 import com.nevex.investing.service.TickerService;
@@ -16,6 +17,8 @@ import org.springframework.context.annotation.Profile;
 @Profile("!mock")
 class ServicesConfiguration {
 
+    @Autowired
+    private AnalyzerPricePerformanceRepository analyzerPricePerformanceRepository;
     @Autowired
     private TickerAnalyzersSummaryRepository tickerAnalyzersSummaryRepository;
     @Autowired
@@ -40,6 +43,11 @@ class ServicesConfiguration {
     @Bean
     StockPriceService stockPriceService() {
         return new StockPriceService(tickerService(), stockPricesRepository, stockPricesHistoricalRepository);
+    }
+
+    @Bean
+    AnalyzerPricePerformanceService analyzerPricePerformanceService() {
+        return new AnalyzerPricePerformanceService(analyzerPricePerformanceRepository, tickerService());
     }
 
 

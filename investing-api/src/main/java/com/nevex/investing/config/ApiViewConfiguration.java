@@ -17,5 +17,4 @@ class ApiViewConfiguration extends WebMvcConfigurerAdapter {
             registry.addResourceHandler(resourcePattern).addResourceLocations("/resources/");
         }
     }
-
 }

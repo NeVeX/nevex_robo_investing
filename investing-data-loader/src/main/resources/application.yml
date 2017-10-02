@@ -33,22 +33,30 @@ nevex-investing:
     stock-financials-analyzer:
       enabled: true
       send-events-on-startup: false
-      send-events-on-startup-starting-from-date: 2017-09-01
+      send-events-on-startup-starting-from-date: 2017-09-30
+      send-events-on-startup-ending-on-date: 2017-09-30
     all-analyzers-summary-analyzer:
       enabled: true
       send-events-on-startup: false
       send-events-on-startup-starting-from-date: 2017-09-01
+      send-events-on-startup-ending-on-date: 2017-09-01
     stock-price-change-analyzer:
       enabled: true
       send-events-on-startup: false
       send-events-on-startup-starting-from-date: 2017-09-01
+      send-events-on-startup-ending-on-date: 2017-09-01
+    analyzer-previous-price-performance-analyzer:
+      enabled: true
+      send-events-on-startup: true
+      send-events-on-startup-starting-from-date: 2017-09-29
+      send-events-on-startup-ending-on-date: 2017-09-29
   data-loaders:
     ticker-data-loader:
       enabled: false # Set this to true and and put values in below for the optional csv to load data into the database
       nasdaq-file: D:\Coding\Git\nevex_investing\data\nasdaq_tickers_08_07_2017.csv
       nyse-file: D:\Coding\Git\nevex_investing\data\nyse_tickers_08_07_2017.csv
     stock-historical-loader:
-      enabled: true
+      enabled: false
       wait-time-between-tickers-ms: 4000
       use-bulk-mode: false
       wait-time-between-bulk-ms: 4000

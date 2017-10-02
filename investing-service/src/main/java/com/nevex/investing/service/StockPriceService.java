@@ -49,6 +49,10 @@ public class StockPriceService {
         return getCurrentPrice(tickerId, symbol);
     }
 
+    public Optional<String> tryGetSymbolForTickerId(int tickerId) {
+        return tickerService.tryGetSymbolForId(tickerId);
+    }
+
     private Optional<StockPrice> getCurrentPrice(int tickerId, String symbol) {
 
         Optional<StockPriceEntity> stockPriceOpt = stockPricesRepository.findByTickerId(tickerId);
@@ -58,6 +62,15 @@ public class StockPriceService {
         StockPriceEntity pricesEntity = stockPriceOpt.get();
         StockPrice stockPrice = new StockPrice(symbol, pricesEntity);
         return Optional.of(stockPrice);
+    }
+
+    public Optional<StockPrice> getHistoricalPriceForDate(int tickerId, LocalDate date) throws TickerNotFoundException {
+        Optional<StockPriceHistoricalEntity> stockPriceEntityOpt = stockPricesHistoricalRepository.findByTickerIdAndDate(tickerId, date);
+        if ( stockPriceEntityOpt.isPresent()) {
+            String symbol = tickerService.getSymbolForId(tickerId);
+            return Optional.of(new StockPrice(symbol, stockPriceEntityOpt.get()));
+        }
+        return Optional.empty();
     }
 
     public List<StockPrice> getHistoricalPrices(int tickerId, int maxDays) throws TickerNotFoundException {

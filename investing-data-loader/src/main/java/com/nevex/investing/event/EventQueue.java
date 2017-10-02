@@ -10,6 +10,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by Mark Cunningham on 9/24/2017.
@@ -20,6 +21,7 @@ class EventQueue {
     private final ExecutorService executorService;
     private final TreeSet<EventConsumer> consumers;
     private final Class<Event> eventType;
+    private final AtomicLong eventCounter = new AtomicLong();
 
     public EventQueue(int queueSize, Class<Event> eventType, TreeSet<EventConsumer> consumers) {
         this.queue = new ArrayBlockingQueue<>(queueSize);
@@ -55,11 +57,18 @@ class EventQueue {
         try {
             while ( !Thread.currentThread().isInterrupted()) {
                 final Event event = queue.take();
+
+                long counter = eventCounter.incrementAndGet();
+
                 // let's send the event to all of it's consumers
                 LOGGER.debug("Dequeue'd event [{}] and will now invoke all it's [{}] consumers", event, consumers.size());
                 consumers.stream().forEach(consumer -> {
                     try {
                         consumer.accept(event);
+                        if ( counter % 50 == 0) {
+                            LOGGER.info("{} has processed {} events. Current Queue Size: [{}].", consumer.getConsumerName(), counter, queue.size());
+                        }
+
                     } catch (Exception e) {
                         LOGGER.error("Exception raised while processing event [{}] in consumer [{}] - will ignore and continue.", event, consumer.getConsumerName(), e);
                     }

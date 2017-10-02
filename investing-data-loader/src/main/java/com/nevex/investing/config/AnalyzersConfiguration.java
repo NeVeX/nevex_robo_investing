@@ -2,16 +2,13 @@ package com.nevex.investing.config;
 
 import com.nevex.investing.analyzer.*;
 import com.nevex.investing.config.property.AnalyzerProperties;
-import com.nevex.investing.database.AnalyzerWeightsRepositoryV1;
+import com.nevex.investing.database.AnalyzerPricePerformanceRepository;
 import com.nevex.investing.database.AnalyzerWeightsRepositoryV2;
 import com.nevex.investing.database.TickerAnalyzersRepository;
 import com.nevex.investing.database.TickerAnalyzersSummaryRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.dataloader.loader.AnalyzerEventDataLoader;
-import com.nevex.investing.service.StockPriceAdminService;
-import com.nevex.investing.service.TickerAnalyzersAdminService;
-import com.nevex.investing.service.TickerService;
-import com.nevex.investing.service.YahooStockInfoService;
+import com.nevex.investing.service.*;
 import com.nevex.investing.service.model.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +36,12 @@ class AnalyzersConfiguration {
 
     @Autowired
     private TickerService tickerService;
-//    @Autowired
-//    private AnalyzerWeightsRepositoryV1 analyzerWeightsRepositoryV1;
-    @Autowired
-    private AnalyzerWeightsRepositoryV2 analyzerWeightsRepositoryV2;
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
+    @Autowired
+    private AnalyzerPricePerformanceRepository analyzerPricePerformanceRepository;
+    @Autowired
+    private AnalyzerWeightsRepositoryV2 analyzerWeightsRepositoryV2;
     @Autowired
     private TickerAnalyzersRepository tickerAnalyzersRepository;
     @Autowired
@@ -100,4 +97,14 @@ class AnalyzersConfiguration {
         return new AllAnalyzersSummaryAnalyzer(tickerAnalyzersAdminService(), analyzerService());
     }
 
+    @Bean
+    @ConditionalOnProperty(value = AnalyzerProperties.AnalyzerPreviousPricePerformanceAnalyzerProperties.ENABLED, havingValue = "true")
+    AnalyerPreviousPricePerformanceAnalyzer analyerPreviousPricePerformanceAnalyzer() {
+        return new AnalyerPreviousPricePerformanceAnalyzer(tickerAnalyzersAdminService(), stockPriceAdminService, analyzerPricePerformanceAdminService());
+    }
+
+    @Bean
+    AnalyzerPricePerformanceAdminService analyzerPricePerformanceAdminService() {
+        return new AnalyzerPricePerformanceAdminService(analyzerPricePerformanceRepository, tickerService);
+    }
 }

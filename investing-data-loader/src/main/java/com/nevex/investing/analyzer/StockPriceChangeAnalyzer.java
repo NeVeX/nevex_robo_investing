@@ -80,32 +80,23 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         LocalDate asOfDate = event.getAsOfDate();
         Map<TimePeriod, Set<StockPrice>> timePeriodBuckets;
         Map<TimePeriod, StockPriceSummary> averages;
+        List<StockPrice> stockPrices;
         try {
-
-            List<StockPrice> stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, asOfDate, TimePeriod.ThreeYears.getDays());
-
-            // Order the stock prices
-            TreeSet<StockPrice> orderedStockPrices = new TreeSet<>(stockPrices);
-            // Get a mapping of time periods for all stock prices
-            timePeriodBuckets = TimePeriod.groupDailyElementsIntoExactBuckets(orderedStockPrices);
-
-            averages = calculateStockPriceAverages(timePeriodBuckets, asOfDate);
-
-            if ( averages == null || averages.isEmpty()) {
-                LOGGER.debug("Stock price change summary analyzer cannot summarize for ticker [{}], probably not enough data", tickerId);
-                return;
-            }
-
-            // TODO: Do we actually need to save this data??
-            for ( Map.Entry<TimePeriod, StockPriceSummary> entry : averages.entrySet()) {
-                try {
-                    stockPriceAdminService.savePriceChanges(tickerId, entry.getKey(), entry.getValue());
-                } catch (ServiceException sEx) {
-                    LOGGER.error("Could not save stock price changes for ticker [{}]", sEx);
-                }
-            }
+             stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, asOfDate, TimePeriod.ThreeYears.getDays());
         } catch (TickerNotFoundException tickerNotFound) {
             LOGGER.warn("Ticker Id [{}] is not valid - could not find it", tickerId);
+            return;
+        }
+
+        // Order the stock prices
+        TreeSet<StockPrice> orderedStockPrices = new TreeSet<>(stockPrices);
+        // Get a mapping of time periods for all stock prices
+        timePeriodBuckets = TimePeriod.groupDailyElementsIntoExactBuckets(orderedStockPrices);
+
+        averages = calculateStockPriceAverages(timePeriodBuckets, asOfDate);
+
+        if ( averages == null || averages.isEmpty()) {
+            LOGGER.debug("Stock price change summary analyzer cannot summarize for ticker [{}], probably not enough data", tickerId);
             return;
         }
 

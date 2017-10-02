@@ -4,6 +4,7 @@ import com.nevex.investing.config.property.AnalyzerProperties;
 import com.nevex.investing.database.entity.TickerEntity;
 import com.nevex.investing.dataloader.DataLoaderService;
 import com.nevex.investing.event.EventManager;
+import com.nevex.investing.event.type.AllAnalyzerSummaryUpdatedEvent;
 import com.nevex.investing.event.type.Event;
 import com.nevex.investing.event.type.StockFinancialsUpdatedEvent;
 import com.nevex.investing.event.type.StockPriceUpdatedEvent;
@@ -56,6 +57,9 @@ public class AnalyzerEventDataLoader extends DataLoaderWorker {
         if ( analyzerProperties.getStockFinancialsAnalyzer().getSendEventsOnStartup()) {
             eventNamesToTrigger.add(StockFinancialsUpdatedEvent.class.getSimpleName());
         }
+        if ( analyzerProperties.getAnalyzerPreviousPricePerformanceAnalyzer().getSendEventsOnStartup()) {
+            eventNamesToTrigger.add(AllAnalyzerSummaryUpdatedEvent.class.getSimpleName());
+        }
 
         String message;
         if (eventNamesToTrigger.isEmpty()) {
@@ -69,34 +73,33 @@ public class AnalyzerEventDataLoader extends DataLoaderWorker {
         LOGGER.info("\n\n{} - {}\n\n", getName(), message);
         int processed = 0;
         if ( !eventNamesToTrigger.isEmpty()) {
-            processed = super.processAllPagesIndividuallyForIterable(tickerService::getTickers, this::sendEvents, 0);
+            processed = super.processAllPagesIndividuallyForIterable(tickerService::getTickers, this::sendEvents, 0, 2);
         }
         return new DataLoaderWorkerResult(processed);
     }
 
     private void sendEvents(TickerEntity ticker) {
-        if ( analyzerProperties.getStockPriceChangeAnalyzer().getSendEventsOnStartup()) {
-            sendEvents(ticker,
-                    analyzerProperties.getStockPriceChangeAnalyzer().getSendEventsOnStartupStartingFromDate(),
-                    (t, date) -> new StockPriceUpdatedEvent(t.getId(), date)
-            );
-        }
-        if ( analyzerProperties.getStockFinancialsAnalyzer().getSendEventsOnStartup()) {
-            sendEvents(ticker,
-                    analyzerProperties.getStockFinancialsAnalyzer().getSendEventsOnStartupStartingFromDate(),
-                    (t, date) -> new StockFinancialsUpdatedEvent(t.getId(), date)
-            );
-        }
+        int processed = 0;
+        processed += sendEvents(ticker, analyzerProperties.getStockPriceChangeAnalyzer(), (t, date) -> new StockPriceUpdatedEvent(t.getId(), date));
+        processed += sendEvents(ticker, analyzerProperties.getStockFinancialsAnalyzer(), (t, date) -> new StockFinancialsUpdatedEvent(t.getId(), date));
+        processed += sendEvents(ticker, analyzerProperties.getAnalyzerPreviousPricePerformanceAnalyzer(), (t, date) -> new AllAnalyzerSummaryUpdatedEvent(t.getId(), date));
+        LOGGER.debug("{} - sent [{}] events for ticker [{}]", getName(), processed, ticker.getSymbol());
     }
 
-    private int sendEvents(TickerEntity ticker, LocalDate startDate, EventCreator eventCreator) {
-        LocalDate currentEventDate = startDate;
+    private int sendEvents(TickerEntity ticker, AnalyzerProperties.BaseAnalyzerProperties analyzerProperties, EventCreator eventCreator) {
         int processed = 0;
-        while ( currentEventDate.compareTo(super.getWorkerStartDate()) < 1) {
-            EventManager.sendEvent(eventCreator.createEvent(ticker, currentEventDate));
-            currentEventDate = currentEventDate.plusDays(1); // move forward a day
+        if ( !analyzerProperties.getSendEventsOnStartup() ) {
+            return processed;
+        }
+        LocalDate fromDate = analyzerProperties.getSendEventsOnStartupStartingFromDate();
+        LocalDate toDate = analyzerProperties.getSendEventsOnStartupEndingOnLocalDate();
+
+        while ( !fromDate.isAfter(toDate) ) {
+            EventManager.sendEvent(eventCreator.createEvent(ticker, fromDate));
+            fromDate = fromDate.plusDays(1); // move forward a day
             processed++;
         }
+
         return processed;
     }
 

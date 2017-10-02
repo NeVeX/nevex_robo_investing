@@ -1,5 +1,6 @@
 package com.nevex.investing.config.property;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
@@ -31,14 +32,22 @@ public class AnalyzerProperties {
     @NotNull
     @Valid
     private AllAnalyzersSummaryAnalyzerProperties allAnalyzersSummaryAnalyzer;
+    @NotNull
+    @Valid
+    private AnalyzerPreviousPricePerformanceAnalyzerProperties analyzerPreviousPricePerformanceAnalyzer;
 
     public static class BaseAnalyzerProperties {
+        private static final String DATE_FORMAT = "yyyy-MM-dd";
         @NotNull
         private Boolean enabled;
         @NotNull
         private Boolean sendEventsOnStartup;
+        @NotBlank
         private String sendEventsOnStartupStartingFromDate;
+        @NotBlank
+        private String sendEventsOnStartupEndingOnDate;
         private LocalDate sendEventsOnStartupStartingFromLocalDate;
+        private LocalDate sendEventsOnStartupEndingOnLocalDate;
 
         public Boolean getEnabled() {
             return enabled;
@@ -62,11 +71,26 @@ public class AnalyzerProperties {
 
         public void setSendEventsOnStartupStartingFromDate(String sendEventsOnStartupStartingFromDate) {
             this.sendEventsOnStartupStartingFromDate = sendEventsOnStartupStartingFromDate;
-            if ( this.sendEventsOnStartupStartingFromDate == null ) {
-                sendEventsOnStartupStartingFromLocalDate = LocalDate.now();
-            } else {
-                sendEventsOnStartupStartingFromLocalDate = LocalDate.parse(sendEventsOnStartupStartingFromDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            }
+            sendEventsOnStartupStartingFromLocalDate = LocalDate.parse(sendEventsOnStartupStartingFromDate, DateTimeFormatter.ofPattern(DATE_FORMAT));
+//            if ( this.sendEventsOnStartupStartingFromDate == null ) {
+//                sendEventsOnStartupStartingFromLocalDate = LocalDate.now();
+//            } else {
+//                sendEventsOnStartupStartingFromLocalDate = LocalDate.parse(sendEventsOnStartupStartingFromDate, DateTimeFormatter.ofPattern(DATE_FORMAT));
+//            }
+        }
+
+        public void setSendEventsOnStartupEndingOnDate(String sendEventsOnStartupEndingOnDate) {
+            this.sendEventsOnStartupEndingOnDate = sendEventsOnStartupEndingOnDate;
+            sendEventsOnStartupEndingOnLocalDate = LocalDate.parse(sendEventsOnStartupEndingOnDate, DateTimeFormatter.ofPattern(DATE_FORMAT));
+//            if ( this.sendEventsOnStartupEndingOnDate == null ) {
+//                sendEventsOnStartupEndingOnLocalDate = LocalDate.now();
+//            } else {
+//                sendEventsOnStartupEndingOnLocalDate = LocalDate.parse(sendEventsOnStartupEndingOnDate, DateTimeFormatter.ofPattern(DATE_FORMAT));
+//            }
+        }
+
+        public LocalDate getSendEventsOnStartupEndingOnLocalDate() {
+            return sendEventsOnStartupEndingOnLocalDate;
         }
 
         @Override
@@ -76,6 +100,8 @@ public class AnalyzerProperties {
                     ", sendEventsOnStartup=" + sendEventsOnStartup +
                     ", sendEventsOnStartupStartingFromDate=" + sendEventsOnStartupStartingFromDate +
                     ", sendEventsOnStartupStartingFromLocalDate=" + sendEventsOnStartupStartingFromLocalDate +
+                    ", sendEventsOnStartupEndingOnDate=" + sendEventsOnStartupEndingOnDate +
+                    ", sendEventsOnStartupEndingOnLocalDate=" + sendEventsOnStartupEndingOnLocalDate +
                     '}';
         }
     }
@@ -90,6 +116,10 @@ public class AnalyzerProperties {
 
     public static class StockPriceChangeAnalyzerProperties extends BaseAnalyzerProperties {
         public final static String ENABLED = AnalyzerProperties.PREFIX + ".stock-price-change-analyzer.enabled";
+    }
+
+    public static class AnalyzerPreviousPricePerformanceAnalyzerProperties extends BaseAnalyzerProperties {
+        public final static String ENABLED = AnalyzerProperties.PREFIX + ".analyzer-previous-price-performance-analyzer.enabled";
     }
 
     public Boolean getConfigurationEnabled() {
@@ -124,6 +154,14 @@ public class AnalyzerProperties {
         this.allAnalyzersSummaryAnalyzer = allAnalyzersSummaryAnalyzer;
     }
 
+    public AnalyzerPreviousPricePerformanceAnalyzerProperties getAnalyzerPreviousPricePerformanceAnalyzer() {
+        return analyzerPreviousPricePerformanceAnalyzer;
+    }
+
+    public void setAnalyzerPreviousPricePerformanceAnalyzer(AnalyzerPreviousPricePerformanceAnalyzerProperties analyzerPreviousPricePerformanceAnalyzer) {
+        this.analyzerPreviousPricePerformanceAnalyzer = analyzerPreviousPricePerformanceAnalyzer;
+    }
+
     @Override
     public String toString() {
         return "AnalyzerProperties{" +
@@ -131,6 +169,7 @@ public class AnalyzerProperties {
                 ", stockFinancialsAnalyzer=" + stockFinancialsAnalyzer +
                 ", stockPriceChangeAnalyzer=" + stockPriceChangeAnalyzer +
                 ", allAnalyzersSummaryAnalyzer=" + allAnalyzersSummaryAnalyzer +
+                ", analyzerPreviousPricePerformanceAnalyzer=" + analyzerPreviousPricePerformanceAnalyzer +
                 '}';
     }
 }

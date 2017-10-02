@@ -63,6 +63,11 @@ public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpd
         }
         double averageWeight = stats.getAverage();
         double adjustedWeight = weightOptional.get() + averageWeight;
+
+        // limit the edges
+        if ( adjustedWeight > 1.0 ) { adjustedWeight = 1.0; }
+        if ( adjustedWeight < -1.0 ) { adjustedWeight = -1.0; }
+
         AnalyzerSummaryResult summaryResult = new AnalyzerSummaryResult(tickerId, averageWeight, adjustedWeight, (int) stats.getCount(), asOfDate);
 
         try {
