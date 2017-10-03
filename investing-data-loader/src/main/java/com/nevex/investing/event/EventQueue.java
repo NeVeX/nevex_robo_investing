@@ -66,7 +66,7 @@ class EventQueue {
                     try {
                         consumer.accept(event);
                         if ( counter % 50 == 0) {
-                            LOGGER.info("{} has processed {} events. Current Queue Size: [{}].", consumer.getConsumerName(), counter, queue.size());
+                            LOGGER.info("{} has processed {} events. Current Queue Size: [{}]", consumer.getConsumerName(), counter, queue.size());
                         }
 
                     } catch (Exception e) {

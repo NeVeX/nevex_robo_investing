@@ -1,6 +1,5 @@
 package com.nevex.investing.ws;
 
-import com.nevex.investing.analyzer.model.AnalyzerPricePerformance;
 import com.nevex.investing.analyzer.model.AnalyzerPricePerformanceSummary;
 import com.nevex.investing.analyzer.model.AnalyzerSummaryResult;
 import com.nevex.investing.service.AnalyzerPricePerformanceService;
@@ -9,6 +8,7 @@ import com.nevex.investing.service.TickerService;
 import com.nevex.investing.service.model.Ticker;
 import com.nevex.investing.ws.model.AnalysisDto;
 import com.nevex.investing.ws.model.AnalyzerPricePerformanceSummaryDto;
+import com.nevex.investing.ws.model.NoDataDto;
 import com.nevex.investing.ws.model.TickerAnalyzerSummaryDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,33 +50,40 @@ public class AnalysisEndpoint {
     }
 
     @RequestMapping(value = "/top/buys", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<List<AnalysisDto>> getTopStockBuys() {
-        List<AnalyzerSummaryResult> topBuys = this.tickerAnalyzersService.getTopBestWeightedTickerSummaryAnalyzers();
+    public ResponseEntity<List<AnalysisDto>> getTopStockBuys(@RequestParam(name="date", required = false) String date) {
+        List<AnalyzerSummaryResult> topBuys;
+        if ( StringUtils.isBlank(date)) {
+            topBuys = this.tickerAnalyzersService.getLatestTopBestWeightedTickerSummaryAnalyzers();
+        } else {
+            topBuys = this.tickerAnalyzersService.getTopBestWeightedTickerSummaryAnalyzers(LocalDate.parse(date, DATE_FORMATTER));
+        }
         return returnAnalysis(topBuys);
     }
 
     @RequestMapping(value = "/top/sells", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<List<AnalysisDto>> getTopStockSells() {
-        List<AnalyzerSummaryResult> topSells = this.tickerAnalyzersService.getTopWorstWeightedTickerSummaryAnalyzers();
+    public ResponseEntity<List<AnalysisDto>> getTopStockSells(@RequestParam(name="date", required = false) String date) {
+        List<AnalyzerSummaryResult> topSells;
+        if (StringUtils.isBlank(date)) {
+            topSells = this.tickerAnalyzersService.getLatestTopWorstWeightedTickerSummaryAnalyzers();
+        } else {
+            topSells = this.tickerAnalyzersService.getTopWorstWeightedTickerSummaryAnalyzers(LocalDate.parse(date, DATE_FORMATTER));
+        }
         return returnAnalysis(topSells);
     }
 
     @RequestMapping(value = "/performance/prices", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<?> getPricePerformance(@RequestParam(name="date", required = false) String date) {
-
         Optional<AnalyzerPricePerformanceSummary> pricePerfSummaryOpt;
         if ( StringUtils.isBlank(date)) {
             pricePerfSummaryOpt = analyzerPricePerformanceService.getLatestPricePerformanceSummary();
         } else {
-            pricePerfSummaryOpt =this.analyzerPricePerformanceService.getPricePerformanceSummary(LocalDate.parse(date, DATE_FORMATTER));
+            pricePerfSummaryOpt = this.analyzerPricePerformanceService.getPricePerformanceSummary(LocalDate.parse(date, DATE_FORMATTER));
         }
 
         if ( !pricePerfSummaryOpt.isPresent()) {
-            // TODO: don't do this
-            return ResponseEntity.ok("{ \"message\": \"Nothing to see\"}");
+            return ResponseEntity.ok(new NoDataDto());
         }
         return ResponseEntity.ok(new AnalyzerPricePerformanceSummaryDto(pricePerfSummaryOpt.get()));
-
     }
 
     private ResponseEntity<List<AnalysisDto>> returnAnalysis(List<AnalyzerSummaryResult> summaries) {

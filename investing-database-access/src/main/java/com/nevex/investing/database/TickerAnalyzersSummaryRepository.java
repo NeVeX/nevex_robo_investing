@@ -1,7 +1,9 @@
 package com.nevex.investing.database;
 
+import com.nevex.investing.database.entity.AnalyzerPricePerformanceEntity;
 import com.nevex.investing.database.entity.TickerAnalyzerEntity;
 import com.nevex.investing.database.entity.TickerAnalyzerSummaryEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
@@ -19,4 +21,8 @@ public interface TickerAnalyzersSummaryRepository extends PagingAndSortingReposi
     Optional<TickerAnalyzerSummaryEntity> findTopByTickerIdOrderByDateDesc(int tickerId);
 
     Optional<TickerAnalyzerSummaryEntity> findByTickerIdAndDate(int tickerId, LocalDate date);
+
+    Optional<TickerAnalyzerSummaryEntity> findTopByOrderByDateDesc();
+
+    Page<TickerAnalyzerSummaryEntity> findAllByDate(LocalDate date, Pageable pageable);
 }

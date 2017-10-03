@@ -48,6 +48,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
     private final static String PREVIOUS_VOL_LOW = "previous-vol-low";
     private final static String PREVIOUS_VOL_HIGH = "previous-vol-high";
     private final static String PREVIOUS_VOL_AVG = "previous-vol-average";
+
     private final StockPriceAdminService stockPriceAdminService;
     private final AnalyzerServiceV2 analyzerService;
     private final TickerAnalyzersAdminService tickerAnalyzersAdminService;
@@ -102,10 +103,22 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
 
         if ( calculateAnalysis(tickerId, asOfDate, averages) ) {
             calculateSimpleRegressions(tickerId, asOfDate, timePeriodBuckets);
+            calculateCurrentStockPriceAnalysis(tickerId, asOfDate, orderedStockPrices.first());
             EventManager.sendEvent(new TickerAnalyzerUpdatedEvent(tickerId, asOfDate));
         }
 
         LOGGER.debug("{} has finished processing ticker {}", getConsumerName(), tickerId);
+    }
+
+    private void calculateCurrentStockPriceAnalysis(int tickerId, LocalDate asOfDate, StockPrice currentStockPrice) {
+        if ( currentStockPrice == null) { return; }
+
+        Optional<Double> weightOpt = analyzerService.getWeight(Analyzer.CURRENT_STOCK_PRICE, currentStockPrice.getClose());
+        if ( !weightOpt.isPresent()) {
+            return;
+        }
+        // save this weight for the current stock price
+        saveAnalyzer(new AnalyzerResult(tickerId, Analyzer.CURRENT_STOCK_PRICE.getTitle(), weightOpt.get(), asOfDate));
     }
 
     private void calculateSimpleRegressions(int tickerId, LocalDate asOfDate, Map<TimePeriod, Set<StockPrice>> timePeriodBuckets) {
@@ -205,6 +218,16 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
             return true;
         } catch (ServiceException serEx) {
             LOGGER.error("Could not save all ticker [{}] analyzer results", analyzerResults.size(), serEx);
+            return false;
+        }
+    }
+
+    private boolean saveAnalyzer(AnalyzerResult analyzerResult) {
+        try {
+            tickerAnalyzersAdminService.saveNewAnalyzer(analyzerResult);
+            return true;
+        } catch (ServiceException serEx) {
+            LOGGER.error("Could not save single ticker [{}] analyzer result", analyzerResult, serEx);
             return false;
         }
     }

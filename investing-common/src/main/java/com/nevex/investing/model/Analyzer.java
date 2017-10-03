@@ -12,7 +12,12 @@ public enum Analyzer {
 
     PRICE_TO_EARNINGS_RATIO("price-to-earnings-ratio"),
     EARNINGS_PER_SHARE("earnings-per-share"),
+    PRICE_EARNINGS_TO_GROWTH_RATIO("price-earnings-to-growth_ratio"),
+    PRICE_TO_BOOK_RATIO("price-to-book-ratio"),
+    PRICE_TO_SALES_RATIO("price-to-sales-ratio"),
+    RETURN_ON_EQUITY("return-on-equity"),
     ANALYZER_SUMMARY_COUNTER_ADJUST_WEIGHT("analyzer-summary-counter-adjust-weight"),
+    CURRENT_STOCK_PRICE("current-stock-price"),
 
     // 1 day
     CURRENT_STOCK_PRICE_COMPARED_TO_ONE_DAY_PREVIOUS_CLOSE_AVG_PERCENT_DEVIATION("current-stock-price-compared-to-1-day-previous-close-average-percent-deviation"),

@@ -27,29 +27,29 @@ nevex-investing:
   api-admin-key: space
   events:
     configuration-enabled: true
-    event-queue-size: 1500
+    event-queue-size: 2000
   analyzers:
     configuration-enabled: true
     stock-financials-analyzer:
       enabled: true
-      send-events-on-startup: false
-      send-events-on-startup-starting-from-date: 2017-09-30
-      send-events-on-startup-ending-on-date: 2017-09-30
+      send-events-on-startup: true
+      send-events-on-startup-starting-from-date: 2017-10-02
+      send-events-on-startup-ending-on-date: 2017-10-02
     all-analyzers-summary-analyzer:
       enabled: true
-      send-events-on-startup: false
-      send-events-on-startup-starting-from-date: 2017-09-01
-      send-events-on-startup-ending-on-date: 2017-09-01
+      send-events-on-startup: true
+      send-events-on-startup-starting-from-date: 2017-10-02
+      send-events-on-startup-ending-on-date: 2017-10-02
     stock-price-change-analyzer:
       enabled: true
-      send-events-on-startup: false
-      send-events-on-startup-starting-from-date: 2017-09-01
-      send-events-on-startup-ending-on-date: 2017-09-01
+      send-events-on-startup: true
+      send-events-on-startup-starting-from-date: 2017-10-02
+      send-events-on-startup-ending-on-date: 2017-10-02
     analyzer-previous-price-performance-analyzer:
       enabled: true
       send-events-on-startup: true
-      send-events-on-startup-starting-from-date: 2017-09-29
-      send-events-on-startup-ending-on-date: 2017-09-29
+      send-events-on-startup-starting-from-date: 2017-10-02
+      send-events-on-startup-ending-on-date: 2017-10-02
   data-loaders:
     ticker-data-loader:
       enabled: false # Set this to true and and put values in below for the optional csv to load data into the database

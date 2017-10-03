@@ -64,6 +64,10 @@ public class StockFinancialsAnalyzer extends EventConsumer<StockFinancialsUpdate
         YahooStockInfoEntity entity = entityOpt.get();
         addResult(analyzerResults, tickerId, asOfDate, entity.getPriceToEarningsRatio(), Analyzer.PRICE_TO_EARNINGS_RATIO);
         addResult(analyzerResults, tickerId, asOfDate, entity.getEarningsPerShare(), Analyzer.EARNINGS_PER_SHARE);
+        addResult(analyzerResults, tickerId, asOfDate, entity.getPriceEarningsToGrowthRatio(), Analyzer.PRICE_EARNINGS_TO_GROWTH_RATIO);
+        addResult(analyzerResults, tickerId, asOfDate, entity.getPriceToBookRatio(), Analyzer.PRICE_TO_BOOK_RATIO);
+        addResult(analyzerResults, tickerId, asOfDate, entity.getPriceToBookRatio(), Analyzer.PRICE_TO_SALES_RATIO);
+        addResult(analyzerResults, tickerId, asOfDate, entity.getReturnOnEquity(), Analyzer.RETURN_ON_EQUITY);
 
         if ( analyzerResults.isEmpty()) {
             LOGGER.debug("No stock fundamental analyzers were created for ticker [{}]", tickerId);

@@ -71,20 +71,35 @@ public class TickerAnalyzersService {
         return entities.stream().map(AnalyzerResult::new).collect(Collectors.toList());
     }
 
-    public List<AnalyzerSummaryResult> getTopBestWeightedTickerSummaryAnalyzers() {
-        return getTopTickerSummaryAnalyzers(Sort.Direction.DESC);
+    public List<AnalyzerSummaryResult> getTopBestWeightedTickerSummaryAnalyzers(LocalDate date) {
+        return getTopTickerSummaryAnalyzers(Sort.Direction.DESC, date);
     }
 
-    public List<AnalyzerSummaryResult> getTopWorstWeightedTickerSummaryAnalyzers() {
-        return getTopTickerSummaryAnalyzers(Sort.Direction.ASC);
+    public List<AnalyzerSummaryResult> getTopWorstWeightedTickerSummaryAnalyzers(LocalDate date) {
+        return getTopTickerSummaryAnalyzers(Sort.Direction.ASC, date);
     }
 
-    private List<AnalyzerSummaryResult> getTopTickerSummaryAnalyzers(Sort.Direction direction) {
-        PageRequest pageRequest = new PageRequest(0, 30, new Sort(
-                new Sort.Order(Sort.Direction.DESC, TickerAnalyzerSummaryEntity.DATE),
-                new Sort.Order(direction, TickerAnalyzerSummaryEntity.ADJUSTED_WEIGHT_PROPERTY_NAME) // TODO: fix this (don't have it hidden here, reference it in the entity)
+    public List<AnalyzerSummaryResult> getLatestTopBestWeightedTickerSummaryAnalyzers() {
+        return getTopTickerSummaryAnalyzers(Sort.Direction.DESC, getLatestDateForSummaryAnalyzers());
+    }
+
+    public List<AnalyzerSummaryResult> getLatestTopWorstWeightedTickerSummaryAnalyzers() {
+        return getTopTickerSummaryAnalyzers(Sort.Direction.ASC, getLatestDateForSummaryAnalyzers());
+    }
+
+    private LocalDate getLatestDateForSummaryAnalyzers() {
+        Optional<TickerAnalyzerSummaryEntity> topDateOpt = tickerAnalyzersSummaryRepository.findTopByOrderByDateDesc();
+        if ( topDateOpt.isPresent()) {
+            return topDateOpt.get().getDate();
+        }
+        return null;
+    }
+
+    private List<AnalyzerSummaryResult> getTopTickerSummaryAnalyzers(Sort.Direction weightSortDirection, LocalDate date) {
+        PageRequest pageRequest = new PageRequest(0, 100, new Sort(
+                new Sort.Order(weightSortDirection, TickerAnalyzerSummaryEntity.ADJUSTED_WEIGHT_PROPERTY_NAME)
         ));
-        Page<TickerAnalyzerSummaryEntity> page = tickerAnalyzersSummaryRepository.findAll(pageRequest);
+        Page<TickerAnalyzerSummaryEntity> page = tickerAnalyzersSummaryRepository.findAllByDate(date, pageRequest);
         if ( page.hasContent() ) {
             return page.getContent().stream().map(AnalyzerSummaryResult::new).collect(Collectors.toList());
         }

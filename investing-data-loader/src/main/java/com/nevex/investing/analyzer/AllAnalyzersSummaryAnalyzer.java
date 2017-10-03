@@ -3,6 +3,9 @@ package com.nevex.investing.analyzer;
 import com.nevex.investing.analyzer.model.AnalyzerResult;
 import com.nevex.investing.analyzer.model.AnalyzerSummaryResult;
 import com.nevex.investing.event.EventConsumer;
+import com.nevex.investing.event.EventManager;
+import com.nevex.investing.event.type.AllAnalyzerSummaryUpdatedEvent;
+import com.nevex.investing.event.type.Event;
 import com.nevex.investing.event.type.TickerAnalyzerUpdatedEvent;
 import com.nevex.investing.model.Analyzer;
 import com.nevex.investing.service.TickerAnalyzersAdminService;
@@ -72,6 +75,7 @@ public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpd
 
         try {
             tickerAnalyzersAdminService.saveNewAnalyzer(summaryResult);
+            EventManager.sendEvent(new AllAnalyzerSummaryUpdatedEvent(tickerId, asOfDate));
         } catch (ServiceException serEx) {
             LOGGER.error("Could not save summary analyzer entity ["+summaryResult+"]", serEx);
         }

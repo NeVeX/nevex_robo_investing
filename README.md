@@ -7,3 +7,6 @@ NeVeX Introduced To The World Of Investing!
 * Mark tickers as bad
 * Move to using the StockTickerService, not the repo for looping
 * Figure out how to use the yahoo service better
+* Use the ftp to get the tickers:
+  * ftp://ftp.nasdaqtrader.com/symboldirectory (files in there need to be read)
+  * http://www.nasdaqtrader.com/trader.aspx?id=symboldirdefs
