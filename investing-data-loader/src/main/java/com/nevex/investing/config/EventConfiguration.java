@@ -34,6 +34,6 @@ class EventConfiguration {
 
     @Bean
     EventManager eventManager(@Autowired Set<EventConsumer> eventConsumers) {
-        return new EventManager(eventConsumers, eventProperties.getEventQueueSize());
+        return new EventManager(eventConsumers, eventProperties.getEventQueueSize(), eventProperties.getShardAmount());
     }
 }

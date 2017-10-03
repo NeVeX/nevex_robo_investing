@@ -22,4 +22,9 @@ class TickerBasedEvent implements Event {
     public LocalDate getAsOfDate() {
         return asOfDate;
     }
+
+    @Override
+    public int getId() {
+        return tickerId;
+    }
 }

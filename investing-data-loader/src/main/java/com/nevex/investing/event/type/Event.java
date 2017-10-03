@@ -6,6 +6,7 @@ package com.nevex.investing.event.type;
  */
 public interface Event {
 
+    int getId();
 }
 
 

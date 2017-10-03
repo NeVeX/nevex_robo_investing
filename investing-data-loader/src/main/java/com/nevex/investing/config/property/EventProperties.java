@@ -26,6 +26,9 @@ public class EventProperties {
     @NotNull
     private Integer eventQueueSize;
     @NotNull
+    @Min(value = 1)
+    private Integer shardAmount;
+    @NotNull
     private Boolean configurationEnabled;
 
     public Integer getEventQueueSize() {
@@ -42,5 +45,13 @@ public class EventProperties {
 
     public void setConfigurationEnabled(Boolean configurationEnabled) {
         this.configurationEnabled = configurationEnabled;
+    }
+
+    public Integer getShardAmount() {
+        return shardAmount;
+    }
+
+    public void setShardAmount(Integer shardAmount) {
+        this.shardAmount = shardAmount;
     }
 }

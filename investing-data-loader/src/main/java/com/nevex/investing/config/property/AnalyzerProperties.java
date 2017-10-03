@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -23,6 +24,9 @@ public class AnalyzerProperties {
 
     @NotNull
     private Boolean configurationEnabled;
+    @NotNull
+    @Min(value = 1)
+    private Integer threadCountForStartup;
     @NotNull
     @Valid
     private StockFinancialsAnalyzerProperties stockFinancialsAnalyzer;
@@ -162,10 +166,19 @@ public class AnalyzerProperties {
         this.analyzerPreviousPricePerformanceAnalyzer = analyzerPreviousPricePerformanceAnalyzer;
     }
 
+    public Integer getThreadCountForStartup() {
+        return threadCountForStartup;
+    }
+
+    public void setThreadCountForStartup(Integer threadCountForStartup) {
+        this.threadCountForStartup = threadCountForStartup;
+    }
+
     @Override
     public String toString() {
         return "AnalyzerProperties{" +
                 "configurationEnabled=" + configurationEnabled +
+                "threadCountForStartup=" + threadCountForStartup +
                 ", stockFinancialsAnalyzer=" + stockFinancialsAnalyzer +
                 ", stockPriceChangeAnalyzer=" + stockPriceChangeAnalyzer +
                 ", allAnalyzersSummaryAnalyzer=" + allAnalyzersSummaryAnalyzer +

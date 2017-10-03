@@ -17,7 +17,7 @@ public final class EventManager {
     private final static Logger LOGGER = LoggerFactory.getLogger(EventManager.class);
     private final Map<Class, EventQueue> eventTypeToConsumers = new ConcurrentHashMap<>();
 
-    public EventManager(Set<EventConsumer> consumers, int queueSize) {
+    public EventManager(Set<EventConsumer> consumers, int queueSize, int shardAmount) {
         synchronized (EventManager.class) {
             if ( INSTANCE != null ) {
                 throw new IllegalStateException("There is already an instance of ["+this.getClass()+"] - cannot create another");
@@ -26,7 +26,7 @@ public final class EventManager {
         }
         Map<Class, TreeSet<EventConsumer>> mappings = getEventTypeToConsumerMappings(consumers);
         for ( Map.Entry<Class, TreeSet<EventConsumer>> entry : mappings.entrySet()) {
-            EventQueue eventQueue = new EventQueue(queueSize, entry.getKey(), entry.getValue());
+            EventQueue eventQueue = new EventQueue(queueSize, shardAmount, entry.getKey(), entry.getValue());
             eventTypeToConsumers.put(entry.getKey(), eventQueue);
         }
         printEventConsumerMappings();

@@ -25,7 +25,7 @@ public class EventManagerTest {
         consumers.add(eventOneConsumer);
         consumers.add(eventTwoConsumer);
         consumers.add(eventThreeConsumer);
-        EventManager eventManager = new EventManager(consumers, 100);
+        EventManager eventManager = new EventManager(consumers, 100, 1);
 
         // Sent an event for EventOne - it should get consumed by both consumer one and three
         assertThat(eventOneConsumer.getCounter()).isEqualTo(0);
@@ -59,9 +59,20 @@ public class EventManagerTest {
         }
     }
 
-    private static class EventOne implements Event {}
+    private static class EventOne implements Event {
 
-    private static class EventTwo implements Event {}
+        @Override
+        public int getId() {
+            return 1;
+        }
+    }
+
+    private static class EventTwo implements Event {
+        @Override
+        public int getId() {
+            return 2;
+        }
+    }
 
     private abstract static class EventCounterConsumer<T extends Event> extends EventConsumer<T> {
         private int counter = 0;
