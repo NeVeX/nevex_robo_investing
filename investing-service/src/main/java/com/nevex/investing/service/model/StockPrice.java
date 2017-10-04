@@ -1,6 +1,7 @@
 package com.nevex.investing.service.model;
 
 import com.nevex.investing.database.entity.StockPriceBaseEntity;
+import com.nevex.investing.model.TimePeriodDate;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -11,7 +12,7 @@ import java.util.Optional;
 /**
  * Created by Mark Cunningham on 8/9/2017.
  */
-public class StockPrice implements Comparable<StockPrice> {
+public class StockPrice implements Comparable<StockPrice>, TimePeriodDate {
 
     private final String tickerSymbol;
     private final LocalDate date;

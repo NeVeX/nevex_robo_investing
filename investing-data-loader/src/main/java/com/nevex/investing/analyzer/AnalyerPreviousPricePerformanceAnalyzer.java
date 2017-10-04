@@ -11,6 +11,7 @@ import com.nevex.investing.service.TickerAnalyzersAdminService;
 import com.nevex.investing.service.exception.TickerNotFoundException;
 import com.nevex.investing.service.model.ServiceException;
 import com.nevex.investing.service.model.StockPrice;
+import com.nevex.investing.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +60,7 @@ public class AnalyerPreviousPricePerformanceAnalyzer extends EventConsumer<AllAn
         LocalDate asOfDate = event.getAsOfDate();
 
         // get the previous price (a non weekend date)
-        LocalDate previousDateToFetch = getPreviousDate(asOfDate);
+        LocalDate previousDateToFetch = DateUtils.getPreviousWeekDate(asOfDate);
 
         Optional<AnalyzerSummaryResult> summaryResultOpt = tickerAnalyzersAdminService.getAnalyzerSummary(tickerId, previousDateToFetch);
         if ( !summaryResultOpt.isPresent()) {
@@ -108,14 +109,6 @@ public class AnalyerPreviousPricePerformanceAnalyzer extends EventConsumer<AllAn
 
     private boolean isSignValuesEqual(double previousAdjustedWeight, BigDecimal priceDifference) {
         return BigDecimal.valueOf(previousAdjustedWeight).signum() == priceDifference.signum();
-    }
-
-    private LocalDate getPreviousDate(LocalDate asOfDate) {
-        LocalDate previousDate = asOfDate;
-        do {
-            previousDate = previousDate.minusDays(1);
-        } while (previousDate.getDayOfWeek() == DayOfWeek.SATURDAY || previousDate.getDayOfWeek() == DayOfWeek.SUNDAY);
-        return previousDate;
     }
 
 }

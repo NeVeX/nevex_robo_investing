@@ -3,7 +3,6 @@ package com.nevex.investing.analyzer;
 import com.nevex.investing.analyzer.model.AnalyzerResult;
 import com.nevex.investing.event.EventConsumer;
 import com.nevex.investing.event.EventManager;
-import com.nevex.investing.event.type.Event;
 import com.nevex.investing.event.type.StockPriceUpdatedEvent;
 import com.nevex.investing.event.type.TickerAnalyzerUpdatedEvent;
 import com.nevex.investing.model.Analyzer;
@@ -15,7 +14,6 @@ import com.nevex.investing.service.model.ServiceException;
 import com.nevex.investing.service.StockPriceAdminService;
 import com.nevex.investing.service.exception.TickerNotFoundException;
 import com.nevex.investing.service.model.StockPrice;
-import com.nevex.investing.service.model.Ticker;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +81,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         Map<TimePeriod, StockPriceSummary> averages;
         List<StockPrice> stockPrices;
         try {
-             stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, asOfDate, TimePeriod.ThreeYears.getDays());
+             stockPrices = stockPriceAdminService.getHistoricalPrices(tickerId, asOfDate, TimePeriod.getMaxTimePeriod().getDays());
         } catch (TickerNotFoundException tickerNotFound) {
             LOGGER.warn("Ticker Id [{}] is not valid - could not find it", tickerId);
             return;
@@ -306,9 +304,9 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
     }
 
     Map<TimePeriod, StockPriceSummary> calculateStockPriceAverages(Map<TimePeriod, Set<StockPrice>> timePeriodBuckets, LocalDate asOfDate) {
-        // Do the magic - look at all elements and on the fly calculateWeight various summaries
+        // Do the magic - look at all elements and on the fly and calculate various summaries
         Map<TimePeriod, StockPriceSummary> timePeriodSummaries = timePeriodBuckets.entrySet()
-                .stream()
+                .parallelStream()
                 .flatMap(e -> e.getValue().stream().map(p -> new TimePeriodToStockPrice(e.getKey(), p)))
                 .collect(groupingBy(TimePeriodToStockPrice::getTimePeriod, Collectors.mapping(TimePeriodToStockPrice::getPrice, new StockPriceSummaryCollector(asOfDate))));
 

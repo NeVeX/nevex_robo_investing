@@ -59,7 +59,7 @@
 //        StockPriceChangeAnalyzer priceChangeProcessor = new StockPriceChangeAnalyzer(stockPriceAdminService);
 //        Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(oneYearStockPrices, LocalDate.now());
 //        assertThat(results.keySet().size()).isEqualTo(1); // we should only have one
-//        assertThat(results.get(TimePeriod.SevenDays)).isNotNull(); // should be a value
+//        assertThat(results.get(TimePeriod.TenDays)).isNotNull(); // should be a value
 //        results.values().forEach(result -> assertThat(result).isEqualTo(summary)); // test it's as we expect
 //    }
 //
@@ -79,9 +79,9 @@
 //        StockPriceChangeAnalyzer priceChangeProcessor = new StockPriceChangeAnalyzer(stockPriceAdminService);
 //        Map<TimePeriod, StockPriceSummary> results = priceChangeProcessor.calculateStockPriceAverages(stockPrices, LocalDate.now());
 //        assertThat(results.keySet().size()).isEqualTo(1); // we should only have one
-//        assertThat(results.get(TimePeriod.SevenDays)).isNotNull(); // should be a value
+//        assertThat(results.get(TimePeriod.TenDays)).isNotNull(); // should be a value
 //
-//        StockPriceSummary sevenDaySummary = results.get(TimePeriod.SevenDays);
+//        StockPriceSummary sevenDaySummary = results.get(TimePeriod.FiveDays);
 //        assertThat(sevenDaySummary.getLowest()).isEqualTo(BigDecimal.valueOf(2));
 //        assertThat(sevenDaySummary.getHighest()).isEqualTo(BigDecimal.valueOf(11));
 //        assertThat(sevenDaySummary.getOpenLowest()).isEqualTo(BigDecimal.valueOf(1));
