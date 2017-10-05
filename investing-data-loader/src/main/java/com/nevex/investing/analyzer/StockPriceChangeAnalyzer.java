@@ -90,7 +90,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         // Order the stock prices
         TreeSet<StockPrice> orderedStockPrices = new TreeSet<>(stockPrices);
         // Get a mapping of time periods for all stock prices
-        timePeriodBuckets = TimePeriod.groupDailyElementsIntoExactBuckets(orderedStockPrices);
+        timePeriodBuckets = TimePeriod.groupDailyElementsIntoExactBucketsFromDate(asOfDate, orderedStockPrices);
 
         averages = calculateStockPriceAverages(timePeriodBuckets, asOfDate);
 

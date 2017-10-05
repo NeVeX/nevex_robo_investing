@@ -1,14 +1,20 @@
 package com.nevex.investing.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 /**
  * Created by Mark Cunningham on 10/3/2017.
  */
 public class DateUtils {
+
+    private final static DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
      * Given two dates, a and b, this will return if a is one weekday before b.
@@ -55,6 +61,15 @@ public class DateUtils {
 
     public static long getDaysBetween(LocalDate one, LocalDate two) {
         return ChronoUnit.DAYS.between(one, two);
+    }
+
+    public static Optional<LocalDate> tryGetDate(String date) {
+        if (StringUtils.isNotBlank(date)) {
+            try {
+                return Optional.of(LocalDate.parse(date, DATE_FORMATTER));
+            } catch (Exception ignore) { }
+        }
+        return Optional.empty();
     }
 
 //    public static long getWeekDaysBetween(LocalDate one, LocalDate two) {

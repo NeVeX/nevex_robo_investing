@@ -47,7 +47,7 @@ class ServicesConfiguration {
 
     @Bean
     AnalyzerPricePerformanceService analyzerPricePerformanceService() {
-        return new AnalyzerPricePerformanceService(analyzerPricePerformanceRepository, tickerService());
+        return new AnalyzerPricePerformanceService(analyzerPricePerformanceRepository, tickerService(), tickerAnalyzersService());
     }
 
 

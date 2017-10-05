@@ -27,31 +27,31 @@ nevex-investing:
   api-admin-key: space
   events:
     configuration-enabled: true
-    event-queue-size: 2000
-    shard-amount: 10
+    event-queue-size: 5000
+    shard-amount: 15
   analyzers:
     configuration-enabled: true
     thread-count-for-startup: 2
     stock-financials-analyzer:
       enabled: true
-      send-events-on-startup: false
+      send-events-on-startup: true
       send-events-on-startup-starting-from-date: 2017-10-02
-      send-events-on-startup-ending-on-date: 2017-10-02
+      send-events-on-startup-ending-on-date: 2017-10-04
     all-analyzers-summary-analyzer:
       enabled: true
       send-events-on-startup: true
       send-events-on-startup-starting-from-date: 2017-10-02
-      send-events-on-startup-ending-on-date: 2017-10-02
+      send-events-on-startup-ending-on-date: 2017-10-04
     stock-price-change-analyzer:
       enabled: true
       send-events-on-startup: true
       send-events-on-startup-starting-from-date: 2017-10-02
-      send-events-on-startup-ending-on-date: 2017-10-02
+      send-events-on-startup-ending-on-date: 2017-10-04
     analyzer-previous-price-performance-analyzer:
       enabled: true
       send-events-on-startup: true
       send-events-on-startup-starting-from-date: 2017-10-02
-      send-events-on-startup-ending-on-date: 2017-10-02
+      send-events-on-startup-ending-on-date: 2017-10-04
   data-loaders:
     ticker-data-loader:
       enabled: false # Set this to true and and put values in below for the optional csv to load data into the database

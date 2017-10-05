@@ -29,4 +29,5 @@ public class AnalyzerWeightV1Test {
         assertThat(weight.isAround(BigDecimal.valueOf(3))).isTrue();
     }
 
+
 }

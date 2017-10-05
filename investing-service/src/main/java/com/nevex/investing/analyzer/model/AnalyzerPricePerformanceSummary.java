@@ -1,12 +1,8 @@
 package com.nevex.investing.analyzer.model;
 
-import com.nevex.investing.database.entity.AnalyzerPricePerformanceEntity;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Created by Mark Cunningham on 10/1/2017.
@@ -24,8 +20,20 @@ public final class AnalyzerPricePerformanceSummary {
     private final List<AnalyzerPricePerformance> bestPricePercentMovements;
     private final List<AnalyzerPricePerformance> worstPriceMovements;
     private final List<AnalyzerPricePerformance> worstPricePercentMovements;
+    private final int totalCorrectTopRecommendationsPercent;
+//    private final int totalInCorrectTopRecommendationsPercent;
+    private final List<AnalyzerSummaryResult> correctRecommendedBuys;
+    private final List<AnalyzerSummaryResult> correctRecommendedSells;
+    private final List<AnalyzerSummaryResult> inCorrectRecommendedBuys;
+    private final List<AnalyzerSummaryResult> inCorrectRecommendedSells;
 
-    public AnalyzerPricePerformanceSummary(LocalDate date, int totalStocks, int percentCorrect, BigDecimal bestPriceMovement, BigDecimal bestPricePercentMovement, BigDecimal worstPriceMovement, BigDecimal worstPricePercentMovement, List<AnalyzerPricePerformance> bestPriceMovements, List<AnalyzerPricePerformance> bestPricePercentMovements, List<AnalyzerPricePerformance> worstPriceMovements, List<AnalyzerPricePerformance> worstPricePercentMovements) {
+    public AnalyzerPricePerformanceSummary(LocalDate date, int totalStocks, int percentCorrect, BigDecimal bestPriceMovement, BigDecimal bestPricePercentMovement,
+                                           BigDecimal worstPriceMovement, BigDecimal worstPricePercentMovement,
+                                           int totalCorrectTopRecommendationsPercent,
+                                           List<AnalyzerSummaryResult> correctRecommendedBuys, List<AnalyzerSummaryResult> correctRecommendedSells,
+                                           List<AnalyzerSummaryResult> inCorrectRecommendedBuys, List<AnalyzerSummaryResult> inCorrectRecommendedSells,
+                                           List<AnalyzerPricePerformance> bestPriceMovements, List<AnalyzerPricePerformance> bestPricePercentMovements,
+                                           List<AnalyzerPricePerformance> worstPriceMovements, List<AnalyzerPricePerformance> worstPricePercentMovements) {
         this.date = date;
         this.totalStocks = totalStocks;
         this.percentCorrect = percentCorrect;
@@ -33,10 +41,22 @@ public final class AnalyzerPricePerformanceSummary {
         this.bestPricePercentMovement = bestPricePercentMovement;
         this.worstPriceMovement = worstPriceMovement;
         this.worstPricePercentMovement = worstPricePercentMovement;
+
         this.bestPriceMovements = bestPriceMovements;
         this.bestPricePercentMovements = bestPricePercentMovements;
         this.worstPriceMovements = worstPriceMovements;
         this.worstPricePercentMovements = worstPricePercentMovements;
+
+        this.correctRecommendedBuys = correctRecommendedBuys;
+        this.correctRecommendedSells = correctRecommendedSells;
+
+        this.inCorrectRecommendedBuys = inCorrectRecommendedBuys;
+        this.inCorrectRecommendedSells = inCorrectRecommendedSells;
+
+        this.totalCorrectTopRecommendationsPercent = totalCorrectTopRecommendationsPercent;
+//        this.totalInCorrectTopRecommendationsPercent = totalInCorrectTopRecommendationsPercent;
+
+
     }
 
     public LocalDate getDate() {
@@ -81,5 +101,29 @@ public final class AnalyzerPricePerformanceSummary {
 
     public List<AnalyzerPricePerformance> getWorstPricePercentMovements() {
         return worstPricePercentMovements;
+    }
+
+    public List<AnalyzerSummaryResult> getCorrectRecommendedBuys() {
+        return correctRecommendedBuys;
+    }
+
+    public List<AnalyzerSummaryResult> getCorrectRecommendedSells() {
+        return correctRecommendedSells;
+    }
+
+    public int getTotalCorrectTopRecommendationsPercent() {
+        return totalCorrectTopRecommendationsPercent;
+    }
+
+//    public int getTotalInCorrectTopRecommendationsPercent() {
+//        return totalInCorrectTopRecommendationsPercent;
+//    }
+
+    public List<AnalyzerSummaryResult> getInCorrectRecommendedBuys() {
+        return inCorrectRecommendedBuys;
+    }
+
+    public List<AnalyzerSummaryResult> getInCorrectRecommendedSells() {
+        return inCorrectRecommendedSells;
     }
 }

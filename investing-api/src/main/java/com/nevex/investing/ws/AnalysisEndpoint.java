@@ -6,11 +6,11 @@ import com.nevex.investing.service.AnalyzerPricePerformanceService;
 import com.nevex.investing.service.TickerAnalyzersService;
 import com.nevex.investing.service.TickerService;
 import com.nevex.investing.service.model.Ticker;
+import com.nevex.investing.util.DateUtils;
 import com.nevex.investing.ws.model.AnalysisDto;
 import com.nevex.investing.ws.model.AnalyzerPricePerformanceSummaryDto;
 import com.nevex.investing.ws.model.NoDataDto;
 import com.nevex.investing.ws.model.TickerAnalyzerSummaryDto;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +24,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static com.nevex.investing.ws.EndpointConstants.DATE_FORMATTER;
 
 /**
  * Created by Mark Cunningham on 9/26/2017.
@@ -52,10 +50,12 @@ public class AnalysisEndpoint {
     @RequestMapping(value = "/top/buys", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<List<AnalysisDto>> getTopStockBuys(@RequestParam(name="date", required = false) String date) {
         List<AnalyzerSummaryResult> topBuys;
-        if ( StringUtils.isBlank(date)) {
-            topBuys = this.tickerAnalyzersService.getLatestTopBestWeightedTickerSummaryAnalyzers();
+
+        Optional<LocalDate> dateOpt = DateUtils.tryGetDate(date);
+        if ( dateOpt.isPresent() ) {
+            topBuys = this.tickerAnalyzersService.getTopBestWeightedTickerSummaryAnalyzers(dateOpt.get());
         } else {
-            topBuys = this.tickerAnalyzersService.getTopBestWeightedTickerSummaryAnalyzers(LocalDate.parse(date, DATE_FORMATTER));
+            topBuys = this.tickerAnalyzersService.getLatestTopBestWeightedTickerSummaryAnalyzers();
         }
         return returnAnalysis(topBuys);
     }
@@ -63,10 +63,11 @@ public class AnalysisEndpoint {
     @RequestMapping(value = "/top/sells", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<List<AnalysisDto>> getTopStockSells(@RequestParam(name="date", required = false) String date) {
         List<AnalyzerSummaryResult> topSells;
-        if (StringUtils.isBlank(date)) {
-            topSells = this.tickerAnalyzersService.getLatestTopWorstWeightedTickerSummaryAnalyzers();
+        Optional<LocalDate> dateOpt = DateUtils.tryGetDate(date);
+        if (dateOpt.isPresent()) {
+            topSells = this.tickerAnalyzersService.getTopWorstWeightedTickerSummaryAnalyzers(dateOpt.get());
         } else {
-            topSells = this.tickerAnalyzersService.getTopWorstWeightedTickerSummaryAnalyzers(LocalDate.parse(date, DATE_FORMATTER));
+            topSells = this.tickerAnalyzersService.getLatestTopWorstWeightedTickerSummaryAnalyzers();
         }
         return returnAnalysis(topSells);
     }
@@ -74,19 +75,29 @@ public class AnalysisEndpoint {
     @RequestMapping(value = "/performance/prices", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<?> getPricePerformance(@RequestParam(name="date", required = false) String date) {
         Optional<AnalyzerPricePerformanceSummary> pricePerfSummaryOpt;
-        if ( StringUtils.isBlank(date)) {
-            pricePerfSummaryOpt = analyzerPricePerformanceService.getLatestPricePerformanceSummary();
+        Optional<LocalDate> dateOpt = DateUtils.tryGetDate(date);
+        if ( dateOpt.isPresent()) {
+            pricePerfSummaryOpt = this.analyzerPricePerformanceService.getPricePerformanceSummary(dateOpt.get());
         } else {
-            pricePerfSummaryOpt = this.analyzerPricePerformanceService.getPricePerformanceSummary(LocalDate.parse(date, DATE_FORMATTER));
+            pricePerfSummaryOpt = analyzerPricePerformanceService.getLatestPricePerformanceSummary();
         }
 
         if ( !pricePerfSummaryOpt.isPresent()) {
             return ResponseEntity.ok(new NoDataDto());
         }
-        return ResponseEntity.ok(new AnalyzerPricePerformanceSummaryDto(pricePerfSummaryOpt.get()));
+        return ResponseEntity.ok(new AnalyzerPricePerformanceSummaryDto(pricePerfSummaryOpt.get(),
+                convertToSymbols(pricePerfSummaryOpt.get().getCorrectRecommendedBuys()),
+                convertToSymbols(pricePerfSummaryOpt.get().getCorrectRecommendedSells()),
+                convertToSymbols(pricePerfSummaryOpt.get().getInCorrectRecommendedBuys()),
+                convertToSymbols(pricePerfSummaryOpt.get().getInCorrectRecommendedSells())
+                ));
     }
 
     private ResponseEntity<List<AnalysisDto>> returnAnalysis(List<AnalyzerSummaryResult> summaries) {
+        return ResponseEntity.ok(convertToAnalysisDtos(summaries));
+    }
+
+    private List<AnalysisDto> convertToAnalysisDtos(List<AnalyzerSummaryResult> summaries) {
         List<AnalysisDto> topAnalysis = new ArrayList<>();
         for ( AnalyzerSummaryResult summaryResult : summaries) {
             Optional<String> symbolOpt = tickerService.tryGetSymbolForId(summaryResult.getTickerId());
@@ -103,6 +114,20 @@ public class AnalysisEndpoint {
             Ticker ticker = tickerOpt.get();
             topAnalysis.add(new AnalysisDto(ticker.getSymbol(), ticker.getName(), new TickerAnalyzerSummaryDto(summaryResult)));
         }
-        return ResponseEntity.ok(topAnalysis);
+        return topAnalysis;
     }
+
+    private List<String> convertToSymbols(List<AnalyzerSummaryResult> results) {
+        List<String> symbols = new ArrayList<>();
+        for ( AnalyzerSummaryResult summaryResult : results) {
+            Optional<String> symbolOpt = tickerService.tryGetSymbolForId(summaryResult.getTickerId());
+            if ( !symbolOpt.isPresent()) {
+                // todo: do stuff
+                continue;
+            }
+            symbols.add(symbolOpt.get());
+        }
+        return symbols;
+    }
+
 }

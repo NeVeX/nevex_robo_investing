@@ -18,8 +18,8 @@ public class AnalyzerPricePerformanceAdminService extends AnalyzerPricePerforman
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AnalyzerPricePerformanceAdminService.class);
 
-    public AnalyzerPricePerformanceAdminService(AnalyzerPricePerformanceRepository analyzerPricePerformanceRepository, TickerService tickerService) {
-        super(analyzerPricePerformanceRepository, tickerService);
+    public AnalyzerPricePerformanceAdminService(AnalyzerPricePerformanceRepository analyzerPricePerformanceRepository, TickerService tickerService, TickerAnalyzersAdminService tickerAnalyzersAdminService) {
+        super(analyzerPricePerformanceRepository, tickerService, tickerAnalyzersAdminService);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

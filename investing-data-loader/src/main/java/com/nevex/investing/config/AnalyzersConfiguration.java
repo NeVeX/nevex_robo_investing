@@ -105,6 +105,6 @@ class AnalyzersConfiguration {
 
     @Bean
     AnalyzerPricePerformanceAdminService analyzerPricePerformanceAdminService() {
-        return new AnalyzerPricePerformanceAdminService(analyzerPricePerformanceRepository, tickerService);
+        return new AnalyzerPricePerformanceAdminService(analyzerPricePerformanceRepository, tickerService, tickerAnalyzersAdminService());
     }
 }

@@ -52,21 +52,17 @@ public enum TimePeriod {
     /**
      * Given an ordered collection, where each element represents a day, this will split the collection
      * into a map of each defined period.
-     * If there is not enough elements to fill the time period, the time period is not returned
+     * If there is not enough elements to fill the time period, the time period is not returned.
+     * @param startDate - the start date is used to make sure the period is a reference
      */
-    public static <T extends TimePeriodDate & Comparable<T>> Map<TimePeriod, Set<T>> groupDailyElementsIntoExactBuckets(Collection<T> collection) {
+    public static <T extends TimePeriodDate & Comparable<T>> Map<TimePeriod, Set<T>> groupDailyElementsIntoExactBucketsFromDate(LocalDate startDate, Collection<T> collection) {
 
         Map<TimePeriod, Set<T>> periodBuckets = new HashMap<>();
         for (TimePeriod tp : values()) {
             periodBuckets.put(tp, new HashSet<>());
         }
 
-        LocalDate startDate = null;
         for ( T data : collection) {
-
-            if ( startDate == null ) {
-                startDate = data.getDate();
-            }
 
             long daysBetween = DateUtils.getDaysBetween(data.getDate(), startDate);
 

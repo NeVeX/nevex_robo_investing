@@ -96,7 +96,7 @@ public class TickerAnalyzersService {
     }
 
     private List<AnalyzerSummaryResult> getTopTickerSummaryAnalyzers(Sort.Direction weightSortDirection, LocalDate date) {
-        PageRequest pageRequest = new PageRequest(0, 100, new Sort(
+        PageRequest pageRequest = new PageRequest(0, 30, new Sort(
                 new Sort.Order(weightSortDirection, TickerAnalyzerSummaryEntity.ADJUSTED_WEIGHT_PROPERTY_NAME)
         ));
         Page<TickerAnalyzerSummaryEntity> page = tickerAnalyzersSummaryRepository.findAllByDate(date, pageRequest);

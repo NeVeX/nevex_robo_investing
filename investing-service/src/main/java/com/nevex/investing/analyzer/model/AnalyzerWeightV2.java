@@ -38,31 +38,34 @@ public class AnalyzerWeightV2 {
         this(entity.getVersion(), analyzer, entity.getCenter(), entity.getLowest(), entity.getHighest(), entity.getInvertLowest(), entity.getInvertHighest(), entity.getSignDirection());
     }
 
-    public double calculateWeight(BigDecimal value) {
-        if ( value.compareTo(center) == 0 ) {
+    public double calculateWeight(final BigDecimal inputValue) {
+        if ( inputValue.compareTo(center) == 0 ) {
             return 0;
         }
-        if ( value.compareTo(lowest) <= 0) {
-            return -1;
-        }
-        if ( value.compareTo(highest) >= 0) {
-            return 1;
+
+        BigDecimal inputValueLimited; // the limited value (in case it exceeds limits)
+        if ( inputValue.compareTo(lowest) <= 0) {
+            inputValueLimited = lowest;
+        } else if ( inputValue.compareTo(highest) >= 0) {
+            inputValueLimited = highest;
+        } else {
+            inputValueLimited = inputValue;
         }
 
         BigDecimal rangeOther;
         BigDecimal valueConstrained;
         int signValue;
         boolean shouldInvert;
-        if ( value.compareTo(center) < 0) {
+        if ( inputValueLimited.compareTo(center) < 0) {
             signValue = signDirection * -1;
             rangeOther = lowest;
             shouldInvert = invertLowest;
-            valueConstrained = center.subtract(value).abs();
+            valueConstrained = center.abs().subtract(inputValueLimited.abs()).abs();
         } else {
             signValue = signDirection;
             rangeOther = highest;
             shouldInvert = invertHighest;
-            valueConstrained = value.subtract(center).abs();
+            valueConstrained = inputValueLimited.abs().subtract(center.abs()).abs();
         }
 
         BigDecimal range = center.abs().subtract(rangeOther.abs()).abs();

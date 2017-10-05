@@ -64,21 +64,23 @@ class EventQueue {
 
     private void continuallyProcessEventQueue(int shardQueue) {
         try {
-            final AtomicLong eventCounter = new AtomicLong();
+            long eventCounter = 0;
+            final AtomicLong lastLogTimeMs = new AtomicLong();
             BlockingQueue<Event> queue = shardQueues.get(shardQueue);
             while ( !Thread.currentThread().isInterrupted()) {
 
-                final Event event = queue.take();
-
-                long counter = eventCounter.incrementAndGet();
+                final Event event = queue.take(); // can wait forever...
+                final long counter = ++eventCounter;
+                final long threadLastLongTimeMs = lastLogTimeMs.get();
 
                 // let's send the event to all of it's consumers
                 LOGGER.debug("Dequeue'd event [{}] and will now invoke all it's [{}] consumers", event, consumers.size());
                 consumers.stream().forEach(consumer -> {
                     try {
                         consumer.accept(event);
-                        if ( counter % 50 == 0) {
+                        if ( counter % 50 == 0 || (System.currentTimeMillis() - threadLastLongTimeMs > 5000) ) {
                             LOGGER.info("Shard Queue [{}] for [{}] has processed [{}] events. Current Queue Size: [{}]", shardQueue, consumer.getConsumerName(), counter, queue.size());
+                            lastLogTimeMs.set(System.currentTimeMillis());
                         }
 
                     } catch (Exception e) {
