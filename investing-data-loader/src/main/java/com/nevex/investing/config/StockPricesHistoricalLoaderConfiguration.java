@@ -1,6 +1,7 @@
 package com.nevex.investing.config;
 
 import com.nevex.investing.api.tiingo.TiingoApiClient;
+import com.nevex.investing.api.yahoo.YahooApiClient;
 import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
@@ -34,12 +35,14 @@ class StockPricesHistoricalLoaderConfiguration {
     private DataLoaderService dataLoaderService;
     @Autowired
     private TickersRepository tickersRepository;
-    @Autowired
-    private TiingoApiClient tiingoApiClient;
+//    @Autowired
+//    private TiingoApiClient tiingoApiClient;
     @Autowired
     private StockPriceAdminService stockPriceAdminService;
     @Autowired
     private DataLoaderProperties dataLoaderProperties;
+    @Autowired
+    private YahooApiClient yahooApiClient;
 
     @PostConstruct
     void init() throws Exception {
@@ -48,7 +51,7 @@ class StockPricesHistoricalLoaderConfiguration {
 
     @Bean
     HistoricalStockPriceLoader historicalStockPriceLoader() {
-        return new HistoricalStockPriceLoader(tickersRepository, tiingoApiClient, stockPriceAdminService, dataLoaderService, dataLoaderProperties.getStockHistoricalLoader());
+        return new HistoricalStockPriceLoader(tickersRepository, yahooApiClient, stockPriceAdminService, dataLoaderService, dataLoaderProperties.getStockHistoricalLoader());
     }
 
 }

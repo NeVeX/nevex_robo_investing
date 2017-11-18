@@ -35,7 +35,8 @@ public class AnalyzerServiceV2 {
 
             Optional<Analyzer> analyzerOpt = Analyzer.fromTitle(entity.getName());
             if ( !analyzerOpt.isPresent()) {
-                throw new ServiceException("The database name for analyzer ["+entity.getName()+"] does not exist in the code");
+                LOGGER.warn("The database name for analyzer ["+entity.getName()+"] does not exist in the code");
+                continue;
             }
 
             AnalyzerWeightV2 weight = new AnalyzerWeightV2(analyzerOpt.get(), entity);
