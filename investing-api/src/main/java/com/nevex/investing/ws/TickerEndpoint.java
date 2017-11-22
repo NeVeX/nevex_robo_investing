@@ -36,7 +36,7 @@ public class TickerEndpoint {
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
     ResponseEntity<PageableDataDto<TickerDto>> getTickersForPage(
             @Min(value = 0, message = "Invalid page size provided") @RequestParam(value = "page", defaultValue = "0") Integer pageNumber) {
-        PageableData<Ticker> pageableData = tickerService.getTickers(pageNumber);
+        PageableData<Ticker> pageableData = tickerService.getActiveTickers(pageNumber);
         if ( pageableData == null || !pageableData.hasData() ) {
             return ResponseEntity.ok(new PageableDataDto<>()); // empty response
         }

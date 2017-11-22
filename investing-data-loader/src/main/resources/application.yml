@@ -57,6 +57,8 @@ nevex-investing:
       enabled: false # Set this to true and and put values in below for the optional csv to load data into the database
       nasdaq-file: D:\Coding\Git\nevex_investing\data\nasdaq_tickers_08_07_2017.csv
       nyse-file: D:\Coding\Git\nevex_investing\data\nyse_tickers_08_07_2017.csv
+    ticker-data-checker:
+      enabled: true
     stock-historical-loader:
       enabled: false
       wait-time-between-tickers-ms: 1000

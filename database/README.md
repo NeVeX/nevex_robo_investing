@@ -34,11 +34,15 @@ pg_restore -h localhost -p 5432 -U postgres -d postgres -C -v /opt/srv/investing
 Note, the above `-d` is not `viper` the database name; it's confusing, [but look here for more info](https://dba.stackexchange.com/questions/82161/why-pg-restore-ignores-create-error-failed-fatal-database-new-db-does-n)
 * However, you'll need to create `viper` before restoring if coming from windows vs unix. If you do this, then the above command becomes `-d viper`. See more below.
 
-##### Warning
+#### Warnings/Notes
+
+##### Locales
 
 Be careful with the locales. On windows it is different to unix.
 Windows: `English_United States.1252`
 UNIX: `en_US.UTF-8`
+
+#### Creating Database First
 
 So, if you dump from one and into another, you can run into issues.
 Use the database creation script to first create the database and then use it in the above.
@@ -64,3 +68,8 @@ An example is shown below (remember to be logged in as the postgres owner)
 psql -U postgres postgres -d viper -f /opt/srv/investing-svc/database/reference_data/analyzer_weights_v2.sql
 ```
 
+#### Moving Data between servers
+
+* Create the database on the server you want to copy too
+* `pg_dump --dbname=postgresql://postgres:PASSWORD_HERE@192.168.8.167:5432/viper --data-only | psql -h 192.168.8.168 -p 5432 -U postgres --password viper`
+  * To send the database schema too; then take out `data-only` from above

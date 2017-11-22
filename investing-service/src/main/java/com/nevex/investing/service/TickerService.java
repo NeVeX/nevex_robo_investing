@@ -36,7 +36,7 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
     private final ConcurrentHashMap<Integer, String> tickerIdToSymbolMap = new ConcurrentHashMap<>();
     private final static int DEFAULT_PAGE_ELEMENT_SIZE = 20;
     private final static Pageable DEFAULT_PAGEABLE = new PageRequest(0, DEFAULT_PAGE_ELEMENT_SIZE);
-    private final TickersRepository tickersRepository;
+    protected final TickersRepository tickersRepository;
     private final ReadWriteLock tickersLock = new ReentrantReadWriteLock();
     private Set<Ticker> allTickers = new HashSet<>();
 
@@ -94,7 +94,7 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
     }
 
     protected int refreshAllTickers() {
-        return refreshAllTickers(tickersRepository.findAll());
+        return refreshAllTickers(tickersRepository.findAllByIsTradableTrue());
     }
 
     protected int refreshAllTickers(Iterable<TickerEntity> tickerIter) {
@@ -151,23 +151,23 @@ public class TickerService implements ApplicationListener<ApplicationReadyEvent>
     /**
      * Returns found tickers using a default pageable result
      */
-    public PageableData<Ticker> getTickers() {
-        return getTickersForPageable(DEFAULT_PAGEABLE);
+    public PageableData<Ticker> getActiveTickers() {
+        return getActiveTickersForPageable(DEFAULT_PAGEABLE);
     }
 
     /**
      * Returns found tickers using the given page as the start
      */
-    public PageableData<Ticker> getTickers(int page) {
-        return getTickersForPageable(new PageRequest(page, DEFAULT_PAGE_ELEMENT_SIZE));
+    public PageableData<Ticker> getActiveTickers(int page) {
+        return getActiveTickersForPageable(new PageRequest(page, DEFAULT_PAGE_ELEMENT_SIZE));
     }
 
-    public Page<TickerEntity> getTickers(Pageable pageable) {
-        return tickersRepository.findAll(pageable);
+    public Page<TickerEntity> getActiveTickers(Pageable pageable) {
+        return tickersRepository.findAllByIsTradableTrue(pageable);
     }
 
-    private PageableData<Ticker> getTickersForPageable(Pageable pageable) {
-        Page<TickerEntity> foundTickers = tickersRepository.findAll(pageable);
+    private PageableData<Ticker> getActiveTickersForPageable(Pageable pageable) {
+        Page<TickerEntity> foundTickers = getActiveTickers(pageable);
 
         if ( foundTickers == null || !foundTickers.hasContent()) {
             return PageableData.empty();

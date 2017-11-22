@@ -1,6 +1,7 @@
 package com.nevex.investing.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nevex.investing.api.iextrading.IEXTradingClient;
 import com.nevex.investing.api.tiingo.TiingoApiClient;
 import com.nevex.investing.api.usfundamentals.UsFundamentalsApiClient;
 import com.nevex.investing.api.yahoo.YahooApiClient;
@@ -28,6 +29,11 @@ class ApiClientConfiguration {
     private UsFundamentalsApiClientProperties usFundamentalsApiClientProperties;
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Bean
+    IEXTradingClient iexTradingClient() {
+        return new IEXTradingClient();
+    }
 
     @Bean
     TiingoApiClient tiingoApiClient() {

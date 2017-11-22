@@ -56,12 +56,12 @@ public class MockTickerService extends TickerService {
     /**
      * Returns found tickers using a default pageable result
      */
-    public PageableData<Ticker> getTickers() {
+    public PageableData<Ticker> getActiveTickers() {
         return new PageableData<>(mockTickers, new PageImpl<>(mockTickers));
     }
 
-    public PageableData<Ticker> getTickers(int page) {
-        return getTickers();
+    public PageableData<Ticker> getActiveTickers(int page) {
+        return getActiveTickers();
     }
 
     public Optional<Ticker> getTickerInformation(String inputSymbol) {

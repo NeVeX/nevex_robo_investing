@@ -27,17 +27,14 @@ public class TickerSymbolLoader extends DataLoaderWorker {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TickerSymbolLoader.class);
     private final StockExchangesRepository stockExchangesRepository;
-    private final TickersRepository tickersRepository;
     private final TickerAdminService tickerAdminService;
     private final Map<StockExchange, String> tickersToLoad = new HashMap<>();
 
     public TickerSymbolLoader(TickerAdminService tickerAdminService, StockExchangesRepository stockExchangesRepository,
-                              TickersRepository tickersRepository, DataLoaderService dataLoaderService) {
+                              DataLoaderService dataLoaderService) {
         super(dataLoaderService);
         if ( tickerAdminService == null ) { throw new IllegalArgumentException("ticker admin service is null"); }
         if ( stockExchangesRepository == null ) { throw new IllegalArgumentException("stock exchange repository is null"); }
-        if ( tickersRepository == null ) { throw new IllegalArgumentException("tickers repository is null"); }
-        this.tickersRepository = tickersRepository;
         this.stockExchangesRepository = stockExchangesRepository;
         this.tickerAdminService = tickerAdminService;
     }
@@ -151,7 +148,7 @@ public class TickerSymbolLoader extends DataLoaderWorker {
         boolean didSave;
 
         try {
-            didSave = tickersRepository.save(entity) != null;
+            didSave = tickerAdminService.saveTicker(entity) != null;
         } catch (Exception ex ) {
             saveExceptionToDatabase("Failed to save ticker entity ["+entity.getSymbol()+"]. Reason: ["+ex.getMessage()+"]");
             throw new DataLoaderWorkerException("Failed to save ticker entity ["+entity+"]", ex);

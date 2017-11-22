@@ -52,9 +52,7 @@ public class DataLoaderStarter implements ApplicationListener<ApplicationReadyEv
         logInfoAboutAllWorkers();
 
         try {
-            for ( DataLoaderWorker dw : workers ) {
-                dw.start();
-            }
+            workers.forEach(DataLoaderWorker::start);
         } catch (Exception e ) {
             LOGGER.error("Data loader failed - shutting application down", e);
             SpringApplication.exit(applicationContext, (ExitCodeGenerator) () -> EXIT_CODE_ON_EXCEPTION);

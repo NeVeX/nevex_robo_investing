@@ -10,7 +10,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(schema = "investing", name = "tickers", uniqueConstraints = @UniqueConstraint(columnNames = "symbol"))
-public class TickerEntity {
+public class TickerEntity implements MergeableEntity<TickerEntity> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +32,18 @@ public class TickerEntity {
     private boolean isTradable;
     @Column(name = "trading_end_date", columnDefinition = "DATE")
     private LocalDate tradingEndDate;
+
+    @Override
+    public void merge(TickerEntity other) {
+        this.symbol = other.symbol;
+        this.name = other.name;
+        this.sector = other.sector;
+        this.industry = other.industry;
+        this.createdDate = other.createdDate;
+        this.stockExchange = other.stockExchange;
+        this.isTradable = other.isTradable;
+        this.tradingEndDate = other.tradingEndDate;
+    }
 
     public int getId() {
         return id;
@@ -132,4 +144,6 @@ public class TickerEntity {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+
 }

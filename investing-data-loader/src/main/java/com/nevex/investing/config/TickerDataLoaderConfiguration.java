@@ -1,9 +1,11 @@
 package com.nevex.investing.config;
 
+import com.nevex.investing.api.iextrading.IEXTradingClient;
 import com.nevex.investing.config.property.DataLoaderProperties;
 import com.nevex.investing.database.StockExchangesRepository;
 import com.nevex.investing.database.TickersRepository;
 import com.nevex.investing.dataloader.DataLoaderService;
+import com.nevex.investing.dataloader.loader.TickerSymbolChecker;
 import com.nevex.investing.dataloader.loader.TickerSymbolLoader;
 import com.nevex.investing.service.TickerAdminService;
 import com.nevex.investing.service.model.StockExchange;
@@ -22,13 +24,14 @@ import javax.annotation.PostConstruct;
  */
 @Validated
 @Configuration
-@ConditionalOnProperty(name = TickerDataLoaderConfiguration.CONFIGURATION_ENABLED_KEY, havingValue = "true")
 class TickerDataLoaderConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TickerDataLoaderConfiguration.class);
 
-    private static final String CONFIGURATION_PREFIX_KEY = DataLoaderProperties.PREFIX + ".ticker-data-loader";
-    static final String CONFIGURATION_ENABLED_KEY = CONFIGURATION_PREFIX_KEY + ".enabled";
+    private static final String LOADER_PREFIX_KEY = DataLoaderProperties.PREFIX + ".ticker-data-loader";
+    private static final String CHECKER_PREFIX_KEY = DataLoaderProperties.PREFIX + ".ticker-data-checker";
+    private static final String LOADER_ENABLED_KEY = LOADER_PREFIX_KEY + ".enabled";
+    private static final String CHECKER_ENABLED_KEY = CHECKER_PREFIX_KEY + ".enabled";
 
     @Autowired
     private DataLoaderService dataLoaderService;
@@ -40,6 +43,8 @@ class TickerDataLoaderConfiguration {
     private TickerAdminService tickerAdminService;
     @Autowired
     private DataLoaderProperties dataLoaderProperties;
+    @Autowired
+    private IEXTradingClient iexTradingClient;
 
     @PostConstruct
     void init() throws Exception {
@@ -47,10 +52,17 @@ class TickerDataLoaderConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty(name = LOADER_ENABLED_KEY, havingValue = "true")
     TickerSymbolLoader tickerSymbolLoader() {
-        TickerSymbolLoader loader = new TickerSymbolLoader(tickerAdminService, stockExchangesRepository, tickersRepository, dataLoaderService);
+        TickerSymbolLoader loader = new TickerSymbolLoader(tickerAdminService, stockExchangesRepository, dataLoaderService);
         loader.addTickerFileToLoad(StockExchange.Nasdaq, dataLoaderProperties.getTickerDataLoader().getNasdaqFile());
         loader.addTickerFileToLoad(StockExchange.Nyse, dataLoaderProperties.getTickerDataLoader().getNyseFile());
         return loader;
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = CHECKER_ENABLED_KEY, havingValue = "true")
+    TickerSymbolChecker tickerSymbolChecker() {
+        return new TickerSymbolChecker(tickerAdminService, dataLoaderService, iexTradingClient);
     }
 }

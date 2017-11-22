@@ -70,7 +70,7 @@ public class AnalyzerEventDataLoader extends DataLoaderWorker {
         LOGGER.info("\n\n{} - {}\n\n", getName(), message);
         int processed = 0;
         if ( !eventNamesToTrigger.isEmpty()) {
-            processed = super.processAllPagesIndividuallyForIterable(tickerService::getTickers, this::sendEvents, 0, analyzerProperties.getThreadCountForStartup());
+            processed = super.processAllPagesIndividuallyForIterable(tickerService::getActiveTickers, this::sendEvents, 0, analyzerProperties.getThreadCountForStartup());
         }
         return new DataLoaderWorkerResult(processed);
     }

@@ -1,6 +1,8 @@
 package com.nevex.investing.database;
 
 import com.nevex.investing.database.entity.TickerEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +19,8 @@ public interface TickersRepository extends PagingAndSortingRepository<TickerEnti
      */
     Optional<TickerEntity> findBySymbol(String symbol);
 
+    // https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods.query-creation
+    Page<TickerEntity> findAllByIsTradableTrue(Pageable pageable);
+
+    Iterable<TickerEntity> findAllByIsTradableTrue();
 }
