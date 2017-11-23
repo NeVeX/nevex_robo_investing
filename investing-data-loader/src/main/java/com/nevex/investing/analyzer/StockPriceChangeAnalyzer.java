@@ -161,7 +161,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
         }
         Optional<Analyzer> analyzerOptional = Analyzer.fromTitle(title);
         if ( !analyzerOptional.isPresent()) {
-            LOGGER.warn("Could not find the analyzer for name [{}]", title);
+//            LOGGER.warn("Could not find the analyzer for name [{}]", title);
             return;
         }
         Optional<Double> weightOpt = analyzerService.getWeight(analyzerOptional.get(), BigDecimal.valueOf(value));
@@ -292,7 +292,7 @@ public class StockPriceChangeAnalyzer extends EventConsumer<StockPriceUpdatedEve
     private TimePeriodAnalyzerResult getWeightForDeviation(String dynamicAnalyzerTitle, BigDecimal percentDeviation) {
         Optional<Analyzer> analyzerOpt = Analyzer.fromTitle(dynamicAnalyzerTitle);
         if (!analyzerOpt.isPresent()) {
-            LOGGER.warn("Could not get analyzer for dynamic analyzer name [{}]", dynamicAnalyzerTitle);
+//            LOGGER.warn("Could not get analyzer for dynamic analyzer name [{}]", dynamicAnalyzerTitle);
             return null;
         }
         Analyzer analyzer = analyzerOpt.get();

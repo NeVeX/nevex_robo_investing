@@ -38,8 +38,6 @@ class TickerDataLoaderConfiguration {
     @Autowired
     private StockExchangesRepository stockExchangesRepository;
     @Autowired
-    private TickersRepository tickersRepository;
-    @Autowired
     private TickerAdminService tickerAdminService;
     @Autowired
     private DataLoaderProperties dataLoaderProperties;
