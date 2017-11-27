@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 @Validated
 @RequestMapping(value = "/api/tickers/{symbol}/analyzers")
 public class StockAnalyzerEndpoint {
+    
     private final TickerAnalyzersService tickerAnalyzersService;
     private final TickerService tickerService;
     private final AnalyzerPricePerformanceService analyzerPricePerformanceService;

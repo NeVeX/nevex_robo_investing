@@ -28,10 +28,10 @@ nevex-investing:
   events:
     configuration-enabled: true
     event-queue-size: 5000
-    shard-amount: 15
+    shard-amount: 1
   analyzers:
     configuration-enabled: true
-    thread-count-for-startup: 2
+    thread-count-for-startup: 1
     stock-financials-analyzer:
       enabled: true
       send-events-on-startup: true

@@ -47,34 +47,21 @@ public class AnalyzerServiceV2 {
         }
 
         if ( !analyzerWeights.isEmpty()) {
-            validateAnalyzerWeights();
+            checkGeneratedAnalyzerWeights();
             LOGGER.info("Updated and validated the analyzer weights. Previous count [{}], New count [{}]", previousCount, analyzerWeights.size());
         } else {
             LOGGER.warn("No analyzer weights were updated");
         }
     }
 
-    private void validateAnalyzerWeights() throws ServiceException {
-        Set<Analyzer> databaseAnalyzers = new HashSet<>();
-        for ( Analyzer analyzer : analyzerWeights.keySet()) {
-            databaseAnalyzers.add(analyzer);
-
-            AnalyzerWeightV2 weight = analyzerWeights.get(analyzer);
-
-            if ( weight.getLowest().compareTo(weight.getCenter()) > 0) {
-                throw new ServiceException("Invalid analyzer weight found. Lowest cannot be greater than center for weight ["+weight+"]");
-            }
-            if ( weight.getHighest().compareTo(weight.getCenter()) < 0 ) {
-                throw new ServiceException("Invalid analyzer weight found. Highest cannot be less than center for weight ["+weight+"]");
-            }
-        }
+    private void checkGeneratedAnalyzerWeights() throws ServiceException {
 
         // Check we have the same amount of analyzers
-        if ( databaseAnalyzers.size() != Analyzer.values().length) {
-            LOGGER.warn("\n\n\nThe amount of database analyzers [{}] does not equal to the amount of code analyzers [{}]", databaseAnalyzers.size(), Analyzer.values().length);
+        if ( analyzerWeights.size() != Analyzer.values().length) {
+            LOGGER.warn("\n\n\nThe amount of database analyzers [{}] does not equal to the amount of code analyzers [{}]", analyzerWeights.size(), Analyzer.values().length);
 //            throw new ServiceException("Amount of database analyzers ["+databaseAnalyzers.size()+"] does not equal to the amount of code analyzers ["+Analyzer.values().length+"]");
         }
-        List<Analyzer> missingAnalyzers = Arrays.stream(Analyzer.values()).filter( analyzer -> !databaseAnalyzers.contains(analyzer)).collect(Collectors.toList());
+        List<Analyzer> missingAnalyzers = Arrays.stream(Analyzer.values()).filter( analyzer -> !analyzerWeights.containsKey(analyzer)).collect(Collectors.toList());
         if ( !missingAnalyzers.isEmpty()) {
             throw new ServiceException("Missing the following analyzers ["+missingAnalyzers+"] in the database");
         }
@@ -85,6 +72,10 @@ public class AnalyzerServiceV2 {
             return Optional.empty();
         }
         return Optional.ofNullable(analyzerWeights.get(analyzer).calculateWeight(value));
+    }
+
+    int getTotalWeights() {
+        return analyzerWeights.size();
     }
 
 }

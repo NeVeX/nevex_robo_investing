@@ -2,15 +2,20 @@ package com.nevex.investing.analyzer.model;
 
 import com.nevex.investing.database.entity.AnalyzerWeightEntityV2;
 import com.nevex.investing.model.Analyzer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Mark Cunningham on 9/25/2017.
  */
 public class AnalyzerWeightV2 {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(AnalyzerWeightV2.class);
 
     private final int SCALE = 4;
     private final BigDecimal ONE = BigDecimal.valueOf(1);
@@ -32,6 +37,18 @@ public class AnalyzerWeightV2 {
         this.invertLowest = invertLowest;
         this.invertHighest = invertHighest;
         this.signDirection = signDirection;
+        validate();
+    }
+
+    private void validate() {
+
+        if ( lowest.compareTo(center) > 0) {
+            throw new IllegalStateException("Invalid analyzer weight found. Lowest cannot be greater than center for weight ["+this+"]");
+        }
+        if ( highest.compareTo(center) < 0 ) {
+            throw new IllegalStateException("Invalid analyzer weight found. Highest cannot be less than center for weight ["+this+"]");
+        }
+
     }
 
     public AnalyzerWeightV2(Analyzer analyzer, AnalyzerWeightEntityV2 entity) {
@@ -52,31 +69,41 @@ public class AnalyzerWeightV2 {
             inputValueLimited = inputValue;
         }
 
-        BigDecimal rangeOther;
         BigDecimal valueConstrained;
+        BigDecimal range;
         int signValue;
         boolean shouldInvert;
         if ( inputValueLimited.compareTo(center) < 0) {
             signValue = signDirection * -1;
-            rangeOther = lowest;
             shouldInvert = invertLowest;
-            valueConstrained = center.abs().subtract(inputValueLimited.abs()).abs();
+            valueConstrained = center.subtract(inputValueLimited).abs();
+            if ( inputValueLimited.signum() < 0) { valueConstrained = valueConstrained.negate(); }
+            range = center.subtract(lowest).abs();
         } else {
             signValue = signDirection;
-            rangeOther = highest;
             shouldInvert = invertHighest;
-            valueConstrained = inputValueLimited.abs().subtract(center.abs()).abs();
+            valueConstrained = inputValueLimited.subtract(center).abs();
+            if ( inputValueLimited.signum() < 0) { valueConstrained = valueConstrained.negate(); }
+            range = highest.subtract(center).abs();
         }
 
-        BigDecimal range = center.abs().subtract(rangeOther.abs()).abs();
-        // TODO: divide by zero possible? What to do when range == 0?
-        BigDecimal weight = valueConstrained.divide(range, SCALE, RoundingMode.HALF_EVEN).abs();
+        BigDecimal weight;
+        if ( range.compareTo(BigDecimal.ZERO) == 0) { // special edge cases
+            weight = ONE;
+        } else {
+            weight = valueConstrained.divide(range, SCALE, RoundingMode.HALF_EVEN).abs();
+        }
 
         if ( shouldInvert ) {
             // TODO: this right? It used to be ONE.subtract...
             weight = ONE.subtract(weight);
         }
-        return weight.multiply(BigDecimal.valueOf(signValue)).doubleValue();
+        // finally, flip the signs if need be
+        double finalWeight = weight.multiply(BigDecimal.valueOf(signValue)).doubleValue();
+        if ( finalWeight < -1.0 || finalWeight > 1.0) {
+            LOGGER.warn("The final weight calculation is [{}] which is beyond +=1; the input value was [{}] to this weight [{}]", finalWeight, inputValue, this);
+        }
+        return finalWeight;
     }
 
     @Override

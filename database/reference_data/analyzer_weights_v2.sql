@@ -13,8 +13,6 @@ values
 (1, 'price-to-sales-ratio', 1, 0, 3, false, false, -1),
 (1, 'return-on-equity', 0, -10, 70, false, false, 1),
 
--- Summary of analyzers
-(1, 'analyzer-summary-counter-adjust-weight', 100, -50, 2000, false, false, 1),
 
 -- stock prices (whether to favour less pricey stocks or not)
 (1, 'current-stock-price', 0.1, 0, 100, false, true, 1),

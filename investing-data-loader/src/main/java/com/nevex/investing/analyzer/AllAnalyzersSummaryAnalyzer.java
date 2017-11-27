@@ -2,10 +2,10 @@ package com.nevex.investing.analyzer;
 
 import com.nevex.investing.analyzer.model.AnalyzerResult;
 import com.nevex.investing.analyzer.model.AnalyzerSummaryResult;
+import com.nevex.investing.analyzer.model.AnalyzerWeightV2;
 import com.nevex.investing.event.EventConsumer;
 import com.nevex.investing.event.EventManager;
 import com.nevex.investing.event.type.AllAnalyzerSummaryUpdatedEvent;
-import com.nevex.investing.event.type.Event;
 import com.nevex.investing.event.type.TickerAnalyzerUpdatedEvent;
 import com.nevex.investing.model.Analyzer;
 import com.nevex.investing.service.TickerAnalyzersAdminService;
@@ -59,19 +59,14 @@ public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpd
         // Use the java api to calculateWeight the average
         DoubleSummaryStatistics stats = analyzerResults.stream().collect(Collectors.summarizingDouble(AnalyzerResult::getWeight));
 
-        Optional<Double> weightOptional = analyzerService.getWeight(Analyzer.ANALYZER_SUMMARY_COUNTER_ADJUST_WEIGHT, BigDecimal.valueOf(stats.getCount()));
-        if ( !weightOptional.isPresent()) {
-            LOGGER.warn("Could not get an adjusted weight for ["+Analyzer.ANALYZER_SUMMARY_COUNTER_ADJUST_WEIGHT+"]");
-            return;
-        }
         double averageWeight = stats.getAverage();
-        double adjustedWeight = weightOptional.get() + averageWeight;
 
-        // limit the edges
-        if ( adjustedWeight > 1.0 ) { adjustedWeight = 1.0; }
-        if ( adjustedWeight < -1.0 ) { adjustedWeight = -1.0; }
+        int currentTotalAnalyzersInSystem = analyzerService.getTotalWeights();
+        int tickerAnalyzerCount = (int) stats.getCount();
 
-        AnalyzerSummaryResult summaryResult = new AnalyzerSummaryResult(tickerId, averageWeight, adjustedWeight, (int) stats.getCount(), asOfDate);
+        double adjustedWeight = getAdjustedWeight(currentTotalAnalyzersInSystem, tickerAnalyzerCount);
+
+        AnalyzerSummaryResult summaryResult = new AnalyzerSummaryResult(tickerId, averageWeight, adjustedWeight, tickerAnalyzerCount, asOfDate);
 
         try {
             tickerAnalyzersAdminService.saveNewAnalyzer(summaryResult);
@@ -80,6 +75,19 @@ public class AllAnalyzersSummaryAnalyzer extends EventConsumer<TickerAnalyzerUpd
             LOGGER.error("Could not save summary analyzer entity ["+summaryResult+"]", serEx);
         }
         LOGGER.debug("{} has finished processing ticker {}", getConsumerName(), tickerId);
+    }
+
+    double getAdjustedWeight(int currentTotalAnalyzersInSystem, int tickerAnalyzerCount) {
+        AnalyzerWeightV2 analyzerWeight = getWeightForTotalAnalyzers(currentTotalAnalyzersInSystem);
+        return analyzerWeight.calculateWeight(new BigDecimal(tickerAnalyzerCount));
+    }
+
+    private AnalyzerWeightV2 getWeightForTotalAnalyzers(int totalAnalyzers) {
+        BigDecimal center = new BigDecimal(totalAnalyzers);
+        BigDecimal highest = center;
+        BigDecimal lowest = highest.negate();
+        return new AnalyzerWeightV2(1, Analyzer.ANALYZER_SUMMARY_DYNAMIC_COUNTER_ADJUST_WEIGHT,
+                center, lowest, highest, false, false, 1);
     }
 
 }

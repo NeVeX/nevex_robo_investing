@@ -80,10 +80,11 @@ public class AnalyzerWeightsV2Test {
         assertThat(weight).isEqualTo(0.8);
     }
 
+
     @Test
     public void makeSureLowestAndHighestAreHonoured() {
-        BigDecimal middle = BigDecimal.valueOf(10);
         BigDecimal lowest = BigDecimal.valueOf(-5);
+        BigDecimal middle = BigDecimal.valueOf(10);
         BigDecimal highest = BigDecimal.valueOf(25);
 
         AnalyzerWeightV2 analyzerWeightV2 = new AnalyzerWeightV2(1, Analyzer.PRICE_TO_EARNINGS_RATIO, middle, lowest, highest, false, false, 1);
@@ -308,6 +309,69 @@ public class AnalyzerWeightsV2Test {
         assertThat(allNegativeWeights.calculateWeight(new BigDecimal("80"))).isEqualTo(-0.2); // inverted and sign changed
         assertThat(allNegativeWeights.calculateWeight(new BigDecimal("100"))).isEqualTo(0.0); // inverted and sign changed
 
+    }
+
+    @Test
+    public void makeSureVariousRangesWorksOk() {
+
+        BigDecimal lowest = BigDecimal.valueOf(-100);
+        BigDecimal middle = BigDecimal.valueOf(0);
+        BigDecimal highest = BigDecimal.valueOf(100);
+        AnalyzerWeightV2 analyzer = new AnalyzerWeightV2(1, Analyzer.PRICE_TO_EARNINGS_RATIO, middle, lowest, highest, false, false, 1); // normal
+
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(100))).isEqualTo(1); // is the highest
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-100))).isEqualTo(-1); // is the lowest
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(0))).isEqualTo(0); // is the center
+
+        // check exceeding the limit
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(200))).isEqualTo(1); // more than the highest; should constraint to 1 still
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-200))).isEqualTo(-1); // less than the lowest; should constraint to -1 still
+
+
+        lowest = BigDecimal.valueOf(500);
+        middle = BigDecimal.valueOf(750);
+        highest = BigDecimal.valueOf(1000);
+        analyzer = new AnalyzerWeightV2(1, Analyzer.PRICE_TO_EARNINGS_RATIO, middle, lowest, highest, false, false, 1); // normal
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(1000))).isEqualTo(1); // is the highest
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(500))).isEqualTo(-1); // is the lowest
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(750))).isEqualTo(0); // is the center
+        // check exceeding the limit
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(1100))).isEqualTo(1); // more than the highest; should constraint to 1 still
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(400))).isEqualTo(-1); // less than the lowest; should constraint to -1 still
+
+        // All negatives
+        lowest = BigDecimal.valueOf(-300);
+        middle = BigDecimal.valueOf(-200);
+        highest = BigDecimal.valueOf(-100);
+        analyzer = new AnalyzerWeightV2(1, Analyzer.PRICE_TO_EARNINGS_RATIO, middle, lowest, highest, false, false, 1); // normal
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-100))).isEqualTo(1); // is the highest
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-300))).isEqualTo(-1); // is the lowest
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-200))).isEqualTo(0); // is the center
+
+
+        lowest = BigDecimal.valueOf(-1000);
+        middle = BigDecimal.valueOf(-750);
+        highest = BigDecimal.valueOf(-500);
+        analyzer = new AnalyzerWeightV2(1, Analyzer.PRICE_TO_EARNINGS_RATIO, middle, lowest, highest, false, false, 1); // normal
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-500))).isEqualTo(1); // is the highest
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-1000))).isEqualTo(-1); // is the lowest
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-750))).isEqualTo(0); // is the center
+        // check exceeding the limit
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-400))).isEqualTo(1); // more than the highest; should constraint to 1 still
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-1100))).isEqualTo(-1); // less than the lowest; should constraint to -1 still
+
+    }
+
+    @Test // This used to occur
+    public void makeSureWhenRangeIsZeroThatItDoesNotBreak_bugTest() {
+
+        // create an example with a zero range
+        BigDecimal lowest = BigDecimal.valueOf(-100);
+        BigDecimal middle = BigDecimal.valueOf(100);
+        BigDecimal highest = BigDecimal.valueOf(100);
+        AnalyzerWeightV2 analyzer = new AnalyzerWeightV2(1, Analyzer.PRICE_TO_EARNINGS_RATIO, middle, lowest, highest, false, false, 1);
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(200))).isEqualTo(1); // should not break (divide by zero exception)
+        assertThat(analyzer.calculateWeight(BigDecimal.valueOf(-200))).isEqualTo(-1); // should not break (divide by zero exception)
     }
 
 }

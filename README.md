@@ -10,3 +10,4 @@ NeVeX Introduced To The World Of Investing!
 * Use the ftp to get the tickers:
   * ftp://ftp.nasdaqtrader.com/symboldirectory (files in there need to be read)
   * http://www.nasdaqtrader.com/trader.aspx?id=symboldirdefs
+* Use Gradle 3 or 4 (2.3 used, since there's problems upgrading to 3 - no classes found etc)

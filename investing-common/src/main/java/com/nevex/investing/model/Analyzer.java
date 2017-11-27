@@ -10,13 +10,22 @@ import java.util.Optional;
  */
 public enum Analyzer {
 
+    /**
+     * Dynamic analyzers
+     */
+
+    ANALYZER_SUMMARY_DYNAMIC_COUNTER_ADJUST_WEIGHT("analyzer-summary-dynamic-counter-adjust-weight"),
+
+    /**
+     * Static analyzers
+     */
+
     PRICE_TO_EARNINGS_RATIO("price-to-earnings-ratio"),
     EARNINGS_PER_SHARE("earnings-per-share"),
     PRICE_EARNINGS_TO_GROWTH_RATIO("price-earnings-to-growth_ratio"),
     PRICE_TO_BOOK_RATIO("price-to-book-ratio"),
     PRICE_TO_SALES_RATIO("price-to-sales-ratio"),
     RETURN_ON_EQUITY("return-on-equity"),
-    ANALYZER_SUMMARY_COUNTER_ADJUST_WEIGHT("analyzer-summary-counter-adjust-weight"),
     CURRENT_STOCK_PRICE("current-stock-price"),
 
     // 1 day
